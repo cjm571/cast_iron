@@ -14,6 +14,6 @@ pub mod ability;
 mod tests {
     #[test]
     fn it_works() {
-        super::actor::test_fn();
+        assert_eq!(2+2, 4);;;
     }
 }
