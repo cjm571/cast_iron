@@ -6,6 +6,7 @@
 //
 // Module declarations
 //
+pub mod environment;
 pub mod actor;
 pub mod ability;
 

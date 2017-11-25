@@ -5,49 +5,111 @@
 
 pub mod aspect;
 
+use self::aspect::*;
+use std::collections::HashMap;
+
 ///////////////////////////////////////////////////////////////////////////////
-// Data members
+// Data Structures
 ///////////////////////////////////////////////////////////////////////////////
+
+
 // Struct containing all necessary data fields to define an ability for use in CastIron
 #[allow(dead_code)]
 pub struct Ability {
-    aesthetics: aspect::Aesthetics,
-    element: aspect::Element,
-    method: aspect::Method,
-    morality: aspect::Morality,
-    school: aspect::School,
+    name: String,
+    aspects: HashMap<Tag, Aspect>,
+    potency: u8,
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//  Functions and Methods
+///////////////////////////////////////////////////////////////////////////////
 
 // TODO: Figure out how to comment this shit well...
 impl Ability {
     // Constructor
     pub fn new() -> Ability {
+        // Allocate local aspects map
+        let mut _aspects: HashMap<Tag, Aspect> = HashMap::new();
+
+        // Populate the map with Unset
+        _aspects.insert(Tag::Aesthetics, 
+            Aspect { 
+                tag: Tag::Aesthetics,
+                val: Value{ aesthetics: Aesthetics::Unset}
+            });
+        _aspects.insert(Tag::Element, 
+            Aspect { 
+                tag: Tag::Element,
+                val: Value{ element: Element::Unset}
+            });
+        _aspects.insert(Tag::Method, 
+            Aspect { 
+                tag: Tag::Method,
+                val: Value{ method: Method::Unset}
+            });
+        _aspects.insert(Tag::Morality, 
+            Aspect { 
+                tag: Tag::Morality,
+                val: Value{ morality: Morality::Unset}
+            });
+        _aspects.insert(Tag::School, 
+            Aspect { 
+                tag: Tag::School,
+                val: Value{ school: School::Unset}
+            });
+
+        // Return Ability with ownership of _aspects' data
         Ability {
-            aesthetics: aspect::Aesthetics::Unset,
-            element: aspect::Element::Unset,
-            method: aspect::Method::Unset,
-            morality: aspect::Morality::Unset,
-            school: aspect::School::Unset,
+            name: "Unset".to_string(),
+            aspects: _aspects,
+            potency: 0,
         }
     }
 
-    //TODO: See if aspects can be placed under some sort of "parent class". Maybe traits can help?
-    
-    // Set aspect to given value
-    pub fn set_aesthetics (&mut self, value: aspect::Aesthetics) {
-        self.aesthetics = value;
+
+    ///////////////////////////////////////////////////////////////////////////
+    //  Mutator Methods
+    ///////////////////////////////////////////////////////////////////////////
+
+    // Name the ability
+    pub fn set_name (&mut self, _name: &'static str) {
+        self.name.clear();
+        self.name.push_str(_name);
     }
-    pub fn set_element (&mut self, value: aspect::Element) {
-        self.element = value;
+
+    // Set the aspect of the given tag to the given value
+    pub fn set_aspect (&mut self, _tag: Tag, _val: Value) {
+        if let Some(_aspect) = self.aspects.get_mut(&_tag){
+            *_aspect = Aspect {tag: _tag, val: _val};
+        }
     }
-    pub fn set_method (&mut self, value: aspect::Method) {
-        self.method = value;
+
+    ///////////////////////////////////////////////////////////////////////////
+    //  Accessor Methods
+    ///////////////////////////////////////////////////////////////////////////
+
+    // Returns a reference to the name of the ability
+    pub fn get_name (&self) -> &String {
+        &self.name
     }
-    pub fn set_morality (&mut self, value: aspect::Morality) {
-        self.morality = value;
+
+    // Returns a reference to the given aspect
+    pub fn get_aspect (&self, _tag: &Tag) -> &Aspect {
+        if let Some(_aspect) = self.aspects.get(_tag){
+            _aspect
+        } else {
+            //TODO: graceful handling
+            panic!("Invalid aspect tag requested");
+        }
     }
-    pub fn set_school (&mut self, value: aspect::School) {
-        self.school = value;
+
+    // Returns a reference to the HashMap that denotes to all ability aspects
+    pub fn get_aspects (&self) -> &HashMap<Tag, Aspect> {
+        &self.aspects
     }
-        
+    // Returns potency of the ability
+    pub fn get_potency (&self) -> u8 {
+        self.potency
+    }
 }
