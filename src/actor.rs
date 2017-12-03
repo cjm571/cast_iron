@@ -24,9 +24,9 @@ pub struct Actor {
 ///////////////////////////////////////////////////////////////////////////////
 impl Actor {
     // Constructor
-    pub fn new() -> Actor {
+    pub fn new(_name: &'static str) -> Actor {
         Actor {
-            name: "Unset".to_string(),
+            name: _name.to_string(),
             pos: [0,0,0],
             cur_fatigue: 0,
             abilities: Vec::new(),
