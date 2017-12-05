@@ -1,20 +1,35 @@
-// Filename : environment\world_grid.rs
-// Author   : CJ McAllister
-// Created  : 23-11-2017
-// License  : TODO: Add license info
-//
-// Purpose  : Provide an implementation for a 2-dimensional hexagonal grid that
-//            represents all cells of the gameworld. Cells will be populated
-//            with the centerpoints of various environmental features such as
-//            weather and resources.
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+Filename : environment\world_grid.rs
+
+Copyright (C) 2017 CJ McAllister
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+Purpose:
+    Provide an implementation for a 2-dimensional hexagonal grid that
+    represents all cells of the gameworld. Cells will be populated
+    with the centerpoints of various environmental features such as
+    weather and resources.
+\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Data members
+// Data structures
 ///////////////////////////////////////////////////////////////////////////////
-#[derive(Debug)]
+
 pub struct WorldGrid {
+    size: u32, // Maximum value for an axis of the hex grid
+
 }
 
 
@@ -22,8 +37,10 @@ pub struct WorldGrid {
 //  Functions and Methods
 ///////////////////////////////////////////////////////////////////////////////
 
-
-// Defines the contents of a world grid cell
-mod cell{
-    
+impl WorldGrid {
+    pub fn new(_size: u32) -> WorldGrid {
+        WorldGrid {
+            size: _size,
+        }
+    }
 }
