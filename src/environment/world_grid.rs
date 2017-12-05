@@ -19,6 +19,9 @@ Purpose:
     represents all cells of the gameworld. Cells will be populated
     with the centerpoints of various environmental features such as
     weather and resources.
+
+Changelog:
+
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
