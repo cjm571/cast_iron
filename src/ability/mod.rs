@@ -24,6 +24,7 @@ Changelog:
 pub mod aspect;
 
 use self::aspect::*;
+use super::environment::Element;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Data Structures

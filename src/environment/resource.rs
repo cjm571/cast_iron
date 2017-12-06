@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-Filename : environment\world_grid.rs
+Filename : resource.rs
 
 Copyright (C) 2017 CJ McAllister
     This program is free software; you can redistribute it and/or modify
@@ -15,22 +15,36 @@ Copyright (C) 2017 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    Provides functions to determine interactions between various objects
-    in the world grid.
-    
+    //TODO: purpose writeup for resource
+
 Changelog:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+use uuid::Uuid;
 
+use super::Element;
+use super::coords::Coords;
 
 ///////////////////////////////////////////////////////////////////////////////
-// Data structures
+//  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
-pub struct WorldGrid {
-    size: u32, // Maximum value for an axis of the hex grid
+pub struct Resource {
+    uid:    Uuid,
+    kind:   Element,
+    state:  ResourceState,
+    pos:    Coords,
+    radius: u8,
+}
 
+pub enum ResourceState {
+    Depleted    = 0,
+    Low         = 1,
+    Partial     = 2,
+    High        = 3,
+    Full        = 4,
+    Overflow    = 5,
 }
 
 
@@ -38,10 +52,12 @@ pub struct WorldGrid {
 //  Functions and Methods
 ///////////////////////////////////////////////////////////////////////////////
 
-impl WorldGrid {
-    pub fn new(_size: u32) -> WorldGrid {
-        WorldGrid {
-            size: _size,
-        }
+pub fn new() -> Resource {
+    Resource {
+        uid:    Uuid::new_v4(),
+        kind:   Element::Unset,
+        state:  ResourceState::Depleted,
+        pos:    Coords::new(),
+        radius: 0,
     }
 }

@@ -22,12 +22,26 @@ Changelog:
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 pub mod coords;
+pub mod resource;
 
 ///////////////////////////////////////////////////////////////////////////////
-// Data members
+//  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
-
+// Enumeration of all element types
+#[allow(dead_code)]
+#[derive(Debug)]
+pub enum Element {
+    Unset       = 0,
+    Fire        = 1,
+    Ice         = 2,
+    Wind        = 3,
+    Water       = 4,
+    Electric    = 5,
+    Earth       = 6,
+    Light       = 7,
+    Dark        = 8,
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Functions and Methods

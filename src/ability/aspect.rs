@@ -22,6 +22,7 @@ Changelog:
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 use std::fmt;
+use ::environment::Element;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Data Structures
@@ -37,20 +38,6 @@ pub enum Aesthetics {
     Erotic      = 3,
     Ugly        = 4,
     Subtle      = 5,
-}
-// Enumeration of all element types
-#[allow(dead_code)]
-#[derive(Debug)]
-pub enum Element {
-    Unset       = 0,
-    Fire        = 1,
-    Ice         = 2,
-    Wind        = 3,
-    Water       = 4,
-    Electric    = 5,
-    Earth       = 6,
-    Light       = 7,
-    Dark        = 8,
 }
 // Enumeration of method by which an ability is performed
 #[allow(dead_code)]
