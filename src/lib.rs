@@ -21,14 +21,6 @@ Changelog:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-//
-// Module declarations
-//
-pub mod environment;
-pub mod actor;
-pub mod ability;
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // Global Data structures
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,10 +30,30 @@ pub enum CiResult {
     EBounds    = 1,
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2+2, 4);;;
-    }
+//TODO: Tests to be run with --test
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Attribute Definitions
+///////////////////////////////////////////////////////////////////////////////
+
+// Non-interruptive debug output
+#[cfg(debug_assertions)]
+macro_rules! debug_println {
+    ($( $args:expr ),*) => {
+        println!( $( $args ),* );        
+    };
 }
+#[cfg(not(debug_assertions))]
+macro_rules! debug_println {
+    ($( $args:expr ),*) => {}
+}
+
+//
+// Module declarations
+//
+#[macro_use]
+pub mod environment;
+pub mod actor;
+pub mod ability;

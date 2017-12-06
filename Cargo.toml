@@ -2,5 +2,3 @@
 name = "cast_iron"
 version = "0.1.0"
 authors = ["CJ McAllister <cjm571@gmail.com>"]
-
-[dependencies]
