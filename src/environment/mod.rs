@@ -15,7 +15,9 @@ Copyright (C) 2017 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    //TODO: purpose writeup for environment
+    Defines the structures and interactions that make up the environment
+    in which the actors perform their actions. Provides functions pertaining
+    to both immediate and atmospheric conditions.
 
 Changelog:
 
@@ -23,6 +25,7 @@ Changelog:
 
 pub mod coords;
 pub mod resource;
+pub mod weather;
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
@@ -43,7 +46,49 @@ pub enum Element {
     Dark        = 8,
 }
 
+// Defines the global characteristics and enumerates the objects present within
+// the game environment
+pub struct Environment {
+    size:       u32, // world size, as a radius measured in hexgrid units
+    weather:    weather::Weather,
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 //  Functions and Methods
 ///////////////////////////////////////////////////////////////////////////////
 
+impl Environment {
+
+    // Creates and returns a new Environment object
+    pub fn new() -> Environment {
+        Environment {
+            size:       0,
+            weather:    weather::Weather::new(),
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    //  Mutator Methods
+    ///////////////////////////////////////////////////////////////////////////
+
+    pub fn set_size(&mut self, _size: u32) {
+        self.size = _size;
+    }
+
+    pub fn change_weather(&mut self, _weather: weather::Weather) {
+        self.weather = _weather
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    //  Accessor Methods
+    ///////////////////////////////////////////////////////////////////////////
+
+    pub fn get_size(self) -> u32 {
+        self.size
+    }
+
+    pub fn get_weather(self) -> weather::Weather {
+        self.weather
+    }
+}
