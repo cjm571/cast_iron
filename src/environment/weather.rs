@@ -22,6 +22,8 @@ Changelog:
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 use super::Element;
+use ::polyfunc::PolyFunc;
+use std::i32::{MIN, MAX};
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
@@ -29,17 +31,17 @@ use super::Element;
 
 pub struct Weather {
     kind:       Element,
-    intensity:  Intensity,
+    function:   PolyFunc,
 }
 
-//TODO: Cool feature: Intensity as a polynomial function of time?
+#[repr(u8)]
+#[derive(Debug)]
 pub enum Intensity {
     None    = 0,
-    Mild    = 1,
-    Weak    = 2,
-    Medium  = 3,
-    Strong  = 4,
-    Severe  = 5,
+    Mild    = 63,
+    Strong  = 127,
+    Severe  = 191,
+    Max     = 255,
 }
 
 
@@ -53,15 +55,15 @@ impl Weather {
     pub fn new() -> Weather {
         Weather {
             kind:       Element::Unset,
-            intensity:  Intensity::None,
+            function:   PolyFunc::new(),
         }
     }
 
     // Creates and returns a new Weather object from the given parameters
-    pub fn from(_kind: Element, _intensity: Intensity) -> Weather {
+    pub fn from(_kind: Element, _function: PolyFunc) -> Weather {
         Weather {
             kind:       _kind,
-            intensity:  _intensity,
+            function:   _function,
         }
     }
 
@@ -74,30 +76,6 @@ impl Weather {
         self.kind = _kind;
     }
 
-    // Makes the weather more intense, unless it is already Severe
-    pub fn intensify(&mut self) {
-        match self.intensity {
-            Intensity::None     => self.intensity = Intensity::Mild,
-            Intensity::Mild     => self.intensity = Intensity::Weak,
-            Intensity::Weak     => self.intensity = Intensity::Medium,
-            Intensity::Medium   => self.intensity = Intensity::Strong,
-            Intensity::Strong   => self.intensity = Intensity::Severe,
-            Intensity::Severe   => debug_println!("Attempted to intensify Severe weather!"),
-        }
-    }
-
-    // Makes the weather less intense, unless it is already None
-    pub fn weaken(&mut self) {
-        match self.intensity {
-            Intensity::None     => debug_println!("Attempted to weaken None weather!"),
-            Intensity::Mild     => self.intensity = Intensity::None,
-            Intensity::Weak     => self.intensity = Intensity::Mild,
-            Intensity::Medium   => self.intensity = Intensity::Weak,
-            Intensity::Strong   => self.intensity = Intensity::Medium,
-            Intensity::Severe   => self.intensity = Intensity::Strong,
-        }
-    }
-
     ///////////////////////////////////////////////////////////////////////////
     //  Accessor Methods
     ///////////////////////////////////////////////////////////////////////////
@@ -106,7 +84,21 @@ impl Weather {
         self.kind
     }
 
-    pub fn get_intensity(self) -> Intensity {
-        self.intensity
+    pub fn get_intensity(&self, _tick: u32) -> Intensity {
+        let intensity = self.function.solve(_tick);
+
+        //TODO: Magic numbers. Ugh.
+        match intensity {
+            MIN ... -1  => Intensity::None,
+            0 ... 62    => Intensity::None,
+            63 ... 126  => Intensity::Mild,
+            127 ... 190 => Intensity::Strong,
+            191 ... 254 => Intensity::Severe,
+            255 ... MAX => Intensity::Max,
+            _           => {
+                            debug_println!("Invalid weather intensity!");
+                            Intensity::None
+                           }
+        }
     }
 }
