@@ -2,3 +2,6 @@
 **/*.rs.bk
 Cargo.lock
 *.code-workspace
+
+# Data Files
+*.dat

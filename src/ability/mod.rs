@@ -18,10 +18,13 @@ Purpose:
     //TODO: purpose writeup for ability
 
 Changelog:
-
+    CJ McAllister   22 Nov 2017     File created
+    CJ McAllister   31 Jan 2018     Added UUID
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 pub mod aspect;
+
+use uuid::Uuid;
 
 use self::aspect::*;
 use super::environment::Element;
@@ -31,11 +34,11 @@ use super::environment::Element;
 ///////////////////////////////////////////////////////////////////////////////
 
 // Struct containing all necessary data fields to define an ability for use in CastIron
-#[allow(dead_code)]
 pub struct Ability {
-    name: String,
-    aspects: Aspects,
-    potency: u8,
+    uid:        Uuid,
+    name:       String,
+    aspects:    Aspects,
+    potency:    u8,
 }
 
 
@@ -48,9 +51,10 @@ impl Ability {
     // Constructor
     pub fn new(_name: &'static str) -> Ability {
         Ability {
-            name: _name.to_string(),
-            aspects: Aspects::new(),
-            potency: 0,
+            uid:        Uuid::new_v4(),
+            name:       _name.to_string(),
+            aspects:    Aspects::new(),
+            potency:    0,
         }
     }
 
@@ -96,6 +100,11 @@ impl Ability {
     ///////////////////////////////////////////////////////////////////////////
     //  Accessor Methods
     ///////////////////////////////////////////////////////////////////////////
+
+    // Returns a reference to the name of the ability
+    pub fn get_uid (&self) -> &Uuid {
+        &self.uid
+    }
 
     // Returns a reference to the name of the ability
     pub fn get_name (&self) -> &String {

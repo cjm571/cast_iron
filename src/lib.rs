@@ -54,3 +54,4 @@ pub mod environment;
 pub mod actor;
 pub mod ability;
 pub mod polyfunc;
+pub mod fileops;

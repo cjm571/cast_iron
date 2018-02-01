@@ -18,8 +18,12 @@ Purpose:
     //TODO: purpose writeup for actor
 
 Changelog:
+    CJ McAllister   21 Nov 2017     File created
+    CJ McAllister   31 Jan 2018     Added UUID
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+use uuid::Uuid;
 
 use ::ability::Ability;
 use ::environment::coords::Coords;
@@ -29,12 +33,12 @@ use ::environment::coords::Coords;
 ///////////////////////////////////////////////////////////////////////////////
 
 // Struct containing state information for the Actor
-#[allow(dead_code)]
 pub struct Actor {
-    name: String,               // Actor's name
-    pos: Coords,              // Actor's 3D position in the environment
-    cur_fatigue: u8,            // Actor's current fatigue level
-    abilities: Vec<Ability>,    // List of Actor's Abilities
+    uid:            Uuid,
+    name:           String,               // Actor's name
+    pos:            Coords,                // Actor's 3D position in the environment
+    cur_fatigue:    u8,            // Actor's current fatigue level
+    abilities:      Vec<Ability>,    // List of Actor's Abilities
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,10 +48,11 @@ impl Actor {
     // Constructor
     pub fn new(_name: &'static str) -> Actor {
         Actor {
-            name: _name.to_string(),
-            pos: Coords::new(),
-            cur_fatigue: 0,
-            abilities: Vec::new(),
+            uid:            Uuid::new_v4(),
+            name:           _name.to_string(),
+            pos:            Coords::new(),
+            cur_fatigue:    0,
+            abilities:      Vec::new(),
         }
     }
 
@@ -78,6 +83,11 @@ impl Actor {
     //  Accessor Methods
     ///////////////////////////////////////////////////////////////////////////
 
+    // Returns a reference for the actor's unique ID
+    pub fn get_uid(&self) -> &Uuid {
+        &self.uid
+    }
+    
     // Returns a reference for the actor's name
     pub fn get_name(&self) -> &String {
         &self.name
