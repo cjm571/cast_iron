@@ -119,12 +119,19 @@ impl Coords {
     }
 }
 
-// Output format for coordinates
+// Debug output format for coordinates
 impl fmt::Debug for Coords {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Coords: {{X: {} Y: {} Z: {}}}", self.x, self.y, self.z)
     }
 }
+
+// Display output format for coordinates
+impl fmt::Display for Coords {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}-{}-{})", self.x, self.y, self.z)
+    }
+} 
 
 // Equivalence comparison 
 impl PartialEq for Coords {
