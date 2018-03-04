@@ -107,4 +107,28 @@ impl Actor {
     pub fn get_abilities(&self) -> &Vec<Ability>{
         &self.abilities
     }
+
+    
+    ///////////////////////////////////////////////////////////////////////////
+    //  Other Methods
+    ///////////////////////////////////////////////////////////////////////////
+     
+    // Returns a string representing the actor in the format:
+    // [UID]:[Name]:[Position]:[Fatigue]
+    pub fn to_string(&self) -> String {
+        let mut actor_string = String::new();
+
+        actor_string.push_str(&self.get_uid().to_string());
+        actor_string.push_str(":");
+
+        actor_string.push_str(&self.get_name());
+        actor_string.push_str(":");
+
+        actor_string.push_str(&self.get_pos().to_string());
+        actor_string.push_str(":");
+
+        actor_string.push_str(&self.get_cur_fatigue().to_string());
+
+        actor_string
+    }
 }
