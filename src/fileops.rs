@@ -163,6 +163,8 @@ pub fn write_actor(actor: &Actor) -> Result<(), IoError> {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+
     use super::*;
     use ::ability::Ability;
     use ::ability::aspect::*;
@@ -170,23 +172,21 @@ mod tests {
 
     #[test]
     fn a_file_create() {
+        // Delete the file so we start clean
+        match fs::remove_file(FILENAME) {
+            _ => (), // ignore errors
+        }
+
         let mut data_file = open_data_file();
+        
         let metadata = match data_file.metadata() {
-            Err(_err)    => panic!("Error occurred while attempting to retrieve data file metadata."),
+            Err(_err)   => panic!("Error occurred while attempting to retrieve data file metadata."),
             Ok(meta)    => meta,
         };
         let file_len = metadata.len();
 
-        // Assert that file should only contain the template, which is 20 bytes long
-        assert_eq!(file_len, 20);
-
-        let cursor = match data_file.seek(SeekFrom::Current(0)) {
-            Err(_err)    => panic!("Error occurred while attempting to check cursor position"),
-            Ok(pos)     => pos,
-        };
-
-        // Assert that the current cursor position is at the start of the file
-        assert_eq!(cursor, 0);
+        // Assert that file should only contain the template
+        assert_eq!(file_len, TEMPLATE.len() as u64);
     }
 
     #[test]
@@ -207,19 +207,21 @@ mod tests {
 
         let result = match write_actor(&player_one) {
             Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
-            Ok(val)     => val,
+            Ok(_tmp)    => (),
         };
 
-        assert_eq!(result, 99);
+        assert_eq!(result, ());
     }
 
     #[test]
     fn c_file_update() {
         let player_two = Actor::new("John Public");
+
         let result = match write_actor(&player_two) {
             Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
-            Ok(val)     => val,
+            Ok(_tmp)    => (),
         };
-        assert_eq!(result, 99);
+
+        assert_eq!(result, ());
     }
 }
