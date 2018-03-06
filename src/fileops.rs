@@ -20,8 +20,8 @@ Purpose:
     File format is as follows:
 
     _ACTORS_\n
-    [UID]:[Name]:[Position]:[Fatigue]:[Ability List (CSV)]\n
-    [UID]:[Name]:[Position]:[Fatigue]:[Ability List (CSV)]\n
+    [UID]:[Name]:[Position]:[Fatigue]:[Ability UID List (CSV)]\n
+    [UID]:[Name]:[Position]:[Fatigue]:[Ability UID List (CSV)]\n
     ...
     _ABILITIES_\n
     [UID]:[Name]:[Aspect List (ordered CSV)]:[potency]\n
@@ -36,7 +36,6 @@ Changelog:
 
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
-use std::fmt::Write as FmtWrite;
 use std::io::Error as IoError;
 use std::io::{ErrorKind, SeekFrom, BufReader};
 use std::error::Error;
@@ -48,7 +47,7 @@ use super::actor::Actor;
 ///////////////////////////////////////////////////////////////////////////////
 
 const FILENAME: &'static str = "castiron.dat";
-const TEMPLATE: &'static str = "_ACTORS_\n_ABILITIES\n";
+const TEMPLATE: &'static str = "_ACTORS_\n_ABILITIES_\n";
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Functions and Methods
@@ -63,7 +62,7 @@ fn open_data_file() -> File {
                             // Data file already exists, open it as-is
                             match OpenOptions::new().read(true).write(true).open(FILENAME) {
                                 Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
-                                Ok(mut file) => file,
+                                Ok(file) => file,
                             }
                         },
         Err(io_err) => panic!("IO_ERROR: {}", io_err.description()),
@@ -86,68 +85,6 @@ fn open_data_file() -> File {
     }
 }
 
-// Writes actor data to CastIron data file, creating the file if necessary
-// Returns number of bytes written, or IO Error
-//TODO: Migrate this to an install folder eventually
-pub fn write_actor(_actor: &Actor) -> Result<u32, IoError> {
-    // Open castiron.dat for R/W, and create if doesn't exist
-    let mut data_file = open_data_file();
-
-    // Read everything into a string for seeking/editing TODO: Optimze this trash
-    let mut data_file_buf = String::new();
-    data_file.read_to_string(&mut data_file_buf)?;
-
-    // Construct actor data string
-    let mut actor_data = String::new();
-    write!(actor_data, "{}:{}:{}:{}:", _actor.get_uid(), _actor.get_name(), _actor.get_pos(), _actor.get_cur_fatigue())
-        .expect("Error occurred while trying to write in String");
-    for abil in _actor.get_abilities() {
-        write!(actor_data, "{},", abil.get_name())
-            .expect("Error occurred while trying to write in String");
-    }
-    write!(actor_data, "\n")
-        .expect("Error occurred while trying to write in String");
-    
-    // Check if actor already exists in file
-    match data_file_buf.find(_actor.get_uid().to_string().as_str()){
-        None => { // Insert new actor record
-            let write_cursor = match data_file_buf.find("_ACTORS_"){
-                None         => panic!("IO ERROR: Could not find _ACTORS_ in {}", FILENAME),
-                Some(loc)    => loc + 9, //use location just after \n
-            };
-            data_file_buf.insert_str(write_cursor, actor_data.as_str());
-
-            
-            // Reset file cursor to start and write
-            data_file.seek(SeekFrom::Start(0))?;
-            data_file.write(data_file_buf.as_bytes())
-                .expect("Error occurred while trying to write to data file.");
-        },
-        Some(preactor_loc) => { // Overwrite existing actor record
-            let (preactor_buf, temp_buf) = data_file_buf.split_at(preactor_loc);
-            let postactor_loc = match temp_buf.find("\n"){
-                None        => panic!("IO ERROR: Could not find newline after actor data in castiron.dat"),
-                Some(loc)   => loc + 1, //use location just after \n
-            };
-            let (_temp_buf, postactor_buf) = data_file_buf.split_at(postactor_loc);
-            
-            // Concatenate new actor record between pre- and post-actor data_file_bufs
-            let mut final_data_buf = String::from(preactor_buf);
-            final_data_buf.push_str(actor_data.as_str());
-            final_data_buf.push_str(postactor_buf);
-
-            
-            // Reset file cursor to start and write
-            data_file.seek(SeekFrom::Start(0))?;
-            data_file.write(final_data_buf.as_bytes())
-                .expect("Error occurred while trying to write to data file.");
-        },
-    }
-    data_file.flush()?;
-
-    Ok(99)
-}
-
 // Reads actor data from CastIron data file
 // Returns actor data, or an IO Error if not found
 pub fn read_actor (_actor: &Actor) -> Result<String, IoError> {
@@ -165,7 +102,7 @@ pub fn read_actor (_actor: &Actor) -> Result<String, IoError> {
             return Err(IoError::new(ErrorKind::NotFound, "Actor data not found"))
         }
 
-        if data_line.contains(_actor.get_uid().to_string().as_str()) {
+        if data_line.contains(_actor.uid().to_string().as_str()) {
             println!("-- Actor UID found at line {}", line_num);
             return Ok(data_line)
         }
@@ -176,12 +113,47 @@ pub fn read_actor (_actor: &Actor) -> Result<String, IoError> {
     }
 }
 
-// WINDOWS-SPECIFIC
-// 
-pub fn win_write_actor (_actor: &Actor) -> Result<u32, IoError> {
-    // Read actor data line
+// Writes actor data to CastIron data file, creating the file if necessary
+//TODO: Migrate this to an install folder eventually
+pub fn write_actor(actor: &Actor) -> Result<(), IoError> {
+    // Open castiron.dat for R/W, and create if doesn't exist
+    let mut data_file = open_data_file();
 
-    Ok(10)
+    // Read the file into one big string buffer
+    let mut data_buf = String::new();
+    data_file.read_to_string(&mut data_buf)?;
+
+    // Tokenize the string on '\n' to get the lines as Strings
+    let data_strs: Vec<&str> = data_buf.split('\n').collect();
+    let mut data_lines: Vec<String> = Vec::new();
+    for data_str in data_strs {
+        data_lines.push(data_str.to_string());
+    }
+    
+    // Check the lines between _ACTOR_ and _ABILITIES_ for the given actor
+    for i in 1 .. (data_lines.len() - 1) {
+        // Did not find actor, append a new actor entry
+        if data_lines[i].contains("_ABILITIES_") {
+            data_lines.insert(i, actor.to_string());
+            break;
+        }
+
+        // Found actor, overwrite existing line
+        if data_lines[i].contains(actor.uid().to_string().as_str()) {
+            data_lines[i] = actor.to_string();
+            break;
+        }
+    }        
+
+    // Push the data lines back together
+    let mut upd_data_buf = String::new();
+    for i in 0 .. (data_lines.len() - 1) {
+        upd_data_buf = upd_data_buf + data_lines[i].as_str() + "\n";
+    }
+
+    // Write the updated data back to the file
+    data_file.seek(SeekFrom::Start(0))?;
+    data_file.write_all(upd_data_buf.as_bytes())
 }
 
 
@@ -249,29 +221,5 @@ mod tests {
             Ok(val)     => val,
         };
         assert_eq!(result, 99);
-    }
-
-    #[test]
-    fn win_b_actor_write() {
-        let mut player_one = Actor::new("CJ McAllister");
-
-        let null_abil = Ability::new("Null");
-        let mut lightning_bolt = Ability::new("Lightning Bolt");
-        lightning_bolt.set_potency(20);
-        lightning_bolt.set_aesthetics(Aesthetics::Impressive);
-        lightning_bolt.set_element(Element::Electric);
-        lightning_bolt.set_method(Method::Wand);
-        lightning_bolt.set_morality(Morality::Neutral);
-        lightning_bolt.set_school(School::Destruction);
-
-        player_one.add_ability(null_abil);
-        player_one.add_ability(lightning_bolt);
-
-        let result = match win_write_actor(&player_one) {
-            Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
-            Ok(val)     => val,
-        };
-
-        assert_eq!(result, 10);
     }
 }

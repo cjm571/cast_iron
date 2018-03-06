@@ -102,47 +102,55 @@ impl Ability {
     ///////////////////////////////////////////////////////////////////////////
 
     // Returns a reference to the name of the ability
-    pub fn get_uid (&self) -> &Uuid {
+    pub fn uid (&self) -> &Uuid {
         &self.uid
     }
 
     // Returns a reference to the name of the ability
-    pub fn get_name (&self) -> &String {
+    pub fn name (&self) -> &String {
         &self.name
     }
 
     // Returns a reference to the Aspects of the ability
-    pub fn get_aspects (&self) -> &Aspects {
+    pub fn aspects (&self) -> &Aspects {
         &self.aspects
     }
     
     // Returns a reference to the ability's aesthetics
-    pub fn get_aesthetics (&self) -> &Aesthetics {
+    pub fn aesthetics (&self) -> &Aesthetics {
         &self.aspects.aesthetics
     }
     
     // Returns a reference to the ability's element
-    pub fn get_element (&self) -> &Element {
+    pub fn element (&self) -> &Element {
         &self.aspects.element
     }
     
     // Returns a reference to the ability's method
-    pub fn get_method (&self) -> &Method {
+    pub fn method (&self) -> &Method {
         &self.aspects.method
     }
     
     // Returns a reference to the ability's morality
-    pub fn get_morality (&self) -> &Morality {
+    pub fn morality (&self) -> &Morality {
         &self.aspects.morality
     }
     
     // Returns a reference to the ability's school
-    pub fn get_school (&self) -> &School {
+    pub fn school (&self) -> &School {
         &self.aspects.school
     }
 
     // Returns potency of the ability
-    pub fn get_potency (&self) -> u8 {
+    pub fn potency (&self) -> u8 {
         self.potency
     }
 }
+
+// Equivalence comparison 
+impl PartialEq for Ability {
+    fn eq(&self, other: &Ability) -> bool {
+        self.uid == other.uid
+    }
+}
+impl Eq for Ability {}

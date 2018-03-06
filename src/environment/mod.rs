@@ -84,11 +84,11 @@ impl Environment {
     //  Accessor Methods
     ///////////////////////////////////////////////////////////////////////////
 
-    pub fn get_size(self) -> u32 {
+    pub fn size(self) -> u32 {
         self.size
     }
 
-    pub fn get_weather(self) -> weather::Weather {
+    pub fn weather(self) -> weather::Weather {
         self.weather
     }
 }

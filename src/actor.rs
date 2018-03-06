@@ -23,6 +23,8 @@ Changelog:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+use std::fmt;
+
 use uuid::Uuid;
 
 use ::ability::Ability;
@@ -84,51 +86,69 @@ impl Actor {
     ///////////////////////////////////////////////////////////////////////////
 
     // Returns a reference for the actor's unique ID
-    pub fn get_uid(&self) -> &Uuid {
+    pub fn uid(&self) -> &Uuid {
         &self.uid
     }
     
     // Returns a reference for the actor's name
-    pub fn get_name(&self) -> &String {
+    pub fn name(&self) -> &String {
         &self.name
     }
 
     // Returns a reference for the actor's position
-    pub fn get_pos(&self) -> &Coords {
+    pub fn pos(&self) -> &Coords {
         &self.pos
     }
 
     // Returns a reference for the actor's current fatigue
-    pub fn get_cur_fatigue(&self) -> &u8 {
+    pub fn cur_fatigue(&self) -> &u8 {
         &self.cur_fatigue
     }
 
     // Returns a refernce to the vector of the actor's abilities
-    pub fn get_abilities(&self) -> &Vec<Ability>{
+    pub fn abilities(&self) -> &Vec<Ability>{
         &self.abilities
     }
+}
 
-    
-    ///////////////////////////////////////////////////////////////////////////
-    //  Other Methods
-    ///////////////////////////////////////////////////////////////////////////
-     
-    // Returns a string representing the actor in the format:
-    // [UID]:[Name]:[Position]:[Fatigue]
-    pub fn to_string(&self) -> String {
-        let mut actor_string = String::new();
+// Display output format for actors
+// [UID]:[Name]:[Position]:[Fatigue]:[Abilities],
+impl fmt::Display for Actor {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        //TODO: actually understand this return value
+        let mut res = write!(f, "{}:{}:{}:{}:", self.uid(), self.name(), self.pos(), self.cur_fatigue());
+        
+        let abilities = self.abilities();
+        for abil in abilities {
+            res = write!(f, "{}", abil.uid());
+            
+            // Avoid adding a trailing comma
+            if abil != abilities.last().unwrap() {
+                res = write!(f, ",");
+            }
+        }
 
-        actor_string.push_str(&self.get_uid().to_string());
-        actor_string.push_str(":");
+        
 
-        actor_string.push_str(&self.get_name());
-        actor_string.push_str(":");
+        res
+    }
+}
 
-        actor_string.push_str(&self.get_pos().to_string());
-        actor_string.push_str(":");
 
-        actor_string.push_str(&self.get_cur_fatigue().to_string());
+///////////////////////////////////////////////////////////////////////////////
+//  Unit Tests
+///////////////////////////////////////////////////////////////////////////////
 
-        actor_string
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn output() {
+        let player_one = Actor::new("CJ McAllister");
+
+        println!("{}", player_one.to_string());
+
+        assert_eq!(1,1);
     }
 }
