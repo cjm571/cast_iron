@@ -112,7 +112,7 @@ impl Actor {
 }
 
 // Display output format for actors
-// [UID]:[Name]:[Position]:[Fatigue]:[Abilities],
+// [UID]:[Name]:[Position]:[Fatigue]:[Abilities (CSV)]
 impl fmt::Display for Actor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         //TODO: actually understand this return value
@@ -127,8 +127,6 @@ impl fmt::Display for Actor {
                 res = write!(f, ",");
             }
         }
-
-        
 
         res
     }

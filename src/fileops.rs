@@ -41,13 +41,15 @@ use std::io::{ErrorKind, SeekFrom, BufReader};
 use std::error::Error;
 
 use super::actor::Actor;
+use super::ability::Ability;
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
+//TODO: Migrate this to an install folder eventually
 const FILENAME: &'static str = "castiron.dat";
-const TEMPLATE: &'static str = "_ACTORS_\n_ABILITIES_\n";
+const TEMPLATE: &'static str = "_ACTORS_\n_ABILITIES_";
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Functions and Methods
@@ -114,7 +116,6 @@ pub fn read_actor (_actor: &Actor) -> Result<String, IoError> {
 }
 
 // Writes actor data to CastIron data file, creating the file if necessary
-//TODO: Migrate this to an install folder eventually
 pub fn write_actor(actor: &Actor) -> Result<(), IoError> {
     // Open castiron.dat for R/W, and create if doesn't exist
     let mut data_file = open_data_file();
@@ -129,9 +130,10 @@ pub fn write_actor(actor: &Actor) -> Result<(), IoError> {
     for data_str in data_strs {
         data_lines.push(data_str.to_string());
     }
-    
+
     // Check the lines between _ACTOR_ and _ABILITIES_ for the given actor
-    for i in 1 .. (data_lines.len() - 1) {
+    for i in 0 .. data_lines.len() {
+
         // Did not find actor, append a new actor entry
         if data_lines[i].contains("_ABILITIES_") {
             data_lines.insert(i, actor.to_string());
@@ -139,16 +141,21 @@ pub fn write_actor(actor: &Actor) -> Result<(), IoError> {
         }
 
         // Found actor, overwrite existing line
-        if data_lines[i].contains(actor.uid().to_string().as_str()) {
+        if data_lines[i].starts_with(actor.uid().to_string().as_str()) {
             data_lines[i] = actor.to_string();
             break;
         }
-    }        
+    }
 
     // Push the data lines back together
     let mut upd_data_buf = String::new();
-    for i in 0 .. (data_lines.len() - 1) {
-        upd_data_buf = upd_data_buf + data_lines[i].as_str() + "\n";
+    for i in 0 .. data_lines.len() {
+        upd_data_buf = upd_data_buf + data_lines[i].as_str();
+
+        // Avoid adding a trailing \n
+        if i != (data_lines.len() - 1) {
+            upd_data_buf = upd_data_buf + "\n";
+        }
     }
 
     // Write the updated data back to the file
@@ -156,6 +163,53 @@ pub fn write_actor(actor: &Actor) -> Result<(), IoError> {
     data_file.write_all(upd_data_buf.as_bytes())
 }
 
+// Writes ability data to CastIron data file, creating the file if necessary
+pub fn write_ability(abil: &Ability) -> Result<(), IoError> {
+    // Open castiron.dat for R/W, and create if doesn't exist
+    let mut data_file = open_data_file();
+
+    // Read the file into one big string buffer
+    let mut data_buf = String::new();
+    data_file.read_to_string(&mut data_buf)?;
+    
+    // Tokenize the string on '\n' to get the lines as Strings
+    let data_strs: Vec<&str> = data_buf.split('\n').collect();
+    let mut data_lines: Vec<String> = Vec::new();
+    for data_str in data_strs {
+        data_lines.push(data_str.to_string());
+    }
+
+    // Check the lines after _ABILITIES_ for the given ability
+    for i in 0 .. data_lines.len() {
+
+        // Found ability, overwrite existing line
+        if data_lines[i].starts_with(abil.uid().to_string().as_str()) {
+            data_lines[i] = abil.to_string();
+            break;
+        }
+
+        // EOF reached, append a new ability entry
+        if i == (data_lines.len() - 1) {
+            data_lines.push(abil.to_string());
+            break;
+        }
+    }       
+
+    // Push the data lines back together
+    let mut upd_data_buf = String::new();
+    for i in 0 .. data_lines.len() {
+        upd_data_buf = upd_data_buf + data_lines[i].as_str();
+
+        // Avoid adding a trailing \n
+        if i != (data_lines.len() - 1) {
+            upd_data_buf = upd_data_buf + "\n";
+        }
+    }
+
+    // Write the updated data back to the file
+    data_file.seek(SeekFrom::Start(0))?;
+    data_file.write_all(upd_data_buf.as_bytes())
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Unit Tests
@@ -169,28 +223,9 @@ mod tests {
     use ::ability::Ability;
     use ::ability::aspect::*;
     use ::environment::Element;
-
-    #[test]
-    fn a_file_create() {
-        // Delete the file so we start clean
-        match fs::remove_file(FILENAME) {
-            _ => (), // ignore errors
-        }
-
-        let mut data_file = open_data_file();
-        
-        let metadata = match data_file.metadata() {
-            Err(_err)   => panic!("Error occurred while attempting to retrieve data file metadata."),
-            Ok(meta)    => meta,
-        };
-        let file_len = metadata.len();
-
-        // Assert that file should only contain the template
-        assert_eq!(file_len, TEMPLATE.len() as u64);
-    }
-
-    #[test]
-    fn b_actor_write() {
+    
+    // Helper functions
+    fn create_p1() -> Actor{
         let mut player_one = Actor::new("CJ McAllister");
 
         let null_abil = Ability::new("Null");
@@ -205,6 +240,37 @@ mod tests {
         player_one.add_ability(null_abil);
         player_one.add_ability(lightning_bolt);
 
+        player_one
+    }
+
+    #[test]
+    fn file_create() {
+        // Delete the file so we start clean
+        match fs::remove_file(FILENAME) {
+            _ => (), // ignore errors
+        }
+
+        let data_file = open_data_file();
+        
+        let metadata = match data_file.metadata() {
+            Err(_err)   => panic!("Error occurred while attempting to retrieve data file metadata."),
+            Ok(meta)    => meta,
+        };
+        let file_len = metadata.len();
+
+        // Assert that file should only contain the template
+        assert_eq!(file_len, TEMPLATE.len() as u64);
+    }
+
+    #[test]
+    fn actor_write() {
+        // Delete the file so we start clean
+        match fs::remove_file(FILENAME) {
+            _ => (), // ignore errors
+        }
+
+        let player_one = create_p1();
+
         let result = match write_actor(&player_one) {
             Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
             Ok(_tmp)    => (),
@@ -214,14 +280,68 @@ mod tests {
     }
 
     #[test]
-    fn c_file_update() {
+    fn file_update() {       
+        // Delete the file so we start clean
+        match fs::remove_file(FILENAME) {
+            _ => (), // ignore errors
+        }
+
+        let player_one = create_p1();
         let player_two = Actor::new("John Public");
 
-        let result = match write_actor(&player_two) {
+        match write_actor(&player_one) {
             Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
             Ok(_tmp)    => (),
         };
 
-        assert_eq!(result, ());
+        match write_actor(&player_two) {
+            Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
+            Ok(_tmp)    => (),
+        };
+    }
+
+    #[test]
+    fn abil_write() {  
+        // Delete the file so we start clean
+        match fs::remove_file(FILENAME) {
+            _ => (), // ignore errors
+        }
+
+        let mut lightning_bolt = Ability::new("Lightning Bolt");
+        lightning_bolt.set_potency(20);
+        lightning_bolt.set_aesthetics(Aesthetics::Impressive);
+        lightning_bolt.set_element(Element::Electric);
+        lightning_bolt.set_method(Method::Wand);
+        lightning_bolt.set_morality(Morality::Neutral);
+        lightning_bolt.set_school(School::Destruction);
+
+        let null_abil = Ability::new("Null");
+
+        match write_ability(&lightning_bolt) {
+            Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
+            Ok(_tmp)    => (),
+        }
+        match write_ability(&null_abil) {
+            Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
+            Ok(_tmp)    => (),
+        }
+    }
+
+    #[test]
+    fn full_write() {
+        // Delete the file so we start clean
+        match fs::remove_file(FILENAME) {
+            _ => (), // ignore errors
+        }
+
+        let player_one = create_p1();
+        let player_two = Actor::new("John Public");
+
+        write_actor(&player_one).unwrap();
+        for abil in player_one.abilities() {
+            write_ability(abil).unwrap();
+        }
+
+        write_actor(&player_two).unwrap();
     }
 }

@@ -24,6 +24,8 @@ Changelog:
 
 pub mod aspect;
 
+use std::fmt;
+
 use uuid::Uuid;
 
 use self::aspect::*;
@@ -154,3 +156,11 @@ impl PartialEq for Ability {
     }
 }
 impl Eq for Ability {}
+
+// Display output format for abilities
+// [UID]:[Name]:[Potency]:[Aspects (ordered CSV)]
+impl fmt::Display for Ability {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}:{}:{}:{}", self.uid(), self.name(), self.potency(), self.aspects())
+    }
+}
