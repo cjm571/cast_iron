@@ -36,10 +36,13 @@ Changelog:
 
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
+use std::collections::HashMap;
 use std::fmt::Write as FmtWrite;
 use std::io::Error as IoError;
 use std::io::{ErrorKind, SeekFrom, BufReader};
 use std::error::Error;
+
+use uuid::Uuid;
 
 use super::actor::Actor;
 
@@ -48,7 +51,9 @@ use super::actor::Actor;
 ///////////////////////////////////////////////////////////////////////////////
 
 const FILENAME: &'static str = "castiron.dat";
-const TEMPLATE: &'static str = "_ACTORS_\n_ABILITIES\n";
+const ACTOR_HEADER: &'static str = "_ACTORS_";
+const ABIL_HEADER: &'static str = "_ABILITIES_";
+const TEMPLATE: &'static str = "_ACTORS_\n_ABILITIES";
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Functions and Methods
@@ -148,6 +153,7 @@ pub fn write_actor(_actor: &Actor) -> Result<u32, IoError> {
     Ok(99)
 }
 
+//TODO: Why would I ever use this besides testing? :/
 // Reads actor data from CastIron data file
 // Returns actor data, or an IO Error if not found
 pub fn read_actor (_actor: &Actor) -> Result<String, IoError> {
@@ -175,6 +181,47 @@ pub fn read_actor (_actor: &Actor) -> Result<String, IoError> {
         line_num = line_num + 1;
     }
 }
+
+// Reads all actor dat from CastIron data file
+// Returns a HashMap of Actor objects, keyed by UUID
+pub fn read_actors () -> Result<HashMap<Uuid, Actor>, IoError> {
+    // Open data file for reading
+    let data_file = open_data_file();
+
+    // Initialize hashmap
+    let actor_map = HashMap::new();
+    
+
+    // Read actor data line-by-line
+    let mut data_reader = BufReader::new(data_file);
+    let mut data_line = String::new();
+    let mut line_num: i32 = 0;
+    loop {
+        data_reader.read_line(&mut data_line)?;
+        // EOF check
+        if data_line.is_empty() {
+            println!("-- EOF found at line {}", line_num);
+            return Err(IoError::new(ErrorKind::NotFound, "Actor data not found"))
+        }
+
+        // Skip header
+        if data_line.contains(ACTOR_HEADER) {
+            continue;
+        }
+
+        // read line into actor object
+        
+
+        // add actor to hashmap
+
+        // Clear line buffer and increment in prep for next line
+        data_line.clear();
+        line_num = line_num + 1;
+    }
+    
+    Ok(actor_map)
+}
+
 
 // WINDOWS-SPECIFIC
 // 
