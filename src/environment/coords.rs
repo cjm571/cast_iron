@@ -129,7 +129,7 @@ impl fmt::Debug for Coords {
 // Display output format for coordinates
 impl fmt::Display for Coords {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({}-{}-{})", self.x, self.y, self.z)
+        write!(f, "({},{},{})", self.x, self.y, self.z)
     }
 } 
 
@@ -152,6 +152,7 @@ impl Error for CoordsError {
         "Invalid Coordinates. Sum must equal 0."
     }
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Unit Tests

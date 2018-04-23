@@ -80,11 +80,11 @@ impl Weather {
     //  Accessor Methods
     ///////////////////////////////////////////////////////////////////////////
 
-    pub fn get_kind(self) -> Element {
+    pub fn kind(self) -> Element {
         self.kind
     }
 
-    pub fn get_intensity(&self, _tick: u32) -> Intensity {
+    pub fn intensity(&self, _tick: u32) -> Intensity {
         let intensity = self.function.solve(_tick);
 
         //TODO: Magic numbers. Ugh.

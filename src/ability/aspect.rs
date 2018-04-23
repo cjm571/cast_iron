@@ -99,6 +99,16 @@ impl Aspects {
     }
 }
 
+// Display output format for aspects
+impl fmt::Display for Aspects {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?},", self.aesthetics)?;
+        write!(f, "{:?},", self.element)?;
+        write!(f, "{:?},", self.method)?;
+        write!(f, "{:?},", self.morality)?;
+        write!(f, "{:?}", self.school)
+    }
+}
 impl fmt::Debug for Aspects {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Aspects: {{{:?}, {:?}, {:?}, {:?}, {:?}}}", self.aesthetics, self.element, self.method, self.morality, self.school)
