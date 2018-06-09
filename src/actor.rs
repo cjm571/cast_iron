@@ -37,10 +37,10 @@ use ::environment::coords::Coords;
 // Struct containing state information for the Actor
 pub struct Actor {
     uid:            Uuid,
-    name:           String,               // Actor's name
-    pos:            Coords,                // Actor's 3D position in the environment
-    cur_fatigue:    u8,            // Actor's current fatigue level
-    abilities:      Vec<Ability>,    // List of Actor's Abilities
+    name:           String,         // Actor's name
+    pos:            Coords,         // Actor's 3D position in the environment
+    cur_fatigue:    u8,             // Actor's current fatigue level
+    abilities:      Vec<Ability>,   // List of Actor's Abilities
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,6 +56,14 @@ impl Actor {
             cur_fatigue:    0,
             abilities:      Vec::new(),
         }
+    }
+
+    // Constructor
+    // See Display formatter for expected string format
+    pub fn from(data_str: &String) -> Actor {
+        // Tokenize string on ","
+
+        Actor::new("NOPE")
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -76,7 +84,7 @@ impl Actor {
     }
 
     // Adds ability to actor's ability list
-    pub fn add_ability(&mut self, ability: ::ability::Ability) {
+    pub fn add_ability(&mut self, ability: Ability) {
         self.abilities.push(ability);
     }
 
@@ -143,7 +151,9 @@ mod tests {
 
     #[test]
     fn output() {
-        let player_one = Actor::new("CJ McAllister");
+        let mut player_one = Actor::new("CJ McAllister");
+        let null_abil = Ability::new("Null");
+        player_one.add_ability(null_abil);
 
         println!("{}", player_one.to_string());
 

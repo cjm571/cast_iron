@@ -55,7 +55,7 @@ use super::ability::Ability;
 const FILENAME: &'static str = "castiron.dat";
 const ACTOR_HEADER: &'static str = "_ACTORS_";
 const ABIL_HEADER: &'static str = "_ABILITIES_";
-const TEMPLATE: &'static str = "_ACTORS_\n_ABILITIES";
+const TEMPLATE: &'static str = "_ACTORS_\n_ABILITIES_";
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Functions and Methods
@@ -181,7 +181,7 @@ pub fn write_actor(actor: &Actor) -> Result<(), IoError> {
     for i in 0 .. data_lines.len() {
 
         // Did not find actor, append a new actor entry
-        if data_lines[i].contains("_ABILITIES_") {
+        if data_lines[i].contains(ABIL_HEADER) {
             data_lines.insert(i, actor.to_string());
             break;
         }
