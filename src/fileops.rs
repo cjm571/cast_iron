@@ -37,7 +37,6 @@ Changelog:
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
 use std::collections::HashMap;
-use std::fmt::Write as FmtWrite;
 use std::io::Error as IoError;
 use std::io::{ErrorKind, SeekFrom, BufReader};
 use std::error::Error;
@@ -128,8 +127,7 @@ pub fn read_actors () -> Result<HashMap<Uuid, Actor>, IoError> {
     let data_file = open_data_file();
 
     // Initialize hashmap
-    let actor_map = HashMap::new();
-    
+    let mut actor_map = HashMap::new();
 
     // Read actor data line-by-line
     let mut data_reader = BufReader::new(data_file);
@@ -145,13 +143,21 @@ pub fn read_actors () -> Result<HashMap<Uuid, Actor>, IoError> {
 
         // Skip header
         if data_line.contains(ACTOR_HEADER) {
+            data_line.clear();
+            line_num = line_num + 1;
             continue;
         }
 
+        // Break on ABIL_HEADER
+        if data_line.contains(ABIL_HEADER) {
+            break;
+        }
+
         // read line into actor object
-        
+        let _actor = Actor::from(&data_line);
 
         // add actor to hashmap
+        actor_map.insert(_actor.uid(), _actor);
 
         // Clear line buffer and increment in prep for next line
         data_line.clear();
@@ -177,7 +183,7 @@ pub fn write_actor(actor: &Actor) -> Result<(), IoError> {
         data_lines.push(data_str.to_string());
     }
 
-    // Check the lines between _ACTOR_ and _ABILITIES_ for the given actor
+    // Check the lines between ACTOR_HEADER and ABIL_HEADER for the given actor
     for i in 0 .. data_lines.len() {
 
         // Did not find actor, append a new actor entry
@@ -225,7 +231,7 @@ pub fn write_ability(abil: &Ability) -> Result<(), IoError> {
         data_lines.push(data_str.to_string());
     }
 
-    // Check the lines after _ABILITIES_ for the given ability
+    // Check the lines after ABIL_HEADER for the given ability
     for i in 0 .. data_lines.len() {
 
         // Found ability, overwrite existing line
@@ -389,5 +395,34 @@ mod tests {
         }
 
         write_actor(&player_two).unwrap();
+    }
+
+    #[test]
+    fn full_read() {
+        // Delete the file so we start clean
+        match fs::remove_file(FILENAME) {
+            _ => (), // ignore errors
+        }
+
+        // Write basic actor and ability data
+        let player_one = create_p1();
+        let player_two = Actor::new("John Public");
+
+        write_actor(&player_one).unwrap();
+        for abil in player_one.abilities() {
+            write_ability(abil).unwrap();
+        }
+
+        write_actor(&player_two).unwrap();
+
+        // Read the data back into a map
+        let actor_map = read_actors().unwrap();
+
+        // Assert that the data is the same
+        let retrieved_p1 = actor_map.get(&player_one.uid()).unwrap();
+        let retrieved_p2 = actor_map.get(&player_two.uid()).unwrap();
+
+        assert_eq!(player_one.to_string(), retrieved_p1.to_string());
+        assert_eq!(player_two.to_string(), retrieved_p2.to_string());
     }
 }

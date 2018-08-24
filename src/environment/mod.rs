@@ -33,7 +33,7 @@ pub mod weather;
 
 // Enumeration of all element types
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum Element {
     Unset       = 0,
     Fire        = 1,
@@ -44,6 +44,22 @@ pub enum Element {
     Earth       = 6,
     Light       = 7,
     Dark        = 8,
+}
+impl From<u8> for Element {
+    fn from(val: u8) -> Self {
+        match val {
+            0 => Element::Unset,
+            1 => Element::Fire,
+            2 => Element::Ice,
+            3 => Element::Wind,
+            4 => Element::Water,
+            5 => Element::Electric,
+            6 => Element::Earth,
+            7 => Element::Light,
+            8 => Element::Dark,
+            _ => panic!("environment::Element::from: Aspect value out of range")
+        }
+    }
 }
 
 // Defines the global characteristics and enumerates the objects present within

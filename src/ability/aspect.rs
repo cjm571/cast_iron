@@ -30,7 +30,7 @@ use ::environment::Element;
 
 // Enumeration of the aesthetics (coolness) of an ability
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum Aesthetics {
     Unset       = 0,
     Beautiful   = 1,
@@ -39,9 +39,23 @@ pub enum Aesthetics {
     Ugly        = 4,
     Subtle      = 5,
 }
+impl From<u8> for Aesthetics {
+    fn from(val: u8) -> Self {
+        match val {
+            0 => Aesthetics::Unset,
+            1 => Aesthetics::Beautiful,
+            2 => Aesthetics::Impressive,
+            3 => Aesthetics::Erotic,
+            4 => Aesthetics::Ugly,
+            5 => Aesthetics::Subtle,
+            _ => panic!("aspect::Aesthetics::from: Aspect value out of range")
+        }
+    }
+}
+
 // Enumeration of method by which an ability is performed
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum Method {
     Unset   = 0,
     Staff   = 1,
@@ -49,18 +63,43 @@ pub enum Method {
     Manual  = 3,
     Vocal   = 4,
 }
+impl From<u8> for Method {
+    fn from(val: u8) -> Self {
+        match val {
+            0 => Method::Unset,
+            1 => Method::Staff,
+            2 => Method::Wand,
+            3 => Method::Manual,
+            4 => Method::Vocal,
+            _ => panic!("aspect::Method::from: Aspect value out of range")
+        }
+    }
+}
+
 // Enumeration of morality aspect of an ability
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum Morality {
     Unset   = 0,
     Good    = 1,
     Neutral = 2,
     Evil    = 3,
 }
+impl From<u8> for Morality {
+    fn from(val: u8) -> Self {
+        match val {
+            0 => Morality::Unset,
+            1 => Morality::Good,
+            2 => Morality::Neutral,
+            3 => Morality::Evil,
+            _ => panic!("aspect::Morality::from: Aspect value out of range")
+        }
+    }
+}
+
 // Enumeration of all schools of an ability
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum School {
     Unset       = 0,
     Destruction = 1,
@@ -70,6 +109,21 @@ pub enum School {
     Illusion    = 5,
     Nature      = 6,
     Song        = 7,
+}
+impl From<u8> for School {
+    fn from(val: u8) -> Self {
+        match val {
+            0 => School::Unset,
+            1 => School::Destruction,
+            2 => School::Restoration,
+            3 => School::Conjuration,
+            4 => School::Alteration,
+            5 => School::Illusion,
+            6 => School::Nature,
+            7 => School::Song,
+            _ => panic!("aspect::School::from: Aspect value out of range")
+        }
+    }
 }
 
 // Structure containing all aspect classifications
@@ -91,10 +145,25 @@ impl Aspects {
     pub fn new() -> Aspects {
         Aspects {
             aesthetics: Aesthetics::Unset,
-            element: Element::Unset,
-            method: Method::Unset,
-            morality: Morality::Unset,
-            school: School::Unset,
+            element:    Element::Unset,
+            method:     Method::Unset,
+            morality:   Morality::Unset,
+            school:     School::Unset,
+        }
+    }
+
+    // Constructor
+    // See Display formatter for expected string format
+    pub fn from(data_str: &String) -> Aspects {
+        let mut data_chars = data_str.chars();
+
+        // Subtract 48 to extract int value from ascii value
+        Aspects {
+            aesthetics: Aesthetics::from(data_chars.next().unwrap() as u8 - 48),
+            element:    Element::from(data_chars.next().unwrap() as u8 - 48),
+            method:     Method::from(data_chars.next().unwrap() as u8 - 48),
+            morality:   Morality::from(data_chars.next().unwrap() as u8 - 48),
+            school:     School::from(data_chars.next().unwrap() as u8 - 48),
         }
     }
 }
@@ -102,11 +171,11 @@ impl Aspects {
 // Display output format for aspects
 impl fmt::Display for Aspects {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?},", self.aesthetics)?;
-        write!(f, "{:?},", self.element)?;
-        write!(f, "{:?},", self.method)?;
-        write!(f, "{:?},", self.morality)?;
-        write!(f, "{:?}", self.school)
+        write!(f, "{}", self.aesthetics as u8)?;
+        write!(f, "{}", self.element as u8)?;
+        write!(f, "{}", self.method as u8)?;
+        write!(f, "{}", self.morality as u8)?;
+        write!(f, "{}", self.school as u8)
     }
 }
 impl fmt::Debug for Aspects {

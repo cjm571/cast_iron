@@ -27,6 +27,7 @@ pub mod aspect;
 use std::fmt;
 
 use uuid::Uuid;
+use std::str::FromStr;
 
 use self::aspect::*;
 use super::environment::Element;
@@ -55,8 +56,33 @@ impl Ability {
         Ability {
             uid:        Uuid::new_v4(),
             name:       _name.to_string(),
-            aspects:    Aspects::new(),
             potency:    0,
+            aspects:    Aspects::new(),
+        }
+    }
+    
+    // Constructor
+    // See Display formatter for expected string format
+    pub fn from(data_str: &String) -> Ability {
+        // Tokenize on ":"
+        let data_vec: Vec<&str> = data_str.split(':').collect();
+        
+        let uid = match Uuid::from_str(data_vec[0]) {
+            Ok(uid)     => uid,
+            Err(_err)   => panic!("actor::from: Invalid uuid input string."),
+        };
+
+        let name = data_vec[1].to_string();
+
+        let potency = data_vec[2].parse::<u8>().unwrap();
+
+        let aspects = Aspects::from(&data_vec[3].to_string());
+
+        Ability {
+            uid:        uid,
+            name:       name,
+            potency:    potency,
+            aspects:    aspects,
         }
     }
 
@@ -68,6 +94,10 @@ impl Ability {
     pub fn set_name (&mut self, _name: &'static str) {
         self.name.clear();
         self.name.push_str(_name);
+    }
+
+    pub fn set_potency (&mut self, _potency: u8) {
+        self.potency = _potency;
     }
 
     pub fn set_aspects(&mut self, _aspects: Aspects) {
@@ -94,10 +124,6 @@ impl Ability {
         self.aspects.school = _school;
     }
 
-    pub fn set_potency (&mut self, _potency: u8) {
-        self.potency = _potency;
-    }
-
 
     ///////////////////////////////////////////////////////////////////////////
     //  Accessor Methods
@@ -111,6 +137,11 @@ impl Ability {
     // Returns a reference to the name of the ability
     pub fn name (&self) -> &String {
         &self.name
+    }
+
+    // Returns potency of the ability
+    pub fn potency (&self) -> u8 {
+        self.potency
     }
 
     // Returns a reference to the Aspects of the ability
@@ -141,11 +172,6 @@ impl Ability {
     // Returns a reference to the ability's school
     pub fn school (&self) -> &School {
         &self.aspects.school
-    }
-
-    // Returns potency of the ability
-    pub fn potency (&self) -> u8 {
-        self.potency
     }
 }
 

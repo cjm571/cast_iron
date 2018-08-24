@@ -26,6 +26,7 @@ Changelog:
 use std::fmt;
 
 use uuid::Uuid;
+use std::str::FromStr;
 
 use ::ability::Ability;
 use ::environment::coords::Coords;
@@ -48,10 +49,10 @@ pub struct Actor {
 ///////////////////////////////////////////////////////////////////////////////
 impl Actor {
     // Constructor
-    pub fn new(_name: &'static str) -> Actor {
+    pub fn new(name: &'static str) -> Actor {
         Actor {
             uid:            Uuid::new_v4(),
-            name:           _name.to_string(),
+            name:           name.to_string(),
             pos:            Coords::new(),
             cur_fatigue:    0,
             abilities:      Vec::new(),
@@ -61,9 +62,51 @@ impl Actor {
     // Constructor
     // See Display formatter for expected string format
     pub fn from(data_str: &String) -> Actor {
-        // Tokenize string on ","
+        // Tokenize on "|" to separate actor from abil list
+        let split_vec: Vec<&str> = data_str.split('|').collect();
 
-        Actor::new("NOPE")
+        let actor_str = split_vec[0];
+        let abil_str = split_vec[1];
+        
+        // Tokenize string on ":"
+        let data_vec: Vec<&str> = actor_str.split(':').collect();
+        
+        let uid = match Uuid::from_str(data_vec[0]) {
+            Ok(uid)     => uid,
+            Err(_err)   => panic!("actor::from: Invalid uuid input string."),
+        };
+
+        let name = data_vec[1];
+
+        // trim parentheses and tokenize on ','
+        let parens: &[_] = &['(', ')']; //WTF: is this type?
+        let coord_vec: Vec<&str> = data_vec[2].trim_matches(parens).split(',').collect();
+        let pos = match Coords::new_at(coord_vec[0].parse::<i32>().unwrap(), coord_vec[1].parse::<i32>().unwrap(), coord_vec[2].parse::<i32>().unwrap()) {
+            Ok(pos)     => pos,
+            Err(_err)   => panic!("actor::from: Invalid Coords input string."),
+        };
+
+        let cur_fatigue = data_vec[3].parse::<u8>().unwrap();
+
+        // Check for empty ability list
+        let mut abil_vec: Vec<Ability> = Vec::new();
+        if abil_str != "\n" {
+            // Tokenize abil list on ";"
+            let abil_str_vec: Vec<&str> = abil_str.split(';').collect();
+
+            // Iterate through abil list, creating ability objects and dropping them in the vector
+            for i in 0 .. abil_str_vec.len() {
+                abil_vec.push(Ability::from(&abil_str_vec[i].to_string()));
+            }
+        }
+
+        Actor {
+            uid:            uid,
+            name:           name.to_string(),
+            pos:            pos,
+            cur_fatigue:    cur_fatigue,
+            abilities:      abil_vec,
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -94,8 +137,8 @@ impl Actor {
     ///////////////////////////////////////////////////////////////////////////
 
     // Returns a reference for the actor's unique ID
-    pub fn uid(&self) -> &Uuid {
-        &self.uid
+    pub fn uid(&self) -> Uuid {
+        self.uid
     }
     
     // Returns a reference for the actor's name
@@ -123,16 +166,15 @@ impl Actor {
 // [UID]:[Name]:[Position]:[Fatigue]:[Abilities (CSV)]
 impl fmt::Display for Actor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        //TODO: actually understand this return value
-        let mut res = write!(f, "{}:{}:{}:{}:", self.uid(), self.name(), self.pos(), self.cur_fatigue());
+        let mut res = write!(f, "{}:{}:{}:{}:|", self.uid(), self.name(), self.pos(), self.cur_fatigue());
         
         let abilities = self.abilities();
         for abil in abilities {
-            res = write!(f, "{}", abil.uid());
+            res = write!(f, "{}", abil.to_string());
             
-            // Avoid adding a trailing comma
+            // Avoid adding a trailing semicolon
             if abil != abilities.last().unwrap() {
-                res = write!(f, ",");
+                res = write!(f, ";");
             }
         }
 
@@ -150,13 +192,47 @@ mod tests {
     use super::*;
 
     #[test]
-    fn output() {
+    fn output_single() {
+        // set up an actor object with one ability
         let mut player_one = Actor::new("CJ McAllister");
         let null_abil = Ability::new("Null");
         player_one.add_ability(null_abil);
 
+        // output the actor as a string
         println!("{}", player_one.to_string());
 
         assert_eq!(1,1);
+    }
+
+    #[test]
+    fn output_multi() {
+        // set up an actor object with one ability
+        let mut player_one = Actor::new("CJ McAllister");
+        let tbolt = Ability::new("Thunderbolt");
+        let fstorm = Ability::new("Fire Storm");
+        player_one.add_ability(tbolt);
+        player_one.add_ability(fstorm);
+
+        // output the actor as a string
+        println!("{}", player_one.to_string());
+
+        assert_eq!(1,1);
+    }
+
+    #[test]
+    fn input() {
+        // set up an actor object with one ability
+        let mut player_one = Actor::new("CJ McAllister");
+        let null_abil = Ability::new("Null");
+        player_one.add_ability(null_abil);
+
+        // feed the actor string into from() to "clone" the actor
+        let clone_one = Actor::from(&player_one.to_string());
+
+        // output both actor strings for comparison
+        println!("{}\n{}", player_one.to_string(), clone_one.to_string());
+
+        // assert that the strings are identical
+        assert_eq!(player_one.to_string(), clone_one.to_string());
     }
 }
