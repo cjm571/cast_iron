@@ -8,7 +8,7 @@
             "name": "Rust",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/target/debug/cast_iron-7388da3a7e2d9cc4.exe",
+            "program": "${workspaceFolder}/target/debug/cast_iron-03838184079e888e.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

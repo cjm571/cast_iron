@@ -15,11 +15,13 @@ Copyright (C) 2017 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    //TODO: purpose writeup for actor
+    This module defines the Actor object. All PCs and NPCs will have an
+    associated Actor object to record their abilities and game state.
 
 Changelog:
     CJ McAllister   21 Nov 2017     File created
     CJ McAllister   31 Jan 2018     Added UUID
+    CJ McAllister   26 Aug 2018     Reconstruction from data string
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

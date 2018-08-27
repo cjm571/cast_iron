@@ -34,14 +34,20 @@ pub struct Weather {
     function:   PolyFunc,
 }
 
+// Define intensity limits
+const MILD_INT: i32 = 63;
+const STRONG_INT: i32 = 127;
+const SEVERE_INT: i32 = 191;
+const MAX_INT: i32 = 255;
+
 #[repr(u8)]
 #[derive(Debug)]
 pub enum Intensity {
     None    = 0,
-    Mild    = 63,
-    Strong  = 127,
-    Severe  = 191,
-    Max     = 255,
+    Mild    = MILD_INT as u8,
+    Strong  = STRONG_INT as u8,
+    Severe  = SEVERE_INT as u8,
+    Max     = MAX_INT as u8,
 }
 
 
@@ -60,10 +66,10 @@ impl Weather {
     }
 
     // Creates and returns a new Weather object from the given parameters
-    pub fn from(_kind: Element, _function: PolyFunc) -> Weather {
+    pub fn from(kind: Element, function: PolyFunc) -> Weather {
         Weather {
-            kind:       _kind,
-            function:   _function,
+            kind:       kind,
+            function:   function,
         }
     }
 
@@ -72,8 +78,8 @@ impl Weather {
     ///////////////////////////////////////////////////////////////////////////
     
     // Changes the kind of weather to the given Element
-    pub fn change(&mut self, _kind: Element) {
-        self.kind = _kind;
+    pub fn change(&mut self, kind: Element) {
+        self.kind = kind;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -84,21 +90,20 @@ impl Weather {
         self.kind
     }
 
-    pub fn intensity(&self, _tick: u32) -> Intensity {
-        let intensity = self.function.solve(_tick);
+    pub fn intensity(&self, tick: u32) -> Intensity {
+        let intensity = self.function.solve(tick);
 
-        //TODO: Magic numbers. Ugh.
         match intensity {
-            MIN ... -1  => Intensity::None,
-            0 ... 62    => Intensity::None,
-            63 ... 126  => Intensity::Mild,
-            127 ... 190 => Intensity::Strong,
-            191 ... 254 => Intensity::Severe,
-            255 ... MAX => Intensity::Max,
-            _           => {
-                            debug_println!("Invalid weather intensity!");
-                            Intensity::None
-                           }
+            MIN ... -1  =>                  Intensity::None,
+            0 ... MILD_INT  =>              Intensity::None,
+            MILD_INT ... STRONG_INT  =>     Intensity::Mild,
+            STRONG_INT ... SEVERE_INT =>    Intensity::Strong,
+            SEVERE_INT ... MAX_INT =>       Intensity::Severe,
+            MAX_INT ... MAX =>              Intensity::Max,
+            _           =>                  {
+                                            debug_println!("Invalid weather intensity!");
+                                            Intensity::None
+                                            }
         }
     }
 }
