@@ -15,7 +15,9 @@ Copyright (C) 2017 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    //TODO: purpose writeup for resource
+    This package defines the status of an actor-usable resource. A reource
+    can be things like campfires, ponds, etc. that enhance elementally-aligned
+    abilities for actors within its radius.
 
 Changelog:
 

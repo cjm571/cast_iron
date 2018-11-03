@@ -15,7 +15,7 @@ Copyright (C) 2017 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    //TODO: purpose writeup for lib
+    Top-level module for the CastIron engine.
     
 Changelog:
 

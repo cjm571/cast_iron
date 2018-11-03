@@ -15,7 +15,10 @@ Copyright (C) 2017 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    //TODO: purpose writeup for aspect
+    This module defines the aspects (i.e characteristics) of CastIron abilities.
+
+    All aspects are implemented as enumerations, as mixed-aspect abilities are not
+    planned at the time of this writing.
 
 Changelog:
 
@@ -29,7 +32,6 @@ use ::environment::Element;
 ///////////////////////////////////////////////////////////////////////////////
 
 // Enumeration of the aesthetics (coolness) of an ability
-#[allow(dead_code)]
 #[derive(Debug, Copy, Clone)]
 pub enum Aesthetics {
     Unset       = 0,
@@ -54,7 +56,6 @@ impl From<u8> for Aesthetics {
 }
 
 // Enumeration of method by which an ability is performed
-#[allow(dead_code)]
 #[derive(Debug, Copy, Clone)]
 pub enum Method {
     Unset   = 0,
@@ -77,7 +78,6 @@ impl From<u8> for Method {
 }
 
 // Enumeration of morality aspect of an ability
-#[allow(dead_code)]
 #[derive(Debug, Copy, Clone)]
 pub enum Morality {
     Unset   = 0,
@@ -98,7 +98,6 @@ impl From<u8> for Morality {
 }
 
 // Enumeration of all schools of an ability
-#[allow(dead_code)]
 #[derive(Debug, Copy, Clone)]
 pub enum School {
     Unset       = 0,

@@ -15,7 +15,12 @@ Copyright (C) 2017 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    //TODO: purpose writeup for weather
+    This module defines CastIron weather effects.
+
+    Weather can enhance or impede actors in various ways e.g. reducing visibility
+    and lowering accuracy of ranged attacks, enhancing wind-elemental damage, etc.
+
+    Efefects follow a unique polynomial curve in severity.
 
 Changelog:
 

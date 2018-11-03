@@ -15,7 +15,11 @@ Copyright (C) 2017 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    //TODO: purpose writeup for coords
+    This module defines the Coords object, which denotes an actors location in
+    CastIron's hexagonal grid.
+
+    //TODO Define what (0, 0, 0) location is.
+    //TODO Define meaning of x, y, and z
 
 Changelog:
 

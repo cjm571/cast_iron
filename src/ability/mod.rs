@@ -15,7 +15,10 @@ Copyright (C) 2017 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    //TODO: purpose writeup for ability
+    This module defines, and provides interfaces for, CastIron abilities.
+
+    Abilities encompass all actions (spells, melee/ranged attacks, etc.) that 
+    one actor can take on another actor or group of actors.
 
 Changelog:
     CJ McAllister   22 Nov 2017     File created
