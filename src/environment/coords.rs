@@ -18,8 +18,26 @@ Purpose:
     This module defines the Coords object, which denotes an actors location in
     CastIron's hexagonal grid.
 
-    //TODO Define what (0, 0, 0) location is.
-    //TODO Define meaning of x, y, and z
+    (0, 0, 0) is the centermost hexagon in the world grid. 
+    
+    X, Y, and Z coordinates correspond to the "NE", "NW", and "S" directions,
+    respectively, and must always add up to 0. See diagram below for clarity:
+
+              _______
+             /       \
+     _______/ 1, 1,-2 \_______
+    /       \         /       \  
+   / 0, 1,-1 \_______/ 1, 0,-1 \
+   \         /       \         /
+    \_______/ 0, 0, 0 \_______/
+    /       \         /       \
+   /-1, 0, 1 \_______/ 0,-1, 1 \
+   \         /       \         /
+    \_______/ 0, 0, 2 \_______/
+            \         /
+             \_______/
+
+    See World Grid module for the maximum values of the axes.
 
 Changelog:
 
@@ -27,10 +45,21 @@ Changelog:
 
 use std::fmt;
 use std::error::Error;
+use std::f64::consts::*;
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data structures
 ///////////////////////////////////////////////////////////////////////////////
+
+// Define cardinal and sub-cardinal directions for ease-of-use
+pub static EAST:        f64 = 0.0;
+pub static NORTHEAST:   f64 = FRAC_PI_4; 
+pub static NORTH:       f64 = FRAC_PI_2;
+pub static NORTHWEST:   f64 = 3.0 * FRAC_PI_4;
+pub static WEST:        f64 = PI;
+pub static SOUTHWEST:   f64 = 5.0 * FRAC_PI_4;
+pub static SOUTH:       f64 = 3.0 * FRAC_PI_2;
+pub static SOUTHEAST:   f64 = 7.0 * FRAC_PI_4;
 
 pub struct Coords {
     x: i32,
@@ -90,6 +119,10 @@ impl Coords {
                 lat_mag = lat_mag.trunc() + (1.0 * lat_mag.signum());
             }
 
+            //TODO:Check for overflow
+            //let _tempX = match (self.x += lat_mag as i32) {
+            //    Ok( )
+            //}
             // Set movement
             self.x += lat_mag as i32;
             self.y -= lat_mag as i32;
@@ -116,7 +149,6 @@ impl Coords {
             self.z -= ne_mag + nw_mag;
             debug_println!("move_ne by: {}", ne_mag);
             debug_println!("move_nw by: {}", nw_mag);
-
         }
         
         debug_println!("END coord.move_vec()");
@@ -165,10 +197,9 @@ impl Error for CoordsError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::f64::consts::*;
 
     #[test]
-    fn perpendicular_hemisphere() {
+    fn square_hemisphere() {
         // Initialize values
         let mut actual = Coords::new();
         let mut expected = Coords::new();
@@ -177,34 +208,44 @@ mod tests {
         assert_eq!(actual, expected);
         
         // Move 3 cells East
-        actual.move_vec(3, 0.0);
+        actual.move_vec(3, EAST);
         if let Ok(expected) = Coords::new_at(3, -3, 0) {
             assert_eq!(actual, expected);
         }
 
         // Move 4 cells North
-        actual.move_vec(4, FRAC_PI_2);
+        actual.move_vec(4, NORTH);
         if let Ok(expected) = Coords::new_at(5, -1, -4) {
             assert_eq!(actual, expected);
         }
         
         // Move 6 cells West
-        actual.move_vec(6, PI);
+        actual.move_vec(6, WEST);
         if let Ok(expected) = Coords::new_at(-1, 5, -4) {
             assert_eq!(actual, expected);
         }
         
         // Move 4 cells South
-        actual.move_vec(4, 3.0*FRAC_PI_2);
+        actual.move_vec(4, SOUTH);
         if let Ok(expected) = Coords::new_at(-3, 3, 0) {
             assert_eq!(actual, expected);
         }
         
         // Move 3 cells East
-        actual.move_vec(3, 0.0);
+        actual.move_vec(3, EAST);
         expected = Coords::new();
         assert_eq!(actual, expected);
     }
 
-    // TODO: More tests
+    #[test]
+    fn move_max_cardinal_dirs() {
+        // Initialize values
+        let mut actual = Coords::new();
+
+        // Move East by INT_MAX
+        actual.move_vec(i32::max_value(), EAST);
+
+        // Move one more unit East
+        actual.move_vec(1, EAST);
+    }
 }

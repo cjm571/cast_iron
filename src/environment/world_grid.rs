@@ -15,7 +15,7 @@ Copyright (C) 2017 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    Provides functions to determine interactions between various objects
+    This module rovides functions to determine interactions between various objects
     in the world grid.
     
 Changelog:

@@ -20,7 +20,7 @@ Purpose:
     Weather can enhance or impede actors in various ways e.g. reducing visibility
     and lowering accuracy of ranged attacks, enhancing wind-elemental damage, etc.
 
-    Efefects follow a unique polynomial curve in severity.
+    Efefects follow a defined polynomial curve in severity.
 
 Changelog:
 
