@@ -26,6 +26,7 @@ Changelog:
 pub mod coords;
 pub mod resource;
 pub mod weather;
+pub mod world_grid;
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures

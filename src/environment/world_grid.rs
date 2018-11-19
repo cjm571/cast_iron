@@ -22,15 +22,49 @@ Changelog:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+use std::f64::consts::PI;
+use std::collections::HashMap;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Data structures
 ///////////////////////////////////////////////////////////////////////////////
 
-pub struct WorldGrid {
-    size: u32, // Maximum value for an axis of the hex grid
+#[derive(Debug, Hash)]
+pub enum Direction {
+    EAST,
+    NORTHEAST,
+    NORTH,
+    NORTHWEST,
+    WEST,
+    SOUTHWEST,
+    SOUTH,
+    SOUTHEAST
+}
+// Equivalence comparison
+impl PartialEq for Direction {
+    fn eq(&self, other: &Direction) -> bool {
+        (self == other)
+    }
+}
+impl Eq for Direction {}
 
+lazy_static! {
+    pub static ref HEX_SIDES: HashMap<Direction, f64> = {
+        let mut m = HashMap::new();
+
+        m.insert(Direction::NORTHEAST, PI/6.0);
+        m.insert(Direction::NORTH,     PI/2.0);
+        m.insert(Direction::NORTHWEST, 5.0*PI/6.0);
+        m.insert(Direction::SOUTHWEST, 7.0*PI/6.0);
+        m.insert(Direction::SOUTH,     3.0*PI/2.0);
+        m.insert(Direction::SOUTHEAST, 11.0*PI/6.0);
+
+        m
+    };
+}
+
+pub struct WorldGrid {
+    pub size: u32, // Maximum value for an axis of the hex grid
 }
 
 
@@ -39,9 +73,17 @@ pub struct WorldGrid {
 ///////////////////////////////////////////////////////////////////////////////
 
 impl WorldGrid {
-    pub fn new(_size: u32) -> WorldGrid {
+    pub fn new(size: u32) -> WorldGrid {
         WorldGrid {
-            size: _size,
+            size: size,
         }
+    }    
+
+    ///////////////////////////////////////////////////////////////////////////
+    //  Accessor Methods
+    ///////////////////////////////////////////////////////////////////////////
+     
+    pub fn get_size(self) -> u32 {
+        self.size
     }
 }
