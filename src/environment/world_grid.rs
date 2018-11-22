@@ -63,6 +63,21 @@ lazy_static! {
     };
 }
 
+lazy_static! {
+    pub static ref HEX_VERTICES: HashMap<Direction, f64> = {
+        let mut m = HashMap::new();
+
+        m.insert(Direction::EAST,       0.0);
+        m.insert(Direction::NORTHEAST,  PI/3.0);
+        m.insert(Direction::NORTHWEST,  2.0*PI/3.0);
+        m.insert(Direction::WEST,       PI);
+        m.insert(Direction::SOUTHWEST,  4.0*PI/3.0);
+        m.insert(Direction::SOUTHEAST,  5.0*PI/3.0);
+
+        m
+    };
+}
+
 pub struct WorldGrid {
     pub size: u32, // Maximum value for an axis of the hex grid
 }
