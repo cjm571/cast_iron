@@ -104,11 +104,7 @@ impl Weather {
             MILD_INT ... STRONG_INT  =>     Intensity::Mild,
             STRONG_INT ... SEVERE_INT =>    Intensity::Strong,
             SEVERE_INT ... MAX_INT =>       Intensity::Severe,
-            MAX_INT ... MAX =>              Intensity::Max,
-            _           =>                  {
-                                            debug_println!("Invalid weather intensity!");
-                                            Intensity::None
-                                            }
+            MAX_INT ... MAX =>              Intensity::Max
         }
     }
 }
