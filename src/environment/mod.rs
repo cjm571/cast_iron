@@ -28,6 +28,35 @@ pub mod resource;
 pub mod weather;
 pub mod world_grid;
 
+
+///////////////////////////////////////////////////////////////////////////////
+//  Constants
+///////////////////////////////////////////////////////////////////////////////
+
+#[allow(dead_code)]
+const BLACK:        [f32; 4] = [0.0, 0.0, 0.0, 1.0];
+#[allow(dead_code)]
+const WHITE:        [f32; 4] = [1.0, 1.0, 1.0, 1.0];
+#[allow(dead_code)]
+const RED:          [f32; 4] = [1.0, 0.0, 0.0, 1.0];
+#[allow(dead_code)]
+const GREEN:        [f32; 4] = [0.0, 1.0, 0.0, 1.0];
+#[allow(dead_code)]
+const BLUE:         [f32; 4] = [0.0, 0.0, 1.0, 1.0];
+#[allow(dead_code)]
+const YELLOW:       [f32; 4] = [1.0, 1.0, 0.0, 1.0];
+#[allow(dead_code)]
+const CYAN:         [f32; 4] = [0.0, 1.0, 1.0, 1.0];
+#[allow(dead_code)]
+const PURPLE:       [f32; 4] = [1.0, 0.0, 1.0, 1.0];
+#[allow(dead_code)]
+const DARK_PURPLE:  [f32; 4] = [0.5, 0.0, 0.5, 1.0];
+#[allow(dead_code)]
+const GREY:         [f32; 4] = [0.5, 0.5, 0.5, 1.0];
+#[allow(dead_code)]
+const BROWN:        [f32; 4] = [0.25, 0.5, 0.75, 1.0];
+
+
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,8 +73,9 @@ pub enum Element {
     Electric    = 5,
     Earth       = 6,
     Light       = 7,
-    Dark        = 8,
+    Dark        = 8
 }
+
 impl From<u8> for Element {
     fn from(val: u8) -> Self {
         match val {
@@ -107,5 +137,24 @@ impl Environment {
 
     pub fn weather(self) -> weather::Weather {
         self.weather
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////
+//  Utility Methods
+///////////////////////////////////////////////////////////////////////////
+
+pub fn get_default_color(elem: Element) -> [f32; 4]
+{
+    match elem {
+        Element::Unset      => GREY,
+        Element::Fire       => RED,
+        Element::Ice        => CYAN,
+        Element::Wind       => GREEN,
+        Element::Water      => BLUE,
+        Element::Electric   => PURPLE,
+        Element::Earth      => BROWN,
+        Element::Light      => WHITE,
+        Element::Dark       => DARK_PURPLE
     }
 }

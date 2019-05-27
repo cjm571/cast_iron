@@ -100,6 +100,10 @@ impl Coords {
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    //  Mutator Methods
+    ///////////////////////////////////////////////////////////////////////////
+    
     // Moves the object by vector
     //  _mag: number of "straightline" cells to move
     //  _dir: direction of movement in radians
@@ -152,6 +156,23 @@ impl Coords {
         }
         
         debug_println!("END coord.move_vec()");
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    //  Accessor Methods
+    ///////////////////////////////////////////////////////////////////////////
+    
+    pub fn x(&self) -> i32
+    {
+        self.x
+    }
+    pub fn y(&self) -> i32
+    {
+        self.y
+    }
+    pub fn z(&self) -> i32
+    {
+        self.z
     }
 }
 
