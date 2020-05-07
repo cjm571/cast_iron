@@ -40,18 +40,23 @@ pub struct Weather {
 }
 
 // Define intensity limits
-const MILD_INT: i32 = 63;
-const STRONG_INT: i32 = 127;
-const SEVERE_INT: i32 = 191;
+const MIN_INT: i32 = 0;
+const MAX_NO_INT: i32 = 63;
+const MIN_MILD_INT: i32 = 64;
+const MAX_MILD_INT: i32 = 127;
+const MIN_STRONG_INT: i32 = 128;
+const MAX_STRONG_INT: i32 = 191;
+const MIN_SEVERE_INT: i32 = 192;
+const MAX_SEVERE_INT: i32 = 255;
 const MAX_INT: i32 = 255;
 
 #[repr(u8)]
 #[derive(Debug)]
 pub enum Intensity {
-    None    = 0,
-    Mild    = MILD_INT as u8,
-    Strong  = STRONG_INT as u8,
-    Severe  = SEVERE_INT as u8,
+    None    = MIN_INT as u8,
+    Mild    = MIN_MILD_INT as u8,
+    Strong  = MIN_STRONG_INT as u8,
+    Severe  = MIN_SEVERE_INT as u8,
     Max     = MAX_INT as u8,
 }
 
@@ -99,12 +104,12 @@ impl Weather {
         let intensity = self.function.solve(tick);
 
         match intensity {
-            MIN ... -1  =>                  Intensity::None,
-            0 ... MILD_INT  =>              Intensity::None,
-            MILD_INT ... STRONG_INT  =>     Intensity::Mild,
-            STRONG_INT ... SEVERE_INT =>    Intensity::Strong,
-            SEVERE_INT ... MAX_INT =>       Intensity::Severe,
-            MAX_INT ... MAX =>              Intensity::Max
+            MIN             ..= -1              => Intensity::None,
+            MIN_INT         ..= MAX_NO_INT      => Intensity::None,
+            MIN_MILD_INT    ..= MAX_MILD_INT    => Intensity::Mild,
+            MIN_STRONG_INT  ..= MAX_STRONG_INT  => Intensity::Strong,
+            MIN_SEVERE_INT  ..= MAX_SEVERE_INT  => Intensity::Severe,
+            256             ..= MAX             => Intensity::Max
         }
     }
 }

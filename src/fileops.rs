@@ -39,7 +39,6 @@ use std::io::prelude::*;
 use std::collections::HashMap;
 use std::io::Error as IoError;
 use std::io::{ErrorKind, SeekFrom, BufReader};
-use std::error::Error;
 
 use uuid::Uuid;
 
@@ -68,21 +67,21 @@ fn open_data_file() -> File {
         Err(ref io_err) if io_err.kind() == ErrorKind::AlreadyExists => {
                             // Data file already exists, open it as-is
                             match OpenOptions::new().read(true).write(true).open(FILENAME) {
-                                Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
+                                Err(io_err) => panic!("IO ERROR: {}", io_err.to_string()),
                                 Ok(file) => file,
                             }
                         },
-        Err(io_err) => panic!("IO_ERROR: {}", io_err.description()),
+        Err(io_err) => panic!("IO_ERROR: {}", io_err.to_string()),
         Ok(mut file)    => {
             // Data file did not exist, populate it with template
             match file.write_all(TEMPLATE.as_bytes()) {
-                Err(io_err) => panic!("IO_ERROR: {}", io_err.description()),
+                Err(io_err) => panic!("IO_ERROR: {}", io_err.to_string()),
                 Ok(())      => (),
             }
 
             // Reset cursor to 0
             match file.seek(SeekFrom::Start(0)) {
-                Err(io_err) => panic!("IO_ERROR: {}", io_err.description()),
+                Err(io_err) => panic!("IO_ERROR: {}", io_err.to_string()),
                 Ok(_pos)    => (),
             }
 
@@ -324,7 +323,7 @@ mod tests {
         let player_one = create_p1();
 
         let result = match write_actor(&player_one) {
-            Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
+            Err(io_err) => panic!("IO ERROR: {}", io_err.to_string()),
             Ok(_tmp)    => (),
         };
 
@@ -342,12 +341,12 @@ mod tests {
         let player_two = Actor::new("John Public");
 
         match write_actor(&player_one) {
-            Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
+            Err(io_err) => panic!("IO ERROR: {}", io_err.to_string()),
             Ok(_tmp)    => (),
         };
 
         match write_actor(&player_two) {
-            Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
+            Err(io_err) => panic!("IO ERROR: {}", io_err.to_string()),
             Ok(_tmp)    => (),
         };
     }
@@ -370,11 +369,11 @@ mod tests {
         let null_abil = Ability::new("Null");
 
         match write_ability(&lightning_bolt) {
-            Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
+            Err(io_err) => panic!("IO ERROR: {}", io_err.to_string()),
             Ok(_tmp)    => (),
         }
         match write_ability(&null_abil) {
-            Err(io_err) => panic!("IO ERROR: {}", io_err.description()),
+            Err(io_err) => panic!("IO ERROR: {}", io_err.to_string()),
             Ok(_tmp)    => (),
         }
     }

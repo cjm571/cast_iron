@@ -43,7 +43,7 @@ pub enum Direction {
 // Equivalence comparison
 impl PartialEq for Direction {
     fn eq(&self, other: &Direction) -> bool {
-        (self == other)
+        self == other
     }
 }
 impl Eq for Direction {}
