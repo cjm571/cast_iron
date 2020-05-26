@@ -22,8 +22,6 @@ Changelog:
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 extern crate uuid;
-#[macro_use]
-extern crate lazy_static;
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Global Data Structures
