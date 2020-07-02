@@ -20,7 +20,7 @@ Purpose:
     Weather can enhance or impede actors in various ways e.g. reducing visibility
     and lowering accuracy of ranged attacks, enhancing wind-elemental damage, etc.
 
-    Efefects follow a defined polynomial curve in severity.
+    Effects follow a defined polynomial curve in severity.
 
 Changelog:
 
@@ -51,7 +51,7 @@ const MAX_SEVERE_INT: i32 = 255;
 const MAX_INT: i32 = 255;
 
 #[repr(u8)]
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Intensity {
     None    = MIN_INT as u8,
     Mild    = MIN_MILD_INT as u8,
@@ -96,7 +96,7 @@ impl Weather {
     //  Accessor Methods
     ///////////////////////////////////////////////////////////////////////////
 
-    pub fn kind(self) -> Element {
+    pub fn kind(&self) -> Element {
         self.kind
     }
 

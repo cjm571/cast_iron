@@ -61,7 +61,7 @@ const BROWN:        [f32; 4] = [0.25, 0.5, 0.75, 1.0];
 ///////////////////////////////////////////////////////////////////////////////
 
 // Enumeration of all element types
-#[allow(dead_code)]
+#[repr(u8)]
 #[derive(Debug, Copy, Clone)]
 pub enum Element {
     Unset       = 0,

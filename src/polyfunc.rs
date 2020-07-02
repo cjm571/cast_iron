@@ -35,10 +35,11 @@ Changelog:
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
+//FIXME: Needs a debug output implementation
 pub struct PolyFunc {
     magnitude:  u8,
     duration:   u8,
-    start_time: u8
+    start_time: u32
 }
 
 
@@ -58,7 +59,7 @@ impl PolyFunc {
     }
     
     // Creates and returns a new PolyFunc object from the given parameters
-    pub fn from(magnitude: u8, duration: u8, start_time: u8) -> PolyFunc {
+    pub fn from(magnitude: u8, duration: u8, start_time: u32) -> PolyFunc {
         PolyFunc {
             magnitude:  magnitude,
             duration:   duration,
@@ -70,7 +71,7 @@ impl PolyFunc {
     pub fn solve(&self, tick: u32) -> i32 {
         let a: f32 = self.magnitude as f32 / (self.duration as f32 / 2.0).powi(2);
         let b: f32 = self.start_time as f32;
-        let c: f32 = (self.start_time + self.duration) as f32;
+        let c: f32 = (self.start_time + self.duration as u32) as f32;
 
         (-1.0 * a * (tick as f32 - b) * (tick as f32 - c)) as i32
     }
