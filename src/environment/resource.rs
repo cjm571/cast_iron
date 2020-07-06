@@ -36,7 +36,7 @@ pub struct Resource {
     uid:    Uuid,
     kind:   Element,
     state:  State,
-    pos:    Coords,
+    coords: Coords,
     radius: u8,
 }
 
@@ -63,18 +63,18 @@ impl Resource {
             uid:    Uuid::new_v4(),
             kind:   Element::Unset,
             state:  State::Depleted,
-            pos:    Coords::new(),
+            coords: Coords::new(),
             radius: 0,
         }
     }
 
     // Creates and returns a new Resource object with the given parameters
-    pub fn from(_kind: Element, _state: State, _pos: Coords, _radius: u8) -> Resource {
+    pub fn from(_kind: Element, _state: State, _coords: Coords, _radius: u8) -> Resource {
         Resource {
             uid:    Uuid::new_v4(),
             kind:   _kind,
             state:  _state,
-            pos:    _pos,
+            coords: _coords,
             radius: _radius,
         }
     }
@@ -155,12 +155,11 @@ impl Resource {
         self.state
     }
 
-    pub fn get_position(&self) -> &Coords {
-        &self.pos
+    pub fn get_coords(&self) -> &Coords {
+        &self.coords
     }
 
     pub fn get_radius(&self) -> u8 {
         self.radius
     }
 }
-
