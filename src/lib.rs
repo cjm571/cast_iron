@@ -34,12 +34,14 @@ extern crate uuid;
 
 // Non-interruptive debug output
 #[cfg(debug_assertions)]
+#[macro_export]
 macro_rules! debug_println {
     ($( $args:expr ),*) => {
         println!( $( $args ),* );        
     };
 }
 #[cfg(not(debug_assertions))]
+#[macro_export]
 macro_rules! debug_println {
     ($( $args:expr ),*) => {}
 }

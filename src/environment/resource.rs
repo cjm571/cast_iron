@@ -143,23 +143,23 @@ impl Resource {
     //  Accessor Methods
     ///////////////////////////////////////////////////////////////////////////
 
-    pub fn uid(self) -> Uuid {
+    pub fn get_uid(&self) -> Uuid {
         self.uid
     }
 
-    pub fn kind(self) -> Element {
+    pub fn get_kind(&self) -> Element {
         self.kind
     }
 
-    pub fn state(self) -> State {
+    pub fn get_state(&self) -> State {
         self.state
     }
 
-    pub fn position(self) -> Coords {
-        self.pos
+    pub fn get_position(&self) -> &Coords {
+        &self.pos
     }
 
-    pub fn radius(self) -> u8 {
+    pub fn get_radius(&self) -> u8 {
         self.radius
     }
 }

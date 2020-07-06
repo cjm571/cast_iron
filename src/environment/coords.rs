@@ -162,15 +162,15 @@ impl Coords {
     //  Accessor Methods
     ///////////////////////////////////////////////////////////////////////////
     
-    pub fn x(&self) -> i32
+    pub fn get_x(&self) -> i32
     {
         self.x
     }
-    pub fn y(&self) -> i32
+    pub fn get_y(&self) -> i32
     {
         self.y
     }
-    pub fn z(&self) -> i32
+    pub fn get_z(&self) -> i32
     {
         self.z
     }
