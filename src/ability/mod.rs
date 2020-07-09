@@ -64,7 +64,7 @@ impl Ability {
         }
     }
     
-    // Constructor
+    //FIXME: Should implement the From trait
     // See Display formatter for expected string format
     pub fn from(data_str: &String) -> Ability {
         // Tokenize on ":"

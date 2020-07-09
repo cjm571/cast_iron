@@ -56,20 +56,9 @@ pub enum State {
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Resource {
-
-    // Creates and returns a new Resource object
-    pub fn new() -> Resource {
-        Resource {
-            uid:    Uuid::new_v4(),
-            kind:   Element::Unset,
-            state:  State::Depleted,
-            coords: Coords::new(),
-            radius: 0,
-        }
-    }
-
-    // Creates and returns a new Resource object with the given parameters
-    pub fn from(_kind: Element, _state: State, _coords: Coords, _radius: u8) -> Resource {
+    /// Constructor
+    /// Creates and returns a new Resource object with the given parameters
+    pub fn new(_kind: Element, _state: State, _coords: Coords, _radius: u8) -> Resource {
         Resource {
             uid:    Uuid::new_v4(),
             kind:   _kind,

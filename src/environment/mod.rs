@@ -29,34 +29,6 @@ pub mod weather;
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Constants
-///////////////////////////////////////////////////////////////////////////////
-
-#[allow(dead_code)]
-const BLACK:        [f32; 4] = [0.0, 0.0, 0.0, 1.0];
-#[allow(dead_code)]
-const WHITE:        [f32; 4] = [1.0, 1.0, 1.0, 1.0];
-#[allow(dead_code)]
-const RED:          [f32; 4] = [1.0, 0.0, 0.0, 1.0];
-#[allow(dead_code)]
-const GREEN:        [f32; 4] = [0.0, 1.0, 0.0, 1.0];
-#[allow(dead_code)]
-const BLUE:         [f32; 4] = [0.0, 0.0, 1.0, 1.0];
-#[allow(dead_code)]
-const YELLOW:       [f32; 4] = [1.0, 1.0, 0.0, 1.0];
-#[allow(dead_code)]
-const CYAN:         [f32; 4] = [0.0, 1.0, 1.0, 1.0];
-#[allow(dead_code)]
-const PURPLE:       [f32; 4] = [1.0, 0.0, 1.0, 1.0];
-#[allow(dead_code)]
-const DARK_PURPLE:  [f32; 4] = [0.5, 0.0, 0.5, 1.0];
-#[allow(dead_code)]
-const GREY:         [f32; 4] = [0.5, 0.5, 0.5, 1.0];
-#[allow(dead_code)]
-const BROWN:        [f32; 4] = [0.25, 0.5, 0.75, 1.0];
-
-
-///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -89,71 +61,5 @@ impl From<u8> for Element {
             8 => Element::Dark,
             _ => panic!("environment::Element::from: Aspect value out of range")
         }
-    }
-}
-
-// Defines the global characteristics and enumerates the objects present within
-// the game environment
-pub struct Environment {
-    size:       u32, // world size, as a radius measured in hexgrid units
-    weather:    weather::Weather,
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-//  Functions and Methods
-///////////////////////////////////////////////////////////////////////////////
-
-impl Environment {
-
-    // Creates and returns a new Environment object
-    pub fn new() -> Environment {
-        Environment {
-            size:       0,
-            weather:    weather::Weather::new(),
-        }
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    //  Mutator Methods
-    ///////////////////////////////////////////////////////////////////////////
-
-    pub fn set_size(&mut self, _size: u32) {
-        self.size = _size;
-    }
-
-    pub fn change_weather(&mut self, _weather: weather::Weather) {
-        self.weather = _weather
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    //  Accessor Methods
-    ///////////////////////////////////////////////////////////////////////////
-
-    pub fn size(self) -> u32 {
-        self.size
-    }
-
-    pub fn weather(self) -> weather::Weather {
-        self.weather
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////
-//  Utility Methods
-///////////////////////////////////////////////////////////////////////////
-
-pub fn get_default_color(elem: Element) -> [f32; 4]
-{
-    match elem {
-        Element::Unset      => GREY,
-        Element::Fire       => RED,
-        Element::Ice        => CYAN,
-        Element::Wind       => GREEN,
-        Element::Water      => BLUE,
-        Element::Electric   => PURPLE,
-        Element::Earth      => BROWN,
-        Element::Light      => WHITE,
-        Element::Dark       => DARK_PURPLE
     }
 }

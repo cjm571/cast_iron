@@ -67,16 +67,9 @@ pub enum Intensity {
 
 impl Weather {
 
-    // Creates and returns a new Weather object
-    pub fn new() -> Weather {
-        Weather {
-            kind:       Element::Unset,
-            function:   PolyFunc::new(),
-        }
-    }
-
-    // Creates and returns a new Weather object from the given parameters
-    pub fn from(kind: Element, function: PolyFunc) -> Weather {
+    /// Constructor
+    /// Creates and returns a new Weather object from the given parameters
+    pub fn new(kind: Element, function: PolyFunc) -> Weather {
         Weather {
             kind:       kind,
             function:   function,

@@ -58,6 +58,7 @@ impl PolyFunc {
         }
     }
     
+    //FIXME: Should implement the From trait
     // Creates and returns a new PolyFunc object from the given parameters
     pub fn from(magnitude: u8, duration: u8, start_time: u32) -> PolyFunc {
         PolyFunc {

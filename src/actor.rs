@@ -60,8 +60,8 @@ impl Actor {
             abilities:      Vec::new(),
         }
     }
-
-    // Constructor
+    
+    //FIXME: Should implement the From trait
     // See Display formatter for expected string format
     pub fn from(data_str: &String) -> Actor {
         // Tokenize on "|" to separate actor from abil list

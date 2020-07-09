@@ -151,7 +151,7 @@ impl Aspects {
         }
     }
 
-    // Constructor
+    //FIXME: Should implement the From trait
     // See Display formatter for expected string format
     pub fn from(data_str: &String) -> Aspects {
         let mut data_chars = data_str.chars();
