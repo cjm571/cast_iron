@@ -30,6 +30,14 @@ Changelog:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+use rand::{
+    Rng,
+    distributions::{
+        Distribution,
+        Standard
+    }
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
@@ -50,18 +58,18 @@ pub struct PolyFunc {
 impl PolyFunc {
 
     // Creates and returns a new PolyFunc object
-    pub fn new() -> PolyFunc {
-        PolyFunc {
+    pub fn new() -> Self {
+        Self {
             magnitude:  1,
             duration:   1,
             start_time: 1
         }
     }
     
-    //FIXME: Should implement the From trait
+    //FIXME: probably shouldn't be called "from"
     // Creates and returns a new PolyFunc object from the given parameters
-    pub fn from(magnitude: u8, duration: u8, start_time: u32) -> PolyFunc {
-        PolyFunc {
+    pub fn from(magnitude: u8, duration: u8, start_time: u32) -> Self {
+        Self {
             magnitude:  magnitude,
             duration:   duration,
             start_time: start_time
@@ -75,6 +83,27 @@ impl PolyFunc {
         let c: f32 = (self.start_time + self.duration as u32) as f32;
 
         (-1.0 * a * (tick as f32 - b) * (tick as f32 - c)) as i32
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  Trait Implementations
+///////////////////////////////////////////////////////////////////////////////
+
+//OPT: May need to account for start time differently
+// Distribution trait provides randomnization for this module
+impl Distribution<PolyFunc> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PolyFunc {
+        let rand_mag: u8 = rng.gen();
+        let rand_dur: u8 = rng.gen();
+        let rand_start_time: u32 = rng.gen();
+
+        PolyFunc {
+            magnitude:  rand_mag,
+            duration:   rand_dur,
+            start_time: rand_start_time
+        }
     }
 }
 

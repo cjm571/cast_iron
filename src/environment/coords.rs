@@ -39,13 +39,23 @@ Purpose:
 
     See World Grid module for the maximum values of the axes.
 
-Changelog:
-
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+use crate::context::Context;
 
 use std::fmt;
 use std::error::Error;
 use std::f64::consts::*;
+
+use rand::Rng;
+
+// use rand::{
+//     Rng,
+//     distributions::{
+//         Distribution,
+//         Uniform
+//     }
+// };
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data structures
@@ -61,6 +71,7 @@ pub static SOUTHWEST:   f64 = 5.0 * FRAC_PI_4;
 pub static SOUTH:       f64 = 3.0 * FRAC_PI_2;
 pub static SOUTHEAST:   f64 = 7.0 * FRAC_PI_4;
 
+#[derive(Clone, Copy)]
 pub struct Coords {
     x: i32,
     y: i32,
@@ -78,26 +89,38 @@ const MIN_FRACTIONAL_MOVE: f64 = 0.01;
 ///////////////////////////////////////////////////////////////////////////////
  
 impl Coords {
-    // Creates a new coordinates object
-    pub fn new() -> Coords {
-        Coords{
+    /// Creates a coordinates object at (0, 0, 0)
+    pub fn default() -> Self {
+        Self{
             x: 0,
             y: 0,
             z: 0,
         }
     }
-
-    // Creates a new coordinates object at the given (sanity-checked) coordinates
-    pub fn new_at( _x: i32, _y: i32, _z: i32) -> Result<Coords, CoordsError> {
-        if  _x + _y + _z == 0 {
-            Ok(Coords {
-                x: _x,
-                y: _y,
-                z: _z,
+    
+    /// Creates a new coordinates object at the given (sanity-checked) coordinates
+    pub fn new(x: i32, y: i32, z: i32) -> Result<Self, CoordsError> {
+        if  x + y + z == 0 {
+            Ok(Self {
+                x: x,
+                y: y,
+                z: z,
             })
         } else {
             Err(CoordsError)
         }
+    }
+
+    /// Creates a random, valid Coords object within the constraints of the game Context
+    pub fn rand(ctx: &Context) -> Self {
+        let mut rng = rand::thread_rng();
+        
+        //OPT: Will always calculating the z-value lead to non-random coordinates?
+        let rand_x: i32 = rng.gen_range(0, ctx.get_grid_radius() as i32 + 1);
+        let rand_y: i32 = rng.gen_range(0, ctx.get_grid_radius() as i32 + 1);
+        let calc_z: i32 = 0 - rand_x - rand_y; // Coords must meet the x + y + z == 0 requirement
+
+        Self::new(rand_x, rand_y, calc_z).unwrap()
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -105,17 +128,17 @@ impl Coords {
     ///////////////////////////////////////////////////////////////////////////
     
     // Moves the object by vector
-    //  _mag: number of "straightline" cells to move
-    //  _dir: direction of movement in radians
-    pub fn move_vec(&mut self, _mag: i32, _dir: f64) {
+    //  mag: number of "straightline" cells to move
+    //  dir: direction of movement in radians
+    pub fn move_vec(&mut self, mag: i32, dir: f64) {
         debug_println!("START coord.move_vec()");
-        debug_println!("_mag: {}, _dir: {:.4}", _mag, _dir);
+        debug_println!("mag: {}, dir: {:.4}", mag, dir);
         
-        let flt_mag: f64 = _mag as f64;
+        let flt_mag: f64 = mag as f64;
 
         // Determine lateral movement
-        if _dir.cos().abs() > MIN_FRACTIONAL_MOVE {
-            let mut lat_mag: f64 = flt_mag * _dir.cos();
+        if dir.cos().abs() > MIN_FRACTIONAL_MOVE {
+            let mut lat_mag: f64 = flt_mag * dir.cos();
             debug_println!("Lat mag: {:.2}", lat_mag);
 
             // Adjust such that non-negligible fractional movements round to next larger integer
@@ -124,7 +147,7 @@ impl Coords {
             }
 
             //TODO:Check for overflow
-            //let _tempX = match (self.x += lat_mag as i32) {
+            //let tempX = match (self.x += lat_mag as i32) {
             //    Ok( )
             //}
             // Set movement
@@ -134,8 +157,8 @@ impl Coords {
         }
 
         // Approximate vertical movement with partial NE/NW movement
-        if _dir.sin().abs() > MIN_FRACTIONAL_MOVE {
-            let mut vert_mag: f64 = flt_mag * _dir.sin();
+        if dir.sin().abs() > MIN_FRACTIONAL_MOVE {
+            let mut vert_mag: f64 = flt_mag * dir.sin();
             debug_println!("Vert mag: {:.2}", vert_mag);
 
             // Adjust such that non-negligible fractional movements round to next larger integer
@@ -175,6 +198,8 @@ impl Coords {
         self.z
     }
 }
+
+//FIXME: Some kind of distribution implementation
 
 // Debug output format for coordinates
 impl fmt::Debug for Coords {
@@ -222,46 +247,46 @@ mod tests {
     #[test]
     fn square_hemisphere() {
         // Initialize values
-        let mut actual = Coords::new();
-        let mut expected = Coords::new();
+        let mut actual = Coords::default();
+        let mut expected = Coords::default();
 
         // Initial position
         assert_eq!(actual, expected);
         
         // Move 3 cells East
         actual.move_vec(3, EAST);
-        if let Ok(expected) = Coords::new_at(3, -3, 0) {
+        if let Ok(expected) = Coords::new(3, -3, 0) {
             assert_eq!(actual, expected);
         }
 
         // Move 4 cells North
         actual.move_vec(4, NORTH);
-        if let Ok(expected) = Coords::new_at(5, -1, -4) {
+        if let Ok(expected) = Coords::new(5, -1, -4) {
             assert_eq!(actual, expected);
         }
         
         // Move 6 cells West
         actual.move_vec(6, WEST);
-        if let Ok(expected) = Coords::new_at(-1, 5, -4) {
+        if let Ok(expected) = Coords::new(-1, 5, -4) {
             assert_eq!(actual, expected);
         }
         
         // Move 4 cells South
         actual.move_vec(4, SOUTH);
-        if let Ok(expected) = Coords::new_at(-3, 3, 0) {
+        if let Ok(expected) = Coords::new(-3, 3, 0) {
             assert_eq!(actual, expected);
         }
         
         // Move 3 cells East
         actual.move_vec(3, EAST);
-        expected = Coords::new();
+        expected = Coords::default();
         assert_eq!(actual, expected);
     }
 
     #[test]
     fn move_max_cardinal_dirs() {
         // Initialize values
-        let mut actual = Coords::new();
+        let mut actual = Coords::default();
 
         // Move East by INT_MAX
         actual.move_vec(i32::max_value(), EAST);

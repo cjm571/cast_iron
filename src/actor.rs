@@ -33,6 +33,7 @@ use std::str::FromStr;
 use ::ability::Ability;
 use ::environment::coords::Coords;
 
+
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,11 +52,11 @@ pub struct Actor {
 ///////////////////////////////////////////////////////////////////////////////
 impl Actor {
     // Constructor
-    pub fn new(name: &'static str) -> Actor {
-        Actor {
+    pub fn new(name: &'static str) -> Self {
+        Self {
             uid:            Uuid::new_v4(),
             name:           name.to_string(),
-            pos:            Coords::new(),
+            pos:            Coords::default(),
             cur_fatigue:    0,
             abilities:      Vec::new(),
         }
@@ -63,7 +64,7 @@ impl Actor {
     
     //FIXME: Should implement the From trait
     // See Display formatter for expected string format
-    pub fn from(data_str: &String) -> Actor {
+    pub fn from(data_str: &String) -> Self {
         // Tokenize on "|" to separate actor from abil list
         let split_vec: Vec<&str> = data_str.split('|').collect();
 
@@ -83,7 +84,11 @@ impl Actor {
         // trim parentheses and tokenize on ','
         let parens: &[_] = &['(', ')']; //WTF: is this type?
         let coord_vec: Vec<&str> = data_vec[2].trim_matches(parens).split(',').collect();
-        let pos = match Coords::new_at(coord_vec[0].parse::<i32>().unwrap(), coord_vec[1].parse::<i32>().unwrap(), coord_vec[2].parse::<i32>().unwrap()) {
+        let pos = match Coords::new(
+            coord_vec[0].parse::<i32>().unwrap(),
+            coord_vec[1].parse::<i32>().unwrap(),
+            coord_vec[2].parse::<i32>().unwrap()
+        ) {
             Ok(pos)     => pos,
             Err(_err)   => panic!("actor::from: Invalid Coords input string."),
         };
@@ -102,7 +107,7 @@ impl Actor {
             }
         }
 
-        Actor {
+        Self {
             uid:            uid,
             name:           name.to_string(),
             pos:            pos,
@@ -139,27 +144,27 @@ impl Actor {
     ///////////////////////////////////////////////////////////////////////////
 
     // Returns a reference for the actor's unique ID
-    pub fn uid(&self) -> Uuid {
+    pub fn get_uid(&self) -> Uuid {
         self.uid
     }
     
     // Returns a reference for the actor's name
-    pub fn name(&self) -> &String {
+    pub fn get_name(&self) -> &String {
         &self.name
     }
 
     // Returns a reference for the actor's position
-    pub fn pos(&self) -> &Coords {
+    pub fn get_pos(&self) -> &Coords {
         &self.pos
     }
 
     // Returns a reference for the actor's current fatigue
-    pub fn cur_fatigue(&self) -> &u8 {
+    pub fn get_cur_fatigue(&self) -> &u8 {
         &self.cur_fatigue
     }
 
     // Returns a refernce to the vector of the actor's abilities
-    pub fn abilities(&self) -> &Vec<Ability>{
+    pub fn get_abilities(&self) -> &Vec<Ability>{
         &self.abilities
     }
 }
@@ -168,14 +173,13 @@ impl Actor {
 // [UID]:[Name]:[Position]:[Fatigue]:[Abilities (CSV)]
 impl fmt::Display for Actor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut res = write!(f, "{}:{}:{}:{}:|", self.uid(), self.name(), self.pos(), self.cur_fatigue());
+        let mut res = write!(f, "{}:{}:{}:{}:|", self.uid, self.name, self.pos, self.cur_fatigue);
         
-        let abilities = self.abilities();
-        for abil in abilities {
+        for abil in &self.abilities {
             res = write!(f, "{}", abil.to_string());
             
             // Avoid adding a trailing semicolon
-            if abil != abilities.last().unwrap() {
+            if abil != self.abilities.last().unwrap() {
                 res = write!(f, ";");
             }
         }

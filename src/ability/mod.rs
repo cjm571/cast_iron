@@ -33,7 +33,7 @@ use uuid::Uuid;
 use std::str::FromStr;
 
 use self::aspect::*;
-use super::environment::Element;
+use super::environment::element::Element;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Data Structures
@@ -55,8 +55,8 @@ pub struct Ability {
 // TODO: Figure out how to comment this shit well...
 impl Ability {
     // Constructor
-    pub fn new(_name: &'static str) -> Ability {
-        Ability {
+    pub fn new(_name: &'static str) -> Self {
+        Self {
             uid:        Uuid::new_v4(),
             name:       _name.to_string(),
             potency:    0,
@@ -66,7 +66,7 @@ impl Ability {
     
     //FIXME: Should implement the From trait
     // See Display formatter for expected string format
-    pub fn from(data_str: &String) -> Ability {
+    pub fn from(data_str: &String) -> Self {
         // Tokenize on ":"
         let data_vec: Vec<&str> = data_str.split(':').collect();
         
@@ -81,7 +81,7 @@ impl Ability {
 
         let aspects = Aspects::from(&data_vec[3].to_string());
 
-        Ability {
+        Self {
             uid:        uid,
             name:       name,
             potency:    potency,

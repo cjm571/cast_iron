@@ -19,25 +19,34 @@ Purpose:
     can be things like campfires, ponds, etc. that enhance elementally-aligned
     abilities for actors within its radius.
 
-Changelog:
-
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-use uuid::Uuid;
+use crate::context::Context;
 
-use super::Element;
-use super::coords::Coords;
+use uuid::Uuid;
+use rand::{
+    Rng,
+    distributions::{
+        Distribution,
+        Standard
+    }
+};
+
+use super::{
+    element::Element,
+    coords::Coords
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
 pub struct Resource {
-    uid:    Uuid,
-    kind:   Element,
-    state:  State,
-    coords: Coords,
-    radius: u8,
+    uid:        Uuid,
+    element:    Element,
+    state:      State,
+    coords:     Coords,
+    radius:     u8,
 }
 
 #[derive(Copy, Clone)]
@@ -58,13 +67,36 @@ pub enum State {
 impl Resource {
     /// Constructor
     /// Creates and returns a new Resource object with the given parameters
-    pub fn new(_kind: Element, _state: State, _coords: Coords, _radius: u8) -> Resource {
-        Resource {
-            uid:    Uuid::new_v4(),
-            kind:   _kind,
-            state:  _state,
-            coords: _coords,
-            radius: _radius,
+    pub fn new(element: Element, state: State, coords: Coords, radius: u8) -> Self {
+        Self {
+            uid:        Uuid::new_v4(),
+            element:    element,
+            state:      state,
+            coords:     coords,
+            radius:     radius,
+        }
+    }
+
+    // Creates a random, valid Resource object within the constraints of the game Context
+    pub fn rand(ctx: &Context) -> Self {
+        // Set UID
+        let uid = Uuid::new_v4();
+        
+        //  Get RNG thread handle and generate random centerpoint
+        let mut rng = rand::thread_rng();
+        
+        // Generate random properties
+        let rand_center_coords = Coords::rand(ctx);
+        let rand_elem: Element = rng.gen();
+        let rand_state: State = rng.gen();
+        let rand_radius: u8 = rng.gen_range(0, ctx.get_grid_radius()+1);
+
+        Self {
+            uid:        uid,
+            element:    rand_elem,
+            state:      rand_state,
+            coords:     rand_center_coords,
+            radius:     rand_radius
         }
     }
 
@@ -95,10 +127,10 @@ impl Resource {
     }
 
     // Replenish the state of the resource by the given magnitude
-    pub fn replenish(&mut self, _mag: u8) {
+    pub fn replenish(&mut self, mag: u8) {
 
         // set the state to the initial + given magnitude
-        let state_val = (self.state as u8) + _mag;
+        let state_val = (self.state as u8) + mag;
         match state_val {
             0 => self.state = State::Depleted,
             1 => self.state = State::Low,
@@ -110,9 +142,9 @@ impl Resource {
     }
 
     // Increases the radius of the resource
-    pub fn intensify(&mut self, _mag: u8) {
-        if (self.radius as u32) + (_mag as u32) < u8::max_value() as u32 {
-            self.radius += _mag;
+    pub fn intensify(&mut self, mag: u8) {
+        if (self.radius as u32) + (mag as u32) < u8::max_value() as u32 {
+            self.radius += mag;
         } else {
             self.radius = u8::max_value();
         }
@@ -120,9 +152,9 @@ impl Resource {
     }
 
     // Decreases the radius of the resource
-    pub fn weaken(&mut self, _mag: u8) {
-        if (self.radius as i32) - (_mag as i32) > u8::min_value() as i32 {
-            self.radius -= _mag;
+    pub fn weaken(&mut self, mag: u8) {
+        if (self.radius as i32) - (mag as i32) > u8::min_value() as i32 {
+            self.radius -= mag;
         } else {
             self.radius = u8::min_value();
         }
@@ -137,7 +169,7 @@ impl Resource {
     }
 
     pub fn get_kind(&self) -> Element {
-        self.kind
+        self.element
     }
 
     pub fn get_state(&self) -> State {
@@ -150,5 +182,32 @@ impl Resource {
 
     pub fn get_radius(&self) -> u8 {
         self.radius
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  Trait Implementations
+///////////////////////////////////////////////////////////////////////////////
+
+// Distribution trait provides randomnization for this module
+impl Distribution<State> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> State {
+        let rand_num: u8 = rng.gen();
+        State::from((rand_num % State::Overflow as u8) + 1)
+    }
+}
+
+impl From<u8> for State {
+    fn from(val: u8) -> Self {
+        match val {
+            0 => State::Depleted,
+            1 => State::Low,
+            2 => State::Partial,
+            3 => State::High,
+            4 => State::Full,
+            5 => State::Overflow,
+            _ => panic!("State value out of range")
+        }
     }
 }

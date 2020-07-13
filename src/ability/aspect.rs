@@ -25,7 +25,7 @@ Changelog:
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 use std::fmt;
-use ::environment::Element;
+use ::environment::element::Element;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Data Structures
@@ -141,8 +141,8 @@ pub struct Aspects {
 
 impl Aspects {
     // Constructor
-    pub fn new() -> Aspects {
-        Aspects {
+    pub fn new() -> Self {
+        Self {
             aesthetics: Aesthetics::Unset,
             element:    Element::Unset,
             method:     Method::Unset,
@@ -153,11 +153,11 @@ impl Aspects {
 
     //FIXME: Should implement the From trait
     // See Display formatter for expected string format
-    pub fn from(data_str: &String) -> Aspects {
+    pub fn from(data_str: &String) -> Self {
         let mut data_chars = data_str.chars();
 
         // Subtract 48 to extract int value from ascii value
-        Aspects {
+        Self {
             aesthetics: Aesthetics::from(data_chars.next().unwrap() as u8 - 48),
             element:    Element::from(data_chars.next().unwrap() as u8 - 48),
             method:     Method::from(data_chars.next().unwrap() as u8 - 48),

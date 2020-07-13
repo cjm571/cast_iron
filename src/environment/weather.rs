@@ -26,16 +26,25 @@ Changelog:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-use super::Element;
-use ::polyfunc::PolyFunc;
 use std::i32::{MIN, MAX};
+use rand::{
+    Rng,
+    distributions::{
+        Distribution,
+        Standard
+    }
+};
+
+use super::element::Element;
+use ::polyfunc::PolyFunc;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
 pub struct Weather {
-    kind:       Element,
+    element:    Element,
     function:   PolyFunc,
 }
 
@@ -69,9 +78,9 @@ impl Weather {
 
     /// Constructor
     /// Creates and returns a new Weather object from the given parameters
-    pub fn new(kind: Element, function: PolyFunc) -> Weather {
-        Weather {
-            kind:       kind,
+    pub fn new(element: Element, function: PolyFunc) -> Self {
+        Self {
+            element:    element,
             function:   function,
         }
     }
@@ -81,16 +90,16 @@ impl Weather {
     ///////////////////////////////////////////////////////////////////////////
     
     // Changes the kind of weather to the given Element
-    pub fn change(&mut self, kind: Element) {
-        self.kind = kind;
+    pub fn change(&mut self, element: Element) {
+        self.element = element;
     }
 
     ///////////////////////////////////////////////////////////////////////////
     //  Accessor Methods
     ///////////////////////////////////////////////////////////////////////////
 
-    pub fn kind(&self) -> Element {
-        self.kind
+    pub fn get_element(&self) -> Element {
+        self.element
     }
 
     pub fn intensity(&self, tick: u32) -> Intensity {
@@ -103,6 +112,24 @@ impl Weather {
             MIN_STRONG_INT  ..= MAX_STRONG_INT  => Intensity::Strong,
             MIN_SEVERE_INT  ..= MAX_SEVERE_INT  => Intensity::Severe,
             256             ..= MAX             => Intensity::Max
+        }
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  Trait Implementations
+///////////////////////////////////////////////////////////////////////////////
+
+// Distribution trait provides randomnization for this module
+impl Distribution<Weather> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Weather {
+        let rand_elem: Element = rng.gen();
+        let rand_polyfunc: PolyFunc = rng.gen();
+
+        Weather {
+            element:  rand_elem,
+            function: rand_polyfunc
         }
     }
 }

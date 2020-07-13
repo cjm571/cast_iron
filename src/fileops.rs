@@ -108,7 +108,7 @@ pub fn read_actor (_actor: &Actor) -> Result<String, IoError> {
             return Err(IoError::new(ErrorKind::NotFound, "Actor data not found"))
         }
 
-        if data_line.contains(_actor.uid().to_string().as_str()) {
+        if data_line.contains(_actor.get_uid().to_string().as_str()) {
             println!("-- Actor UID found at line {}", line_num);
             return Ok(data_line)
         }
@@ -156,7 +156,7 @@ pub fn read_actors () -> Result<HashMap<Uuid, Actor>, IoError> {
         let _actor = Actor::from(&data_line);
 
         // add actor to hashmap
-        actor_map.insert(_actor.uid(), _actor);
+        actor_map.insert(_actor.get_uid(), _actor);
 
         // Clear line buffer and increment in prep for next line
         data_line.clear();
@@ -192,7 +192,7 @@ pub fn write_actor(actor: &Actor) -> Result<(), IoError> {
         }
 
         // Found actor, overwrite existing line
-        if data_lines[i].starts_with(actor.uid().to_string().as_str()) {
+        if data_lines[i].starts_with(actor.get_uid().to_string().as_str()) {
             data_lines[i] = actor.to_string();
             break;
         }
@@ -273,7 +273,7 @@ mod tests {
     use super::*;
     use ::ability::Ability;
     use ::ability::aspect::*;
-    use ::environment::Element;
+    use ::environment::element::Element;
     
     // Helper functions
     fn create_p1() -> Actor{
@@ -389,7 +389,7 @@ mod tests {
         let player_two = Actor::new("John Public");
 
         write_actor(&player_one).unwrap();
-        for abil in player_one.abilities() {
+        for abil in player_one.get_abilities() {
             write_ability(abil).unwrap();
         }
 
@@ -408,7 +408,7 @@ mod tests {
         let player_two = Actor::new("John Public");
 
         write_actor(&player_one).unwrap();
-        for abil in player_one.abilities() {
+        for abil in player_one.get_abilities() {
             write_ability(abil).unwrap();
         }
 
@@ -418,8 +418,8 @@ mod tests {
         let actor_map = read_actors().unwrap();
 
         // Assert that the data is the same
-        let retrieved_p1 = actor_map.get(&player_one.uid()).unwrap();
-        let retrieved_p2 = actor_map.get(&player_two.uid()).unwrap();
+        let retrieved_p1 = actor_map.get(&player_one.get_uid()).unwrap();
+        let retrieved_p2 = actor_map.get(&player_two.get_uid()).unwrap();
 
         assert_eq!(player_one.to_string(), retrieved_p1.to_string());
         assert_eq!(player_two.to_string(), retrieved_p2.to_string());
