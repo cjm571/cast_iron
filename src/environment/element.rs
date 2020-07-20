@@ -56,7 +56,7 @@ pub enum Element {
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-// Distribution trait provides randomnization for this module
+// Distribution trait provides randomization for this module
 impl Distribution<Element> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Element {
         let rand_num: u8 = rng.gen();

@@ -27,9 +27,12 @@ use crate::context::Context;
 use uuid::Uuid;
 use rand::Rng;
 
-use super::{
-    element::Element,
-    coords::Coords
+use crate::{
+    environment::{
+        element::Element,
+        coords::Coords
+    },
+    hex_direction_provider::*
 };
 
 
@@ -78,10 +81,39 @@ impl Obstacle {
                 break;
             }
 
-            // Move in a random direction and push the new coords into the collection
-            let rand_dir: f64 = rng.gen();
-            last_coord.move_vec(1, rand_dir);
-            all_coords.push(last_coord);
+            // Pick a random direction and ensure it will not double back
+            let direction_provider: HexDirectionProvider<HexSides> = rng.gen();
+
+            // It's possible the current coords are completely surrounded, so use this flag to know
+            // if we should stop the obstacle here
+            let mut found_good_coords = false;
+            
+            for direction in direction_provider {
+                // Attempt a move and then check for a double-back
+                last_coord.move_vec(1, direction.into());
+                if all_coords.contains(&last_coord) {
+                    // Double-back detected! Undo the move, rotate the direction and try again
+                    last_coord.move_vec(-1, direction.into());
+                    continue;
+                }
+
+                //FIXME: Probably need to check context for already-occupied cells...
+
+                // All checks passed! Set the success flag and break
+                found_good_coords = true;
+                break;
+            }
+
+            // If we were able to find good Coords, create an object and push it into the collection
+            if found_good_coords {
+                let new_coord = last_coord;
+                all_coords.push(new_coord);
+            }
+            else
+            {
+                // Nowhere left to go! Stop the obstacle here
+                break;
+            }
         }
 
         // Finally, generate a random element

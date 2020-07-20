@@ -36,7 +36,7 @@ extern crate rand;
 #[macro_export]
 macro_rules! debug_println {
     ($( $args:expr ),*) => {
-        println!( $( $args ),* );        
+        println!( $( $args ),* );
     };
 }
 #[cfg(not(debug_assertions))]
@@ -51,9 +51,10 @@ macro_rules! debug_println {
 ///////////////////////////////////////////////////////////////////////////////
 
 #[macro_use]
+pub mod ability;
+pub mod actor;
 pub mod context;
 pub mod environment;
-pub mod actor;
-pub mod ability;
-pub mod polyfunc;
 pub mod fileops;
+pub mod hex_direction_provider;
+pub mod polyfunc;

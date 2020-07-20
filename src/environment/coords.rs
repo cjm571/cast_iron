@@ -45,31 +45,14 @@ use crate::context::Context;
 
 use std::fmt;
 use std::error::Error;
-use std::f64::consts::*;
 
 use rand::Rng;
 
-// use rand::{
-//     Rng,
-//     distributions::{
-//         Distribution,
-//         Uniform
-//     }
-// };
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data structures
 ///////////////////////////////////////////////////////////////////////////////
 
-// Define cardinal and sub-cardinal directions for ease-of-use
-pub static EAST:        f64 = 0.0;
-pub static NORTHEAST:   f64 = FRAC_PI_4; 
-pub static NORTH:       f64 = FRAC_PI_2;
-pub static NORTHWEST:   f64 = 3.0 * FRAC_PI_4;
-pub static WEST:        f64 = PI;
-pub static SOUTHWEST:   f64 = 5.0 * FRAC_PI_4;
-pub static SOUTH:       f64 = 3.0 * FRAC_PI_2;
-pub static SOUTHEAST:   f64 = 7.0 * FRAC_PI_4;
 
 #[derive(Clone, Copy)]
 pub struct Coords {
@@ -82,7 +65,7 @@ pub struct Coords {
 pub struct CoordsError;
 
 // Defines the limit of a negligible fractional movement
-const MIN_FRACTIONAL_MOVE: f64 = 0.01;
+const MIN_FRACTIONAL_MOVE: f32 = 0.01;
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Functions and Methods
@@ -130,15 +113,15 @@ impl Coords {
     // Moves the object by vector
     //  mag: number of "straightline" cells to move
     //  dir: direction of movement in radians
-    pub fn move_vec(&mut self, mag: i32, dir: f64) {
+    pub fn move_vec(&mut self, mag: i32, dir: f32) {
         debug_println!("START coord.move_vec()");
         debug_println!("mag: {}, dir: {:.4}", mag, dir);
         
-        let flt_mag: f64 = mag as f64;
+        let flt_mag: f32 = mag as f32;
 
         // Determine lateral movement
         if dir.cos().abs() > MIN_FRACTIONAL_MOVE {
-            let mut lat_mag: f64 = flt_mag * dir.cos();
+            let mut lat_mag: f32 = flt_mag * dir.cos();
             debug_println!("Lat mag: {:.2}", lat_mag);
 
             // Adjust such that non-negligible fractional movements round to next larger integer
@@ -158,7 +141,7 @@ impl Coords {
 
         // Approximate vertical movement with partial NE/NW movement
         if dir.sin().abs() > MIN_FRACTIONAL_MOVE {
-            let mut vert_mag: f64 = flt_mag * dir.sin();
+            let mut vert_mag: f32 = flt_mag * dir.sin();
             debug_println!("Vert mag: {:.2}", vert_mag);
 
             // Adjust such that non-negligible fractional movements round to next larger integer
@@ -242,7 +225,14 @@ impl Error for CoordsError {
 
 #[cfg(test)]
 mod tests {
+    use std::f32::consts::PI;
     use super::*;
+
+    // Define cardinal and sub-cardinal directions for ease-of-use
+    pub static EAST:        f32 = 0.0;
+    pub static NORTH:       f32 = PI/2.0;
+    pub static WEST:        f32 = PI;
+    pub static SOUTH:       f32 = 3.0 * PI/4.0;
 
     #[test]
     fn square_hemisphere() {

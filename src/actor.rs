@@ -129,7 +129,7 @@ impl Actor {
     // Moves the object by vector
     //  _mag: number of "straightline" cells to move
     //  _dir: direction of movement in radians
-    pub fn move_vec(&mut self, _mag: i32, _dir: f64) {
+    pub fn move_vec(&mut self, _mag: i32, _dir: f32) {
         self.pos.move_vec(_mag, _dir);
     }
 
