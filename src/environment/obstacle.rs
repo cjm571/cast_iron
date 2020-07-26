@@ -97,8 +97,6 @@ impl Obstacle {
                     continue;
                 }
 
-                //FIXME: Probably need to check context for already-occupied cells...
-
                 // All checks passed! Set the success flag and break
                 found_good_coords = true;
                 break;

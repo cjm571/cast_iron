@@ -20,13 +20,13 @@ Purpose:
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-
 ///////////////////////////////////////////////////////////////////////////////
 //  Constants
 ///////////////////////////////////////////////////////////////////////////////
 
 /* CastIron Game Defaults */ 
 const DEFAULT_GRID_RADIUS:          u8 = 10;
+const DEFAULT_MAX_RESOURCE_RADIUS:  u8 = 4;
 const DEFAULT_MAX_OBSTACLE_LENGTH:  u8 = 5;
 
 
@@ -35,8 +35,9 @@ const DEFAULT_MAX_OBSTACLE_LENGTH:  u8 = 5;
 ///////////////////////////////////////////////////////////////////////////////
 
 pub struct Context {
-    grid_radius:        u8,
-    max_obstacle_len:   u8
+    grid_radius:            u8,
+    max_resource_radius:    u8,
+    max_obstacle_len:       u8
 }
 
 
@@ -45,20 +46,24 @@ pub struct Context {
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Context {
+    
+    //FIXME: Should implement Default trait instead
     /// Default constructor
     pub fn default() -> Self {
         Self {
-            grid_radius:        DEFAULT_GRID_RADIUS,
-            max_obstacle_len:  DEFAULT_MAX_OBSTACLE_LENGTH
+            grid_radius:            DEFAULT_GRID_RADIUS,
+            max_resource_radius:    DEFAULT_MAX_RESOURCE_RADIUS,
+            max_obstacle_len:       DEFAULT_MAX_OBSTACLE_LENGTH
         }
     }
 
     //OPT: If this ends up having more than 4 params, make a builder class
     /// Generic Constructor
-    pub fn new(grid_radius: u8, max_obstacle_len: u8) -> Self {
+    pub fn new(grid_radius: u8, max_resource_radius: u8, max_obstacle_len: u8) -> Self {
         Self {
-            grid_radius:        grid_radius,
-            max_obstacle_len:   max_obstacle_len
+            grid_radius:            grid_radius,
+            max_resource_radius:    max_resource_radius,
+            max_obstacle_len:       max_obstacle_len
         }
     }
 
@@ -69,6 +74,10 @@ impl Context {
 
     pub fn get_grid_radius(&self) -> u8 {
         self.grid_radius
+    }
+    
+    pub fn get_max_resource_radius(&self) -> u8 {
+        self.max_resource_radius
     }
     
     pub fn get_max_obstacle_len(&self) -> u8 {

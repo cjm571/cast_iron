@@ -41,6 +41,7 @@ use super::{
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
+#[derive(Debug, Copy, Clone)]
 pub struct Resource {
     uid:        Uuid,
     element:    Element,
@@ -49,7 +50,7 @@ pub struct Resource {
     radius:     u8,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum State {
     Depleted    = 0,
     Low         = 1,
@@ -77,6 +78,17 @@ impl Resource {
         }
     }
 
+    //FIXME: Should implement Default trait instead
+    pub fn default() -> Self {
+        Self {
+            uid:        Uuid::default(),
+            element:    Element::Unset,
+            state:      State::Depleted,
+            coords:     Coords::default(),
+            radius:     0,
+        }
+    }
+
     // Creates a random, valid Resource object within the constraints of the game Context
     pub fn rand(ctx: &Context) -> Self {
         // Set UID
@@ -86,10 +98,14 @@ impl Resource {
         let mut rng = rand::thread_rng();
         
         // Generate random properties
-        let rand_center_coords = Coords::rand(ctx);
         let rand_elem: Element = rng.gen();
         let rand_state: State = rng.gen();
-        let rand_radius: u8 = rng.gen_range(0, ctx.get_grid_radius()+1);
+
+        // Constrain max resource radius to 1/4 of the total grid
+        let rand_radius: u8 = rng.gen_range(0, ctx.get_max_resource_radius());
+
+        // Generate a random Coords object that won't spill outside the grid
+        let rand_center_coords = Coords::rand_constrained(ctx, rand_radius).unwrap();
 
         Self {
             uid:        uid,

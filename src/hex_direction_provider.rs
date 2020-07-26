@@ -43,12 +43,10 @@ const NUM_HEX_DIRECTIONS: usize = 6;
 ///////////////////////////////////////////////////////////////////////////////
 
 pub trait HexDirection:
-    Copy + Clone + From<f32> + Into<f32> + Eq + PartialEq{
+    Copy + Clone + From<f32> + Into<f32> + Eq + PartialEq {
     fn count() -> usize {
         NUM_HEX_DIRECTIONS
     }
-
-    fn default() -> Self;
 }
 
 
@@ -56,6 +54,7 @@ pub trait HexDirection:
 //  Data structures
 ///////////////////////////////////////////////////////////////////////////////
 
+//OPT: Derive the HexDirection trait if it has no required methods
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum HexSides {
     NORTHEAST,
@@ -66,6 +65,7 @@ pub enum HexSides {
     SOUTHEAST
 }
 
+//OPT: Derive the HexDirection trait if it has no required methods
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum HexVertices {
     EAST,
@@ -144,16 +144,24 @@ impl<T: HexDirection> Distribution<HexDirectionProvider<T>> for Standard {
 // HexSides
 ///
 
-impl HexDirection for HexSides {
-    fn default() -> Self {
-        HexSides::NORTHEAST
+impl HexDirection for HexSides {}
+
+impl From<HexSides> for f32 {
+    fn from(src: HexSides) -> f32 {
+        match src {
+            HexSides::NORTHEAST    => PI/6.0,
+            HexSides::NORTH        => PI/2.0,
+            HexSides::NORTHWEST    => 5.0*PI/6.0,
+            HexSides::SOUTHWEST    => 7.0*PI/6.0,
+            HexSides::SOUTH        => 3.0*PI/2.0,
+            HexSides::SOUTHEAST    => 11.0*PI/6.0
+        }
     }
 }
-
 impl From<f32> for HexSides {
-    fn from(val: f32) -> Self {
+    fn from(src: f32) -> Self {
         // Clamp value to 2*PI before comparison
-        let clamped_val = val % (2.0*PI);
+        let clamped_val = src % (2.0*PI);
 
         match clamped_val {
             x if x < PI/3.0         => HexSides::NORTHEAST,
@@ -166,22 +174,22 @@ impl From<f32> for HexSides {
         }
     }
 }
-impl Into<f32> for HexSides {
-    fn into(self) -> f32 {
-        match self {
-            HexSides::NORTHEAST    => PI/6.0,
-            HexSides::NORTH        => PI/2.0,
-            HexSides::NORTHWEST    => 5.0*PI/6.0,
-            HexSides::SOUTHWEST    => 7.0*PI/6.0,
-            HexSides::SOUTH        => 3.0*PI/2.0,
-            HexSides::SOUTHEAST    => 11.0*PI/6.0
+
+impl From<HexSides> for usize {
+    fn from(src: HexSides) -> usize {
+        match src {
+            HexSides::NORTHEAST    => 0,
+            HexSides::NORTH        => 1,
+            HexSides::NORTHWEST    => 2,
+            HexSides::SOUTHWEST    => 3,
+            HexSides::SOUTH        => 4,
+            HexSides::SOUTHEAST    => 5
         }
     }
 }
-
 impl From<usize> for HexSides {
-    fn from(val: usize) -> Self {
-        match val {
+    fn from(src: usize) -> Self {
+        match src {
             0 => HexSides::NORTHEAST,
             1 => HexSides::NORTH,
             2 => HexSides::NORTHWEST,
@@ -189,18 +197,6 @@ impl From<usize> for HexSides {
             4 => HexSides::SOUTH,
             5 => HexSides::SOUTHEAST,
             _ => panic!("Invalid value for usize->HexSides conversion")
-        }
-    }
-}
-impl Into<usize> for HexSides {
-    fn into(self) -> usize {
-        match self {
-            HexSides::NORTHEAST    => 0,
-            HexSides::NORTH        => 1,
-            HexSides::NORTHWEST    => 2,
-            HexSides::SOUTHWEST    => 3,
-            HexSides::SOUTH        => 4,
-            HexSides::SOUTHEAST    => 5
         }
     }
 }
@@ -219,16 +215,24 @@ impl Distribution<HexSides> for Standard {
 // HexVertices
 ///
 
-impl HexDirection for HexVertices {
-    fn default() -> Self {
-        HexVertices::EAST
+impl HexDirection for HexVertices {}
+
+impl From<HexVertices> for f32 {
+    fn from(src: HexVertices) -> f32 {
+        match src {
+            HexVertices::EAST       => 0.0,
+            HexVertices::NORTHEAST  => PI/3.0,
+            HexVertices::NORTHWEST  => 2.0*PI/3.0,
+            HexVertices::WEST       => PI,
+            HexVertices::SOUTHWEST  => 4.0*PI/3.0,
+            HexVertices::SOUTHEAST  => 5.0*PI/3.0
+        }
     }
 }
-
 impl From<f32> for HexVertices {
-    fn from(val: f32) -> Self {
+    fn from(src: f32) -> Self {
         // Clamp value to 2*PI before comparison
-        let clamped_val = val % (2.0*PI);
+        let clamped_val = src % (2.0*PI);
 
         match clamped_val {
             x if x < PI/6.0         => HexVertices::EAST,
@@ -242,22 +246,22 @@ impl From<f32> for HexVertices {
         }
     }
 }
-impl Into<f32> for HexVertices {
-    fn into(self) -> f32 {
-        match self {
-            HexVertices::EAST       => 0.0,
-            HexVertices::NORTHEAST  => PI/3.0,
-            HexVertices::NORTHWEST  => 2.0*PI/3.0,
-            HexVertices::WEST       => PI,
-            HexVertices::SOUTHWEST  => 4.0*PI/3.0,
-            HexVertices::SOUTHEAST  => 5.0*PI/3.0
+
+impl From<HexVertices> for usize {
+    fn from(src: HexVertices) -> usize {
+        match src {
+            HexVertices::EAST       => 0,
+            HexVertices::NORTHEAST  => 1,
+            HexVertices::NORTHWEST  => 2,
+            HexVertices::WEST       => 3,
+            HexVertices::SOUTHWEST  => 4,
+            HexVertices::SOUTHEAST  => 5
         }
     }
 }
-
 impl From<usize> for HexVertices {
-    fn from(val: usize) -> Self {
-        match val {
+    fn from(src: usize) -> Self {
+        match src {
             0 => HexVertices::EAST,
             1 => HexVertices::NORTHEAST,
             2 => HexVertices::NORTHWEST,
@@ -265,18 +269,6 @@ impl From<usize> for HexVertices {
             4 => HexVertices::SOUTHWEST,
             5 => HexVertices::SOUTHEAST,
             _ => panic!("Invalid value for usize->HexVertices conversion")
-        }
-    }
-}
-impl Into<usize> for HexVertices {
-    fn into(self) -> usize {
-        match self {
-            HexVertices::EAST       => 0,
-            HexVertices::NORTHEAST  => 1,
-            HexVertices::NORTHWEST  => 2,
-            HexVertices::WEST       => 3,
-            HexVertices::SOUTHWEST  => 4,
-            HexVertices::SOUTHEAST  => 5
         }
     }
 }

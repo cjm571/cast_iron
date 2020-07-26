@@ -20,20 +20,20 @@ Purpose:
 
     (0, 0, 0) is the centermost hexagon in the world grid. 
     
-    X, Y, and Z coordinates correspond to the "NE", "NW", and "S" directions,
+    X, Y, and Z coordinates correspond to "East", "Northwest", and "SouthWest" directions,
     respectively, and must always add up to 0. See diagram below for clarity:
 
               _______
              /       \
-     _______/ 1, 1,-2 \_______
+     _______/ 0, 1,-1 \_______
     /       \         /       \  
-   / 0, 1,-1 \_______/ 1, 0,-1 \
+   /-1, 1, 0 \_______/ 1, 0,-1 \
    \         /       \         /
     \_______/ 0, 0, 0 \_______/
     /       \         /       \
-   /-1, 0, 1 \_______/ 0,-1, 1 \
+   /-1, 0, 1 \_______/ 1,-1, 0 \
    \         /       \         /
-    \_______/-1,-1, 2 \_______/
+    \_______/ 0,-1, 1 \_______/
             \         /
              \_______/
 
@@ -53,7 +53,6 @@ use rand::Rng;
 //  Data structures
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #[derive(Clone, Copy)]
 pub struct Coords {
     x: i32,
@@ -67,14 +66,16 @@ pub struct CoordsError;
 // Defines the limit of a negligible fractional movement
 const MIN_FRACTIONAL_MOVE: f32 = 0.01;
 
+
 ///////////////////////////////////////////////////////////////////////////////
 //  Functions and Methods
 ///////////////////////////////////////////////////////////////////////////////
  
 impl Coords {
+    //FIXME: Should implement Default trait instead
     /// Creates a coordinates object at (0, 0, 0)
     pub fn default() -> Self {
-        Self{
+        Self {
             x: 0,
             y: 0,
             z: 0,
@@ -99,11 +100,42 @@ impl Coords {
         let mut rng = rand::thread_rng();
         
         //OPT: Will always calculating the z-value lead to non-random coordinates?
-        let rand_x: i32 = rng.gen_range(0, ctx.get_grid_radius() as i32 + 1);
-        let rand_y: i32 = rng.gen_range(0, ctx.get_grid_radius() as i32 + 1);
+        let rand_x: i32 = rng.gen_range(-1*(ctx.get_grid_radius() as i32), ctx.get_grid_radius() as i32 + 1);
+        let rand_y: i32 = rng.gen_range(-1*(ctx.get_grid_radius() as i32), ctx.get_grid_radius() as i32 + 1);
         let calc_z: i32 = 0 - rand_x - rand_y; // Coords must meet the x + y + z == 0 requirement
 
         Self::new(rand_x, rand_y, calc_z).unwrap()
+    }
+
+    /// Creates a random, valid Coords object within the constraints fo the game Context AND
+    /// constrained the given number cells away from the edge of the hex grid
+    pub fn rand_constrained(ctx: &Context, dist_from_edge: u8) -> Result<Self, CoordsError> {
+        // Ensure that the distance from the edge is less than the Context's grid radius
+        if dist_from_edge >= ctx.get_grid_radius() {
+            return Err(CoordsError)
+        }
+
+        let max_dist = (ctx.get_grid_radius() - dist_from_edge) as i32;
+        
+        let mut rng = rand::thread_rng();
+        
+        //OPT: Will always calculating the y & z values lead to non-random coordinates?
+        // debug_println!("max_dist: {}", max_dist);
+        let rand_x: i32 = rng.gen_range(-1 * max_dist, max_dist);
+        // debug_println!("rand_x: {}", rand_x);
+        // Need to base the next coordinate off of x. Can't be higher than X unless X is 0
+        let calc_rand_y = match rand_x {
+            i32::MIN..=-1   => rng.gen_range(0,             rand_x.abs()),  // X is negative, generate a bounded-positive Y
+            0               => rng.gen_range(-1 * max_dist, max_dist),      // X is 0, generate an unbounded Y
+            1..=i32::MAX    => rng.gen_range(-1 * rand_x,   0)              // X is positive, generate a bounded-negative Y
+        };
+        // debug_println!("calc_rand_y: {}", calc_rand_y);
+        let calc_z: i32 = 0 - rand_x - calc_rand_y; // Coords must meet the x + y + z == 0 requirement
+        // debug_println!("calc_z: {}", calc_z);
+
+
+
+        Ok(Self::new(rand_x, calc_rand_y, calc_z).unwrap())
     }
 
     ///////////////////////////////////////////////////////////////////////////
