@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-Filename : environment\mod.rs
+Filename : environment/mod.rs
 
 Copyright (C) 2017 CJ McAllister
     This program is free software; you can redistribute it and/or modify
@@ -20,6 +20,10 @@ Purpose:
     to both immediate and atmospheric conditions.
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+///////////////////////////////////////////////////////////////////////////////
+//  Module Declarations
+///////////////////////////////////////////////////////////////////////////////
 
 pub mod coords;
 pub mod element;

@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-Filename : element.rs
+Filename : environment/element.rs
 
 Copyright (C) 2020 CJ McAllister
     This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,7 @@ Copyright (C) 2020 CJ McAllister
 
 Purpose:
     This package enumerates available elements and provides utility functions
-    for convenience
+    for convenience.
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -34,7 +34,6 @@ use rand::{
 //////////////////////////////////////////////////////////////////////////////
 
 // Enumeration of all element types
-#[repr(u8)]
 #[derive(Debug, Copy, Clone)]
 pub enum Element {
     Unset       = 0,
@@ -46,7 +45,7 @@ pub enum Element {
     Earth       = 6,
     Light       = 7,
     Dark        = 8
-    //NOTE: Do not add elements to the end! Light and Dark kindof naturally fit at
+    // NOTE: Do not add elements to the end! Light and Dark kindof naturally fit at
     // the end, and using Dark as a marker for "last valid" is very useful due to
     // the weirdness of Rust's "full-fledged data type" enums
 }
@@ -56,17 +55,14 @@ pub enum Element {
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-// Distribution trait provides randomization for this module
-impl Distribution<Element> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Element {
-        let rand_num: u8 = rng.gen();
-        Element::from((rand_num % Element::Dark as u8) + 1)
+impl Default for Element {
+    fn default() -> Self {
+        Self::Unset
     }
 }
-
-impl From<u8> for Element {
-    fn from(val: u8) -> Self {
-        match val {
+impl From<usize> for Element {
+    fn from(src: usize) -> Self {
+        match src {
             1 => Element::Fire,
             2 => Element::Ice,
             3 => Element::Wind,
@@ -77,5 +73,12 @@ impl From<u8> for Element {
             8 => Element::Dark,
             _ => panic!("environment::Element::from: Element value out of range")
         }
+    }
+}
+// Distribution trait provides randomization for this module
+impl Distribution<Element> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Element {
+        let rand_num: usize = rng.gen();
+        Element::from((rand_num % Element::Dark as usize) + 1)
     }
 }

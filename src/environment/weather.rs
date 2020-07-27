@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-Filename : weather.rs
+Filename : environment/weather.rs
 
 Copyright (C) 2017 CJ McAllister
     This program is free software; you can redistribute it and/or modify
@@ -22,11 +22,13 @@ Purpose:
 
     Effects follow a defined polynomial curve in severity.
 
-Changelog:
-
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-use std::i32::{MIN, MAX};
+use crate::{
+    environment::element::Element,
+    polyfunc::PolyFunc
+};
+
 use rand::{
     Rng,
     distributions::{
@@ -35,38 +37,41 @@ use rand::{
     }
 };
 
-use super::element::Element;
-use ::polyfunc::PolyFunc;
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  Named Constants
+///////////////////////////////////////////////////////////////////////////////
+
+// Intensity limits
+const NONE_INTENSITY_RANGE_MIN: i32     = 0;
+const NONE_INTENSITY_RANGE_MAX: i32     = 63;
+const MILD_INTENSITY_RANGE_MIN: i32     = 64;
+const MILD_INTENSITY_RANGE_MAX: i32     = 127;
+const STRONG_INTENSITY_RANGE_MIN: i32   = 128;
+const STRONG_INTENSITY_RANGE_MAX: i32   = 191;
+const SEVERE_INTENSITY_RANGE_MIN: i32   = 192;
+const SEVERE_INTENSITY_RANGE_MAX: i32   = 255;
+const MAX_INTENSITY: i32                = 256;
 
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
+#[derive(Default)]
 pub struct Weather {
     element:    Element,
     function:   PolyFunc,
 }
 
-// Define intensity limits
-const MIN_INT: i32 = 0;
-const MAX_NO_INT: i32 = 63;
-const MIN_MILD_INT: i32 = 64;
-const MAX_MILD_INT: i32 = 127;
-const MIN_STRONG_INT: i32 = 128;
-const MAX_STRONG_INT: i32 = 191;
-const MIN_SEVERE_INT: i32 = 192;
-const MAX_SEVERE_INT: i32 = 255;
-const MAX_INT: i32 = 255;
-
-#[repr(u8)]
 #[derive(Debug, PartialEq)]
 pub enum Intensity {
-    None    = MIN_INT as u8,
-    Mild    = MIN_MILD_INT as u8,
-    Strong  = MIN_STRONG_INT as u8,
-    Severe  = MIN_SEVERE_INT as u8,
-    Max     = MAX_INT as u8,
+    None,
+    Mild,
+    Strong,
+    Severe,
+    Max
 }
 
 
@@ -75,9 +80,7 @@ pub enum Intensity {
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Weather {
-
-    /// Constructor
-    /// Creates and returns a new Weather object from the given parameters
+    /// Fully-qualified constructor
     pub fn new(element: Element, function: PolyFunc) -> Self {
         Self {
             element:    element,
@@ -85,34 +88,27 @@ impl Weather {
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    //  Mutator Methods
-    ///////////////////////////////////////////////////////////////////////////
-    
+
+    ///
+    // Mutator Methods
+    ///
+
     // Changes the kind of weather to the given Element
     pub fn change(&mut self, element: Element) {
         self.element = element;
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    //  Accessor Methods
-    ///////////////////////////////////////////////////////////////////////////
+
+    ///
+    // Accessor Methods
+    ///
 
     pub fn get_element(&self) -> Element {
         self.element
     }
 
-    pub fn intensity(&self, tick: u32) -> Intensity {
-        let intensity = self.function.solve(tick);
-
-        match intensity {
-            MIN             ..= -1              => Intensity::None,
-            MIN_INT         ..= MAX_NO_INT      => Intensity::None,
-            MIN_MILD_INT    ..= MAX_MILD_INT    => Intensity::Mild,
-            MIN_STRONG_INT  ..= MAX_STRONG_INT  => Intensity::Strong,
-            MIN_SEVERE_INT  ..= MAX_SEVERE_INT  => Intensity::Severe,
-            256             ..= MAX             => Intensity::Max
-        }
+    pub fn get_intensity(&self, tick: usize) -> Intensity {
+        Intensity::from(self.function.solve(tick))
     }
 }
 
@@ -121,6 +117,30 @@ impl Weather {
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
+///
+// Intensity
+///
+impl Default for Intensity {
+    fn default() -> Self {
+        Self::None
+    }
+}
+impl From<i32> for Intensity {
+    fn from(src: i32) -> Self {
+        match src {
+            std::i32::MIN               ..= -1                          => Intensity::None,
+            NONE_INTENSITY_RANGE_MIN    ..= NONE_INTENSITY_RANGE_MAX    => Intensity::None,
+            MILD_INTENSITY_RANGE_MIN    ..= MILD_INTENSITY_RANGE_MAX    => Intensity::Mild,
+            STRONG_INTENSITY_RANGE_MIN  ..= STRONG_INTENSITY_RANGE_MAX  => Intensity::Strong,
+            SEVERE_INTENSITY_RANGE_MIN  ..= SEVERE_INTENSITY_RANGE_MAX  => Intensity::Severe,
+            MAX_INTENSITY               ..= std::i32::MAX               => Intensity::Max
+        }
+    }
+}
+
+///
+// Weather
+///
 // Distribution trait provides randomnization for this module
 impl Distribution<Weather> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Weather {

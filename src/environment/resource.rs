@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-Filename : resource.rs
+Filename : environment/resource.rs
 
 Copyright (C) 2017 CJ McAllister
     This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,13 @@ Purpose:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-use crate::context::Context;
+use crate::{
+    context::Context,
+    environment::{
+        coords::Coords,
+        element::Element
+    }
+};
 
 use uuid::Uuid;
 use rand::{
@@ -32,10 +38,6 @@ use rand::{
     }
 };
 
-use super::{
-    element::Element,
-    coords::Coords
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
@@ -47,7 +49,7 @@ pub struct Resource {
     element:    Element,
     state:      State,
     coords:     Coords,
-    radius:     u8,
+    radius:     usize,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -62,13 +64,12 @@ pub enum State {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Functions and Methods
+//  Object Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Resource {
-    /// Constructor
-    /// Creates and returns a new Resource object with the given parameters
-    pub fn new(element: Element, state: State, coords: Coords, radius: u8) -> Self {
+    /// Fully-qualified constructor
+    pub fn new(element: Element, state: State, coords: Coords, radius: usize) -> Self {
         Self {
             uid:        Uuid::new_v4(),
             element:    element,
@@ -78,31 +79,20 @@ impl Resource {
         }
     }
 
-    //FIXME: Should implement Default trait instead
-    pub fn default() -> Self {
-        Self {
-            uid:        Uuid::default(),
-            element:    Element::Unset,
-            state:      State::Depleted,
-            coords:     Coords::default(),
-            radius:     0,
-        }
-    }
-
     // Creates a random, valid Resource object within the constraints of the game Context
     pub fn rand(ctx: &Context) -> Self {
         // Set UID
         let uid = Uuid::new_v4();
-        
+
         //  Get RNG thread handle and generate random centerpoint
         let mut rng = rand::thread_rng();
-        
+
         // Generate random properties
         let rand_elem: Element = rng.gen();
         let rand_state: State = rng.gen();
 
         // Constrain max resource radius to 1/4 of the total grid
-        let rand_radius: u8 = rng.gen_range(0, ctx.get_max_resource_radius());
+        let rand_radius: usize = rng.gen_range(0, ctx.get_max_resource_radius());
 
         // Generate a random Coords object that won't spill outside the grid
         let rand_center_coords = Coords::rand_constrained(ctx, rand_radius).unwrap();
@@ -116,9 +106,9 @@ impl Resource {
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    //  Mutator Methods
-    ///////////////////////////////////////////////////////////////////////////
+    ///
+    // Mutator Methods
+    ///
 
     // Attempt to make use of the resource
     // Returns magnitude of potency boost, or None if already depleted
@@ -158,27 +148,19 @@ impl Resource {
     }
 
     // Increases the radius of the resource
-    pub fn intensify(&mut self, mag: u8) {
-        if (self.radius as u32) + (mag as u32) < u8::max_value() as u32 {
-            self.radius += mag;
-        } else {
-            self.radius = u8::max_value();
-        }
-
+    pub fn intensify(&mut self, mag: usize) {
+        self.radius = self.radius + mag;
     }
 
     // Decreases the radius of the resource
-    pub fn weaken(&mut self, mag: u8) {
-        if (self.radius as i32) - (mag as i32) > u8::min_value() as i32 {
-            self.radius -= mag;
-        } else {
-            self.radius = u8::min_value();
-        }
+    pub fn weaken(&mut self, mag: usize) {
+        self.radius = self.radius - mag;
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    //  Accessor Methods
-    ///////////////////////////////////////////////////////////////////////////
+
+    ///
+    // Accessor Methods
+    ///
 
     pub fn get_uid(&self) -> Uuid {
         self.uid
@@ -196,7 +178,7 @@ impl Resource {
         &self.coords
     }
 
-    pub fn get_radius(&self) -> u8 {
+    pub fn get_radius(&self) -> usize {
         self.radius
     }
 }
@@ -206,14 +188,30 @@ impl Resource {
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-// Distribution trait provides randomnization for this module
-impl Distribution<State> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> State {
-        let rand_num: u8 = rng.gen();
-        State::from((rand_num % State::Overflow as u8) + 1)
+///
+// Resource
+///
+impl Default for Resource {
+    fn default() -> Self {
+        Self {
+            uid:        Uuid::new_v4(),
+            element:    Element::default(),
+            state:      State::default(),
+            coords:     Coords::default(),
+            radius:     0,
+        }
     }
 }
 
+
+///
+// State
+///
+impl Default for State {
+    fn default() -> Self {
+        Self::Depleted
+    }
+}
 impl From<u8> for State {
     fn from(val: u8) -> Self {
         match val {
@@ -227,3 +225,11 @@ impl From<u8> for State {
         }
     }
 }
+// Distribution trait provides randomnization for this module
+impl Distribution<State> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> State {
+        let rand_num: u8 = rng.gen();
+        State::from((rand_num % State::Overflow as u8) + 1)
+    }
+}
+

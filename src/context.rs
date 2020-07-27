@@ -21,13 +21,13 @@ Purpose:
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Constants
+//  Named Constants
 ///////////////////////////////////////////////////////////////////////////////
 
-/* CastIron Game Defaults */ 
-const DEFAULT_GRID_RADIUS:          u8 = 10;
-const DEFAULT_MAX_RESOURCE_RADIUS:  u8 = 4;
-const DEFAULT_MAX_OBSTACLE_LENGTH:  u8 = 5;
+/* CastIron Game Defaults */
+const DEFAULT_GRID_RADIUS:          usize = 10;
+const DEFAULT_MAX_RESOURCE_RADIUS:  usize = 4;
+const DEFAULT_MAX_OBSTACLE_LENGTH:  usize = 5;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,31 +35,20 @@ const DEFAULT_MAX_OBSTACLE_LENGTH:  u8 = 5;
 ///////////////////////////////////////////////////////////////////////////////
 
 pub struct Context {
-    grid_radius:            u8,
-    max_resource_radius:    u8,
-    max_obstacle_len:       u8
+    grid_radius:            usize,
+    max_resource_radius:    usize,
+    max_obstacle_len:       usize
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Functions and Methods
+//  Object Implimentation
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Context {
-    
-    //FIXME: Should implement Default trait instead
-    /// Default constructor
-    pub fn default() -> Self {
-        Self {
-            grid_radius:            DEFAULT_GRID_RADIUS,
-            max_resource_radius:    DEFAULT_MAX_RESOURCE_RADIUS,
-            max_obstacle_len:       DEFAULT_MAX_OBSTACLE_LENGTH
-        }
-    }
-
     //OPT: If this ends up having more than 4 params, make a builder class
-    /// Generic Constructor
-    pub fn new(grid_radius: u8, max_resource_radius: u8, max_obstacle_len: u8) -> Self {
+    /// Fully-qualified constructor
+    pub fn new(grid_radius: usize, max_resource_radius: usize, max_obstacle_len: usize) -> Self {
         Self {
             grid_radius:            grid_radius,
             max_resource_radius:    max_resource_radius,
@@ -67,20 +56,35 @@ impl Context {
         }
     }
 
-    
-    ///////////////////////////////////////////////////////////////////////////
-    //  Accessor Methods
-    ///////////////////////////////////////////////////////////////////////////
 
-    pub fn get_grid_radius(&self) -> u8 {
+    ///
+    // Accessor Methods
+    ///
+
+    pub fn get_grid_radius(&self) -> usize {
         self.grid_radius
     }
-    
-    pub fn get_max_resource_radius(&self) -> u8 {
+
+    pub fn get_max_resource_radius(&self) -> usize {
         self.max_resource_radius
     }
-    
-    pub fn get_max_obstacle_len(&self) -> u8 {
+
+    pub fn get_max_obstacle_len(&self) -> usize {
         self.max_obstacle_len
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  Trait Implimentations
+///////////////////////////////////////////////////////////////////////////////
+
+impl Default for Context {
+    fn default() -> Self {
+        Self {
+            grid_radius:            DEFAULT_GRID_RADIUS,
+            max_resource_radius:    DEFAULT_MAX_RESOURCE_RADIUS,
+            max_obstacle_len:       DEFAULT_MAX_OBSTACLE_LENGTH
+        }
     }
 }

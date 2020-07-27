@@ -49,7 +49,7 @@ macro_rules! debug_println {
 #[macro_export]
 macro_rules! debug_exec {
     ($expr:expr) => {
-        $expr        
+        $expr
     };
 }
 #[cfg(not(debug_assertions))]
@@ -60,7 +60,7 @@ macro_rules! debug_exec {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Module declarations
+//  Module Declarations
 ///////////////////////////////////////////////////////////////////////////////
 
 #[macro_use]

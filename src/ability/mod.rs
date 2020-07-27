@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-Filename : ability\mod.rs
+Filename : ability/mod.rs
 
 Copyright (C) 2017 CJ McAllister
     This program is free software; you can redistribute it and/or modify
@@ -17,81 +17,70 @@ Copyright (C) 2017 CJ McAllister
 Purpose:
     This module defines, and provides interfaces for, CastIron abilities.
 
-    Abilities encompass all actions (spells, melee/ranged attacks, etc.) that 
+    Abilities encompass all actions (spells, melee/ranged attacks, etc.) that
     one actor can take on another actor or group of actors.
 
-Changelog:
-    CJ McAllister   22 Nov 2017     File created
-    CJ McAllister   31 Jan 2018     Added UUID
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-pub mod aspect;
+use std::{
+    fmt,
+    str::FromStr
+};
 
-use std::fmt;
+use crate::environment::element::Element;
 
 use uuid::Uuid;
-use std::str::FromStr;
 
+
+///////////////////////////////////////////////////////////////////////////////
+//  Module Declarations
+///////////////////////////////////////////////////////////////////////////////
+
+pub mod aspect;
 use self::aspect::*;
-use super::environment::element::Element;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
-// Struct containing all necessary data fields to define an ability for use in CastIron
+/// Struct containing all necessary data fields to define an ability for use in CastIron
 pub struct Ability {
     uid:        Uuid,
     name:       String,
     aspects:    Aspects,
-    potency:    u8,
+    potency:    usize,
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Functions and Methods
+// Object Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
-// TODO: Figure out how to comment this shit well...
 impl Ability {
-    // Constructor
-    pub fn new(_name: &'static str) -> Self {
+    /// Fully-qualified constructor
+    pub fn new(name: &'static str, potency: usize, aspects: Aspects) -> Self {
         Self {
             uid:        Uuid::new_v4(),
-            name:       _name.to_string(),
-            potency:    0,
-            aspects:    Aspects::new(),
-        }
-    }
-    
-    //FIXME: Should implement the From trait
-    // See Display formatter for expected string format
-    pub fn from(data_str: &String) -> Self {
-        // Tokenize on ":"
-        let data_vec: Vec<&str> = data_str.split(':').collect();
-        
-        let uid = match Uuid::from_str(data_vec[0]) {
-            Ok(uid)     => uid,
-            Err(_err)   => panic!("actor::from: Invalid uuid input string."),
-        };
-
-        let name = data_vec[1].to_string();
-
-        let potency = data_vec[2].parse::<u8>().unwrap();
-
-        let aspects = Aspects::from(&data_vec[3].to_string());
-
-        Self {
-            uid:        uid,
-            name:       name,
+            name:       name.to_string(),
             potency:    potency,
             aspects:    aspects,
         }
     }
+    /// Name-only constructor
+    pub fn new_name_only(name: &'static str) -> Self {
+        Self {
+            uid:        Uuid::new_v4(),
+            name:       name.to_string(),
+            potency:    0,
+            aspects:    Aspects::default(),
+        }
+    }
 
-    ///////////////////////////////////////////////////////////////////////////
-    //  Mutator Methods
-    ///////////////////////////////////////////////////////////////////////////
+
+    ///
+    // Mutator Methods
+    ///
 
     // Name the ability
     pub fn set_name (&mut self, _name: &'static str) {
@@ -99,7 +88,7 @@ impl Ability {
         self.name.push_str(_name);
     }
 
-    pub fn set_potency (&mut self, _potency: u8) {
+    pub fn set_potency (&mut self, _potency: usize) {
         self.potency = _potency;
     }
 
@@ -128,68 +117,95 @@ impl Ability {
     }
 
 
-    ///////////////////////////////////////////////////////////////////////////
-    //  Accessor Methods
-    ///////////////////////////////////////////////////////////////////////////
+    ///
+    // Accessor Methods
+    ///
 
     // Returns a reference to the name of the ability
-    pub fn uid (&self) -> &Uuid {
+    pub fn get_uid (&self) -> &Uuid {
         &self.uid
     }
 
     // Returns a reference to the name of the ability
-    pub fn name (&self) -> &String {
+    pub fn get_name (&self) -> &String {
         &self.name
     }
 
     // Returns potency of the ability
-    pub fn potency (&self) -> u8 {
+    pub fn get_potency (&self) -> usize {
         self.potency
     }
 
     // Returns a reference to the Aspects of the ability
-    pub fn aspects (&self) -> &Aspects {
+    pub fn get_aspects (&self) -> &Aspects {
         &self.aspects
     }
-    
+
     // Returns a reference to the ability's aesthetics
-    pub fn aesthetics (&self) -> &Aesthetics {
+    pub fn get_aesthetics (&self) -> &Aesthetics {
         &self.aspects.aesthetics
     }
-    
+
     // Returns a reference to the ability's element
-    pub fn element (&self) -> &Element {
+    pub fn get_element (&self) -> &Element {
         &self.aspects.element
     }
-    
+
     // Returns a reference to the ability's method
-    pub fn method (&self) -> &Method {
+    pub fn get_method (&self) -> &Method {
         &self.aspects.method
     }
-    
+
     // Returns a reference to the ability's morality
-    pub fn morality (&self) -> &Morality {
+    pub fn get_morality (&self) -> &Morality {
         &self.aspects.morality
     }
-    
+
     // Returns a reference to the ability's school
-    pub fn school (&self) -> &School {
+    pub fn get_school (&self) -> &School {
         &self.aspects.school
     }
 }
 
-// Equivalence comparison 
+
+///////////////////////////////////////////////////////////////////////////////
+//  Trait Implementations
+///////////////////////////////////////////////////////////////////////////////
+
+/* NOTE: Default trait intentionally omitted for this object */
+
+impl From<&String> for Ability {
+    fn from (src: &String) -> Self {
+        // Tokenize on ":"
+        let data_vec: Vec<&str> = src.split(':').collect();
+
+        let uid = match Uuid::from_str(data_vec[0]) {
+            Ok(uid)     => uid,
+            Err(_err)   => panic!("actor::from: Invalid uuid input string."),
+        };
+
+        let name = data_vec[1].to_string();
+
+        let potency = data_vec[2].parse::<usize>().unwrap();
+
+        let aspects = Aspects::from(&data_vec[3].to_string());
+
+        Self {
+            uid:        uid,
+            name:       name,
+            potency:    potency,
+            aspects:    aspects,
+        }
+
+    }
+}
 impl PartialEq for Ability {
     fn eq(&self, other: &Ability) -> bool {
         self.uid == other.uid
     }
 }
-impl Eq for Ability {}
-
-// Display output format for abilities
-// [UID]:[Name]:[Potency]:[Aspects (ordered CSV)]
 impl fmt::Display for Ability {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}:{}:{}:{}", self.uid(), self.name(), self.potency(), self.aspects())
+        write!(f, "{}:{}:{}:{}", self.get_uid(), self.get_name(), self.get_potency(), self.get_aspects())
     }
 }

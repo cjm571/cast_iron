@@ -18,20 +18,19 @@ Purpose:
     This module defines the Actor object. All PCs and NPCs will have an
     associated Actor object to record their abilities and game state.
 
-Changelog:
-    CJ McAllister   21 Nov 2017     File created
-    CJ McAllister   31 Jan 2018     Added UUID
-    CJ McAllister   26 Aug 2018     Reconstruction from data string
-
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-use std::fmt;
+use std::{
+    fmt,
+    str::FromStr
+};
+
+use crate::{
+    ability::Ability,
+    environment::coords::Coords
+};
 
 use uuid::Uuid;
-use std::str::FromStr;
-
-use ::ability::Ability;
-use ::environment::coords::Coords;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,12 +46,29 @@ pub struct Actor {
     abilities:      Vec<Ability>,   // List of Actor's Abilities
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
-//  Functions and Methods
+//  Object Implementatoin
 ///////////////////////////////////////////////////////////////////////////////
 impl Actor {
-    // Constructor
-    pub fn new(name: &'static str) -> Self {
+    /// Fully-qualified constructor
+    pub fn new(
+        name:           &'static str,
+        pos:            Coords,
+        cur_fatigue:    u8,
+        abilities:      Vec<Ability>,
+    ) -> Self {
+        Self {
+            uid:            Uuid::new_v4(),
+            name:           name.to_string(),
+            pos:            pos,
+            cur_fatigue:    cur_fatigue,
+            abilities:      abilities,
+        }
+    }
+
+    /// Name-only constructor
+    pub fn new_name_only(name: &'static str) -> Self {
         Self {
             uid:            Uuid::new_v4(),
             name:           name.to_string(),
@@ -61,19 +77,96 @@ impl Actor {
             abilities:      Vec::new(),
         }
     }
-    
-    //FIXME: Should implement the From trait
-    // See Display formatter for expected string format
-    pub fn from(data_str: &String) -> Self {
+
+
+    ///
+    // Mutator Methods
+    ///
+
+    // Names the actor
+    pub fn set_name(&mut self, _name: &'static str) {
+        self.name.clear();
+        self.name.push_str(_name);
+    }
+
+    // Moves the object by vector
+    //  _mag: number of "straightline" cells to move
+    //  _dir: direction of movement in radians
+    pub fn move_vec(&mut self, _mag: i32, _dir: f32) {
+        self.pos.move_vec(_mag, _dir);
+    }
+
+    // Adds ability to actor's ability list
+    pub fn add_ability(&mut self, ability: Ability) {
+        self.abilities.push(ability);
+    }
+
+
+    ///
+    // Accessor Methods
+    ///
+
+    // Returns a reference for the actor's unique ID
+    pub fn get_uid(&self) -> Uuid {
+        self.uid
+    }
+
+    // Returns a reference for the actor's name
+    pub fn get_name(&self) -> &String {
+        &self.name
+    }
+
+    // Returns a reference for the actor's position
+    pub fn get_pos(&self) -> &Coords {
+        &self.pos
+    }
+
+    // Returns a reference for the actor's current fatigue
+    pub fn get_cur_fatigue(&self) -> &u8 {
+        &self.cur_fatigue
+    }
+
+    // Returns a refernce to the vector of the actor's abilities
+    pub fn get_abilities(&self) -> &Vec<Ability>{
+        &self.abilities
+    }
+}
+
+// Display output format for actors
+// [UID]:[Name]:[Position]:[Fatigue]:[Abilities (CSV)]
+impl fmt::Display for Actor {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut res = write!(f, "{}:{}:{}:{}:|", self.uid, self.name, self.pos, self.cur_fatigue);
+
+        for abil in &self.abilities {
+            res = write!(f, "{}", abil.to_string());
+
+            // Avoid adding a trailing semicolon
+            if abil != self.abilities.last().unwrap() {
+                res = write!(f, ";");
+            }
+        }
+
+        res
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  Trait Implementations
+///////////////////////////////////////////////////////////////////////////////
+
+impl From<&String> for Actor {
+    fn from(src: &String) -> Self {
         // Tokenize on "|" to separate actor from abil list
-        let split_vec: Vec<&str> = data_str.split('|').collect();
+        let split_vec: Vec<&str> = src.split('|').collect();
 
         let actor_str = split_vec[0];
         let abil_str = split_vec[1];
-        
+
         // Tokenize string on ":"
         let data_vec: Vec<&str> = actor_str.split(':').collect();
-        
+
         let uid = match Uuid::from_str(data_vec[0]) {
             Ok(uid)     => uid,
             Err(_err)   => panic!("actor::from: Invalid uuid input string."),
@@ -115,77 +208,6 @@ impl Actor {
             abilities:      abil_vec,
         }
     }
-
-    ///////////////////////////////////////////////////////////////////////////
-    //  Mutator Methods
-    ///////////////////////////////////////////////////////////////////////////
-
-    // Names the actor
-    pub fn set_name(&mut self, _name: &'static str) {
-        self.name.clear();
-        self.name.push_str(_name);
-    }
-
-    // Moves the object by vector
-    //  _mag: number of "straightline" cells to move
-    //  _dir: direction of movement in radians
-    pub fn move_vec(&mut self, _mag: i32, _dir: f32) {
-        self.pos.move_vec(_mag, _dir);
-    }
-
-    // Adds ability to actor's ability list
-    pub fn add_ability(&mut self, ability: Ability) {
-        self.abilities.push(ability);
-    }
-
-
-    ///////////////////////////////////////////////////////////////////////////
-    //  Accessor Methods
-    ///////////////////////////////////////////////////////////////////////////
-
-    // Returns a reference for the actor's unique ID
-    pub fn get_uid(&self) -> Uuid {
-        self.uid
-    }
-    
-    // Returns a reference for the actor's name
-    pub fn get_name(&self) -> &String {
-        &self.name
-    }
-
-    // Returns a reference for the actor's position
-    pub fn get_pos(&self) -> &Coords {
-        &self.pos
-    }
-
-    // Returns a reference for the actor's current fatigue
-    pub fn get_cur_fatigue(&self) -> &u8 {
-        &self.cur_fatigue
-    }
-
-    // Returns a refernce to the vector of the actor's abilities
-    pub fn get_abilities(&self) -> &Vec<Ability>{
-        &self.abilities
-    }
-}
-
-// Display output format for actors
-// [UID]:[Name]:[Position]:[Fatigue]:[Abilities (CSV)]
-impl fmt::Display for Actor {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut res = write!(f, "{}:{}:{}:{}:|", self.uid, self.name, self.pos, self.cur_fatigue);
-        
-        for abil in &self.abilities {
-            res = write!(f, "{}", abil.to_string());
-            
-            // Avoid adding a trailing semicolon
-            if abil != self.abilities.last().unwrap() {
-                res = write!(f, ";");
-            }
-        }
-
-        res
-    }
 }
 
 
@@ -200,8 +222,8 @@ mod tests {
     #[test]
     fn output_single() {
         // set up an actor object with one ability
-        let mut player_one = Actor::new("CJ McAllister");
-        let null_abil = Ability::new("Null");
+        let mut player_one = Actor::new_name_only("CJ McAllister");
+        let null_abil = Ability::new_name_only("Null");
         player_one.add_ability(null_abil);
 
         // output the actor as a string
@@ -213,9 +235,9 @@ mod tests {
     #[test]
     fn output_multi() {
         // set up an actor object with one ability
-        let mut player_one = Actor::new("CJ McAllister");
-        let tbolt = Ability::new("Thunderbolt");
-        let fstorm = Ability::new("Fire Storm");
+        let mut player_one = Actor::new_name_only("CJ McAllister");
+        let tbolt = Ability::new_name_only("Thunderbolt");
+        let fstorm = Ability::new_name_only("Fire Storm");
         player_one.add_ability(tbolt);
         player_one.add_ability(fstorm);
 
@@ -228,8 +250,8 @@ mod tests {
     #[test]
     fn input() {
         // set up an actor object with one ability
-        let mut player_one = Actor::new("CJ McAllister");
-        let null_abil = Ability::new("Null");
+        let mut player_one = Actor::new_name_only("CJ McAllister");
+        let null_abil = Ability::new_name_only("Null");
         player_one.add_ability(null_abil);
 
         // feed the actor string into from() to "clone" the actor

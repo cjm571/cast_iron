@@ -29,38 +29,47 @@ Purpose:
     ...
     EOF
 
-Changelog:
-    CJ McAllister   30 Jan 2018     File created
-
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-use std::fs::{File, OpenOptions};
-use std::io::prelude::*;
-use std::collections::HashMap;
-use std::io::Error as IoError;
-use std::io::{ErrorKind, SeekFrom, BufReader};
+use std::{
+    collections::HashMap,
+    fs::{
+        File,
+        OpenOptions
+    },
+    io::{
+        BufReader,
+        Error as IoError,
+        ErrorKind,
+        SeekFrom,
+        prelude::*
+    }
+};
+
+use crate::{
+    ability::Ability,
+    actor::Actor
+};
 
 use uuid::Uuid;
 
-use super::actor::Actor;
-use super::ability::Ability;
-
 ///////////////////////////////////////////////////////////////////////////////
-//  Data Structures
+//  Named Constants
 ///////////////////////////////////////////////////////////////////////////////
 
-//TODO: Migrate this to an install folder eventually
+//OPT: Migrate this to an install folder eventually
 const FILENAME: &'static str = "castiron.dat";
 const ACTOR_HEADER: &'static str = "_ACTORS_";
 const ABIL_HEADER: &'static str = "_ABILITIES_";
 const TEMPLATE: &'static str = "_ACTORS_\n_ABILITIES_";
 
+
 ///////////////////////////////////////////////////////////////////////////////
 //  Functions and Methods
 ///////////////////////////////////////////////////////////////////////////////
 
-// Opens the CastIron data file, creates it if it doesn't exist.
-// Returns a File with R/W and cursor at position 0
+/// Opens the CastIron data file, creates it if it doesn't exist.
+/// Returns a File with R/W and cursor at position 0
 fn open_data_file() -> File {
     // Attemp to create a new data file
     match OpenOptions::new().read(true).write(true).create_new(true).open(FILENAME) {
@@ -91,8 +100,8 @@ fn open_data_file() -> File {
     }
 }
 
-// Reads actor data from CastIron data file
-// Returns actor data, or an IO Error if not found
+/// Reads actor data from CastIron data file
+/// Returns actor data, or an IO Error if not found
 pub fn read_actor (_actor: &Actor) -> Result<String, IoError> {
     // Open data file for R/W
     let data_file = open_data_file();
@@ -119,8 +128,8 @@ pub fn read_actor (_actor: &Actor) -> Result<String, IoError> {
     }
 }
 
-// Reads all actor dat from CastIron data file
-// Returns a HashMap of Actor objects, keyed by UUID
+/// Reads all actor dat from CastIron data file
+/// Returns a HashMap of Actor objects, keyed by UUID
 pub fn read_actors () -> Result<HashMap<Uuid, Actor>, IoError> {
     // Open data file for reading
     let data_file = open_data_file();
@@ -162,11 +171,11 @@ pub fn read_actors () -> Result<HashMap<Uuid, Actor>, IoError> {
         data_line.clear();
         line_num = line_num + 1;
     }
-    
+
     Ok(actor_map)
 }
 
-// Writes actor data to CastIron data file, creating the file if necessary
+/// Writes actor data to CastIron data file, creating the file if necessary
 pub fn write_actor(actor: &Actor) -> Result<(), IoError> {
     // Open castiron.dat for R/W, and create if doesn't exist
     let mut data_file = open_data_file();
@@ -214,7 +223,7 @@ pub fn write_actor(actor: &Actor) -> Result<(), IoError> {
     data_file.write_all(upd_data_buf.as_bytes())
 }
 
-// Writes ability data to CastIron data file, creating the file if necessary
+/// Writes ability data to CastIron data file, creating the file if necessary
 pub fn write_ability(abil: &Ability) -> Result<(), IoError> {
     // Open castiron.dat for R/W, and create if doesn't exist
     let mut data_file = open_data_file();
@@ -222,7 +231,7 @@ pub fn write_ability(abil: &Ability) -> Result<(), IoError> {
     // Read the file into one big string buffer
     let mut data_buf = String::new();
     data_file.read_to_string(&mut data_buf)?;
-    
+
     // Tokenize the string on '\n' to get the lines as Strings
     let data_strs: Vec<&str> = data_buf.split('\n').collect();
     let mut data_lines: Vec<String> = Vec::new();
@@ -234,7 +243,7 @@ pub fn write_ability(abil: &Ability) -> Result<(), IoError> {
     for i in 0 .. data_lines.len() {
 
         // Found ability, overwrite existing line
-        if data_lines[i].starts_with(abil.uid().to_string().as_str()) {
+        if data_lines[i].starts_with(abil.get_uid().to_string().as_str()) {
             data_lines[i] = abil.to_string();
             break;
         }
@@ -244,7 +253,7 @@ pub fn write_ability(abil: &Ability) -> Result<(), IoError> {
             data_lines.push(abil.to_string());
             break;
         }
-    }       
+    }
 
     // Push the data lines back together
     let mut upd_data_buf = String::new();
@@ -262,6 +271,7 @@ pub fn write_ability(abil: &Ability) -> Result<(), IoError> {
     data_file.write_all(upd_data_buf.as_bytes())
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 //  Unit Tests
 ///////////////////////////////////////////////////////////////////////////////
@@ -274,13 +284,13 @@ mod tests {
     use ::ability::Ability;
     use ::ability::aspect::*;
     use ::environment::element::Element;
-    
+
     // Helper functions
     fn create_p1() -> Actor{
-        let mut player_one = Actor::new("CJ McAllister");
+        let mut player_one = Actor::new_name_only("CJ McAllister");
 
-        let null_abil = Ability::new("Null");
-        let mut lightning_bolt = Ability::new("Lightning Bolt");
+        let null_abil = Ability::new_name_only("Null");
+        let mut lightning_bolt = Ability::new_name_only("Lightning Bolt");
         lightning_bolt.set_potency(20);
         lightning_bolt.set_aesthetics(Aesthetics::Impressive);
         lightning_bolt.set_element(Element::Electric);
@@ -302,7 +312,7 @@ mod tests {
         }
 
         let data_file = open_data_file();
-        
+
         let metadata = match data_file.metadata() {
             Err(_err)   => panic!("Error occurred while attempting to retrieve data file metadata."),
             Ok(meta)    => meta,
@@ -331,14 +341,14 @@ mod tests {
     }
 
     #[test]
-    fn file_update() {       
+    fn file_update() {
         // Delete the file so we start clean
         match fs::remove_file(FILENAME) {
             _ => (), // ignore errors
         }
 
         let player_one = create_p1();
-        let player_two = Actor::new("John Public");
+        let player_two = Actor::new_name_only("John Public");
 
         match write_actor(&player_one) {
             Err(io_err) => panic!("IO ERROR: {}", io_err.to_string()),
@@ -352,13 +362,13 @@ mod tests {
     }
 
     #[test]
-    fn abil_write() {  
+    fn abil_write() {
         // Delete the file so we start clean
         match fs::remove_file(FILENAME) {
             _ => (), // ignore errors
         }
 
-        let mut lightning_bolt = Ability::new("Lightning Bolt");
+        let mut lightning_bolt = Ability::new_name_only("Lightning Bolt");
         lightning_bolt.set_potency(20);
         lightning_bolt.set_aesthetics(Aesthetics::Impressive);
         lightning_bolt.set_element(Element::Electric);
@@ -366,7 +376,7 @@ mod tests {
         lightning_bolt.set_morality(Morality::Neutral);
         lightning_bolt.set_school(School::Destruction);
 
-        let null_abil = Ability::new("Null");
+        let null_abil = Ability::new_name_only("Null");
 
         match write_ability(&lightning_bolt) {
             Err(io_err) => panic!("IO ERROR: {}", io_err.to_string()),
@@ -386,7 +396,7 @@ mod tests {
         }
 
         let player_one = create_p1();
-        let player_two = Actor::new("John Public");
+        let player_two = Actor::new_name_only("John Public");
 
         write_actor(&player_one).unwrap();
         for abil in player_one.get_abilities() {
@@ -405,7 +415,7 @@ mod tests {
 
         // Write basic actor and ability data
         let player_one = create_p1();
-        let player_two = Actor::new("John Public");
+        let player_two = Actor::new_name_only("John Public");
 
         write_actor(&player_one).unwrap();
         for abil in player_one.get_abilities() {

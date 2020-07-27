@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-Filename : obstacle.rs
+Filename : environment/obstacle.rs
 
 Copyright (C) 2020 CJ McAllister
     This program is free software; you can redistribute it and/or modify
@@ -22,18 +22,17 @@ Purpose:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-use crate::context::Context;
-
-use uuid::Uuid;
-use rand::Rng;
-
 use crate::{
+    context::Context,
     environment::{
         element::Element,
         coords::Coords
     },
     hex_direction_provider::*
 };
+
+use uuid::Uuid;
+use rand::Rng;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,11 +47,11 @@ pub struct Obstacle {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Functions and Methods
+//  Object Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Obstacle {
-    /// Generic Constructor
+    /// Fully-qualified constructor
     pub fn new(all_coords: Vec<Coords>, element: Element) -> Self {
         Self {
             uid:        Uuid::new_v4(),
@@ -61,17 +60,17 @@ impl Obstacle {
         }
     }
 
-    // Creates a random, valid Obstacle within the constraints of the game Context
+    /// Constructs a random, valid Obstacle within the constraints of the game Context
     pub fn rand(ctx: &Context) -> Self {
         // Set UID
         let uid = Uuid::new_v4();
-        
+
         //  Get RNG thread handle and generate random origin
         let mut rng = rand::thread_rng();
         let rand_origin_coords = Coords::rand(ctx);
         let mut all_coords = Vec::new();
         all_coords.push(rand_origin_coords);
-        
+
         // Up to Context's constraint, make a randomly-snaking string of Coords objects
         let mut last_coord = rand_origin_coords;
         for _i in 0 .. ctx.get_max_obstacle_len() {
@@ -87,7 +86,7 @@ impl Obstacle {
             // It's possible the current coords are completely surrounded, so use this flag to know
             // if we should stop the obstacle here
             let mut found_good_coords = false;
-            
+
             for direction in direction_provider {
                 // Attempt a move and then check for a double-back
                 last_coord.move_vec(1, direction.into());

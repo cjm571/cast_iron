@@ -32,7 +32,7 @@ use rand::{
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Constants
+//  Named Constants
 ///////////////////////////////////////////////////////////////////////////////
 
 const NUM_HEX_DIRECTIONS: usize = 6;
@@ -100,7 +100,6 @@ impl<T: HexDirection> HexDirectionProvider<T> {
 }
 
 
-
 ///////////////////////////////////////////////////////////////////////////////
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
@@ -108,7 +107,6 @@ impl<T: HexDirection> HexDirectionProvider<T> {
 ///
 // HexDirectionProvider
 ///
-
 impl<T: HexDirection> Iterator for HexDirectionProvider<T> {
     type Item = T;
 
@@ -130,7 +128,6 @@ impl<T: HexDirection> Iterator for HexDirectionProvider<T> {
 
     }
 }
-
 impl<T: HexDirection> Distribution<HexDirectionProvider<T>> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> HexDirectionProvider<T> {
         let rand_num: f32 = rng.gen();
@@ -140,12 +137,11 @@ impl<T: HexDirection> Distribution<HexDirectionProvider<T>> for Standard {
     }
 }
 
+
 ///
 // HexSides
 ///
-
 impl HexDirection for HexSides {}
-
 impl From<HexSides> for f32 {
     fn from(src: HexSides) -> f32 {
         match src {
@@ -174,7 +170,6 @@ impl From<f32> for HexSides {
         }
     }
 }
-
 impl From<HexSides> for usize {
     fn from(src: HexSides) -> usize {
         match src {
@@ -200,8 +195,6 @@ impl From<usize> for HexSides {
         }
     }
 }
-
-
 // Distribution trait provides randomization for this module
 impl Distribution<HexSides> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> HexSides {
@@ -214,9 +207,7 @@ impl Distribution<HexSides> for Standard {
 ///
 // HexVertices
 ///
-
 impl HexDirection for HexVertices {}
-
 impl From<HexVertices> for f32 {
     fn from(src: HexVertices) -> f32 {
         match src {
@@ -246,7 +237,6 @@ impl From<f32> for HexVertices {
         }
     }
 }
-
 impl From<HexVertices> for usize {
     fn from(src: HexVertices) -> usize {
         match src {
@@ -272,8 +262,6 @@ impl From<usize> for HexVertices {
         }
     }
 }
-
-
 // Distribution trait provides randomization for this module
 impl Distribution<HexVertices> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> HexVertices {

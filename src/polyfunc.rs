@@ -44,31 +44,21 @@ use rand::{
 ///////////////////////////////////////////////////////////////////////////////
 
 //FIXME: Needs a debug output implementation
+#[derive(Default)]
 pub struct PolyFunc {
-    magnitude:  u8,
-    duration:   u8,
-    start_time: u32
+    magnitude:  usize,
+    duration:   usize,
+    start_time: usize
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Functions and Methods
+//  Object Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
 impl PolyFunc {
-
-    // Creates and returns a new PolyFunc object
-    pub fn new() -> Self {
-        Self {
-            magnitude:  1,
-            duration:   1,
-            start_time: 1
-        }
-    }
-    
-    //FIXME: probably shouldn't be called "from"
-    // Creates and returns a new PolyFunc object from the given parameters
-    pub fn from(magnitude: u8, duration: u8, start_time: u32) -> Self {
+    /// Fully-qualified constructor
+    pub fn new(magnitude: usize, duration: usize, start_time: usize) -> Self {
         Self {
             magnitude:  magnitude,
             duration:   duration,
@@ -76,11 +66,15 @@ impl PolyFunc {
         }
     }
 
+    ///
+    // Utility Methods
+    ///
+
     // Solves the polynomial function at the given game time tick
-    pub fn solve(&self, tick: u32) -> i32 {
+    pub fn solve(&self, tick: usize) -> i32 {
         let a: f32 = self.magnitude as f32 / (self.duration as f32 / 2.0).powi(2);
         let b: f32 = self.start_time as f32;
-        let c: f32 = (self.start_time + self.duration as u32) as f32;
+        let c: f32 = (self.start_time + self.duration as usize) as f32;
 
         (-1.0 * a * (tick as f32 - b) * (tick as f32 - c)) as i32
     }
@@ -95,9 +89,9 @@ impl PolyFunc {
 // Distribution trait provides randomnization for this module
 impl Distribution<PolyFunc> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PolyFunc {
-        let rand_mag: u8 = rng.gen();
-        let rand_dur: u8 = rng.gen();
-        let rand_start_time: u32 = rng.gen();
+        let rand_mag: usize = rng.gen();
+        let rand_dur: usize = rng.gen();
+        let rand_start_time: usize = rng.gen();
 
         PolyFunc {
             magnitude:  rand_mag,
@@ -119,10 +113,10 @@ mod tests {
     #[test]
     // Confirm that start, stop, and peak values are correct
     fn solving() {
-        let func_a: PolyFunc = PolyFunc::from(10, 4, 0);
-        let func_b: PolyFunc = PolyFunc::from(255, 16, 10);
-        let func_c: PolyFunc = PolyFunc::from(150, 10, 30);
-        let func_d: PolyFunc = PolyFunc::from(100, 5, 0);
+        let func_a: PolyFunc = PolyFunc::new(10, 4, 0);
+        let func_b: PolyFunc = PolyFunc::new(255, 16, 10);
+        let func_c: PolyFunc = PolyFunc::new(150, 10, 30);
+        let func_d: PolyFunc = PolyFunc::new(100, 5, 0);
 
         // Check function A's solutions
         assert_eq!(func_a.solve(0), 0);
