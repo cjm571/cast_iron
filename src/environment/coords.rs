@@ -245,7 +245,7 @@ impl fmt::Display for CoordsValidityError {
 }
 impl Error for CoordsValidityError {}
 
-//FIXME: Should be more general
+//OPT: Should be more general
 ///
 // CoordsValidityError
 ///

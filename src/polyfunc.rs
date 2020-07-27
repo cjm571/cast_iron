@@ -24,11 +24,9 @@ Purpose:
     Format: y = -([magnitude]/([duration]/2)^2) * (x - [start_time]) * (x - ([duration]+[start_time]))
             where x is the current game tick
 
-Changelog:
-    CJ McAllister   17 May 2018     File created
-    CJ McAllister   27 Aug 2018     Redesign to allow for start times
-
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+use std::fmt;
 
 use rand::{
     Rng,
@@ -43,7 +41,6 @@ use rand::{
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
-//FIXME: Needs a debug output implementation
 #[derive(Default)]
 pub struct PolyFunc {
     magnitude:  usize,
@@ -100,7 +97,15 @@ impl Distribution<PolyFunc> for Standard {
         }
     }
 }
-
+impl fmt::Debug for PolyFunc {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "PolyFunc: y = -({}/({}/2)^2) * (x - {}) * (x - ({}+{}))",
+                  self.magnitude, self.duration,
+                  self.start_time,
+                  self.duration, self.start_time)?;
+        write!(f, "          mag: {}, dur: {}, start_time: {}", self.magnitude, self.duration, self.start_time)
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Unit Tests
