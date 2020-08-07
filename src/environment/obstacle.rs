@@ -25,7 +25,10 @@ Purpose:
 use crate::{
     context::Context,
     environment::{
-        element::Element,
+        element::{
+            Element,
+            Elemental
+        },
         coords::Coords
     },
     hex_direction_provider::*
@@ -39,6 +42,7 @@ use rand::Rng;
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
+#[derive(Debug)]
 pub struct Obstacle {
     uid:        Uuid,
     all_coords: Vec<Coords>,
@@ -55,7 +59,7 @@ impl Obstacle {
     pub fn new(all_coords: Vec<Coords>, element: Element) -> Self {
         Self {
             uid:        Uuid::new_v4(),
-            all_coords: all_coords,
+            all_coords: all_coords, //FIXME: Need to validate that coords are contiguous
             element:    element
         }
     }
@@ -133,8 +137,15 @@ impl Obstacle {
     pub fn get_all_coords(&self) -> &Vec<Coords> {
         &self.all_coords
     }
+}
 
-    pub fn get_element(&self) -> Element {
+
+///////////////////////////////////////////////////////////////////////////////
+//  Trait Implementations
+///////////////////////////////////////////////////////////////////////////////
+
+impl Elemental for Obstacle {
+    fn get_element(&self) -> Element {
         self.element
     }
 }

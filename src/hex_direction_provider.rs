@@ -54,7 +54,7 @@ pub trait HexDirection:
 //  Data structures
 ///////////////////////////////////////////////////////////////////////////////
 
-//OPT: Derive the HexDirection trait if it has no required methods
+//OPT: *STYLE* Derive the HexDirection trait if it has no required methods
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum HexSides {
     NORTHEAST,
@@ -65,7 +65,7 @@ pub enum HexSides {
     SOUTHEAST
 }
 
-//OPT: Derive the HexDirection trait if it has no required methods
+//OPT: *STYLE* Derive the HexDirection trait if it has no required methods
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum HexVertices {
     EAST,
@@ -78,7 +78,7 @@ pub enum HexVertices {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Class Implementation
+//  Object Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
 pub struct HexDirectionProvider<T: HexDirection > {

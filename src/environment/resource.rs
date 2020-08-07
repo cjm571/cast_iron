@@ -25,7 +25,10 @@ use crate::{
     context::Context,
     environment::{
         coords::Coords,
-        element::Element
+        element::{
+            Element,
+            Elemental
+        }
     }
 };
 
@@ -43,7 +46,7 @@ use rand::{
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct Resource {
     uid:        Uuid,
     element:    Element,
@@ -52,6 +55,7 @@ pub struct Resource {
     radius:     usize,
 }
 
+// OPT: *PERFORMANCE* Do custom enums end up on the stack? if not, remove the Copy/Clone derivations
 #[derive(Debug, Copy, Clone)]
 pub enum State {
     Depleted    = 0,
@@ -166,10 +170,6 @@ impl Resource {
         self.uid
     }
 
-    pub fn get_kind(&self) -> Element {
-        self.element
-    }
-
     pub fn get_state(&self) -> State {
         self.state
     }
@@ -200,6 +200,11 @@ impl Default for Resource {
             coords:     Coords::default(),
             radius:     0,
         }
+    }
+}
+impl Elemental for Resource {
+    fn get_element(&self) -> Element {
+        self.element
     }
 }
 

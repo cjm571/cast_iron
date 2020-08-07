@@ -25,7 +25,10 @@ Purpose:
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 use crate::{
-    environment::element::Element,
+    environment::element::{
+        Element,
+        Elemental
+    },
     polyfunc::PolyFunc
 };
 
@@ -76,7 +79,7 @@ pub enum Intensity {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Functions and Methods
+//  Object Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Weather {
@@ -102,10 +105,6 @@ impl Weather {
     ///
     // Accessor Methods
     ///
-
-    pub fn get_element(&self) -> Element {
-        self.element
-    }
 
     pub fn get_intensity(&self, tick: usize) -> Intensity {
         Intensity::from(self.function.solve(tick))
@@ -151,5 +150,10 @@ impl Distribution<Weather> for Standard {
             element:  rand_elem,
             function: rand_polyfunc
         }
+    }
+}
+impl Elemental for Weather {
+    fn get_element(&self) -> Element {
+        self.element
     }
 }

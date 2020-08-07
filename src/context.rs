@@ -46,7 +46,7 @@ pub struct Context {
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Context {
-    //OPT: If this ends up having more than 4 params, make a builder class
+    //OPT: *STYLE*If this ends up having more than 4 params, make a builder class
     /// Fully-qualified constructor
     pub fn new(grid_radius: usize, max_resource_radius: usize, max_obstacle_len: usize) -> Self {
         Self {

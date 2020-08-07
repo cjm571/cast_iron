@@ -57,7 +57,7 @@ use uuid::Uuid;
 //  Named Constants
 ///////////////////////////////////////////////////////////////////////////////
 
-//OPT: Migrate this to an install folder eventually
+//OPT: *DESIGN* Migrate this to an install folder eventually
 const FILENAME: &'static str = "castiron.dat";
 const ACTOR_HEADER: &'static str = "_ACTORS_";
 const ABIL_HEADER: &'static str = "_ABILITIES_";
@@ -65,7 +65,7 @@ const TEMPLATE: &'static str = "_ACTORS_\n_ABILITIES_";
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Functions and Methods
+//  Object Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
 /// Opens the CastIron data file, creates it if it doesn't exist.

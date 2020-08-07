@@ -15,7 +15,7 @@ Copyright (C) 2020 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    This package enumerates available elements and provides utility functions
+    This package enumerates available elements and provides Utility Methods
     for convenience.
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -52,6 +52,15 @@ pub enum Element {
 
 
 ///////////////////////////////////////////////////////////////////////////////
+//  Trait Declaration
+///////////////////////////////////////////////////////////////////////////////
+
+pub trait Elemental {
+    fn get_element(&self) -> Element;
+} 
+
+
+///////////////////////////////////////////////////////////////////////////////
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -60,6 +69,7 @@ impl Default for Element {
         Self::Unset
     }
 }
+
 impl From<usize> for Element {
     fn from(src: usize) -> Self {
         match src {
@@ -75,6 +85,7 @@ impl From<usize> for Element {
         }
     }
 }
+
 // Distribution trait provides randomization for this module
 impl Distribution<Element> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Element {

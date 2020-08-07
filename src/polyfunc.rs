@@ -82,7 +82,7 @@ impl PolyFunc {
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-//OPT: May need to account for start time differently
+//OPT: *DESIGN* May need to account for start time differently
 // Distribution trait provides randomnization for this module
 impl Distribution<PolyFunc> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PolyFunc {
