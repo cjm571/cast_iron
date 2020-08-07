@@ -42,6 +42,13 @@ use rand::Rng;
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
+/// Odds of terminating an obstacle on a given iteration
+const OBSTACLE_TERMINATION_ODDS: f32 = 0.05;
+
+///////////////////////////////////////////////////////////////////////////////
+//  Data Structures
+///////////////////////////////////////////////////////////////////////////////
+
 #[derive(Debug)]
 pub struct Obstacle {
     uid:        Uuid,
@@ -78,9 +85,9 @@ impl Obstacle {
         // Up to Context's constraint, make a randomly-snaking string of Coords objects
         let mut last_coord = rand_origin_coords;
         for _i in 0 .. ctx.get_max_obstacle_len() {
-            // Coin-flip to continue
-            let coin_flip: bool = rng.gen();
-            if coin_flip == false {
+            // Long, snaking objects are cooler, so we want a bit better odds than a coinflip
+            let obstacle_termination_roll: f32 = rng.gen_range(0.0, 1.0);
+            if obstacle_termination_roll < OBSTACLE_TERMINATION_ODDS {
                 break;
             }
 
@@ -92,11 +99,16 @@ impl Obstacle {
             let mut found_good_coords = false;
 
             for direction in direction_provider {
+                //OPT: *DESIGN* a "try_move_vec" function would be much cleaner here
                 // Attempt a move and then check for a double-back
-                last_coord.move_vec(1, direction.into());
+                match last_coord.move_vec(1, direction.into(), ctx) {
+                    Ok(()) => {},       // Move succeeded, do nothing
+                    Err(_e) => continue // Move failed, try another direction
+                };
+
                 if all_coords.contains(&last_coord) {
                     // Double-back detected! Undo the move, rotate the direction and try again
-                    last_coord.move_vec(-1, direction.into());
+                    last_coord.move_vec(-1, direction.into(), ctx).unwrap();
                     continue;
                 }
 

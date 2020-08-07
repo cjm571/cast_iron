@@ -27,6 +27,7 @@ use std::{
 
 use crate::{
     ability::Ability,
+    context::Context,
     environment::coords::Coords
 };
 
@@ -78,6 +79,59 @@ impl Actor {
         }
     }
 
+    pub fn from_string(src: &String, ctx: &Context) -> Self {
+        // Tokenize on "|" to separate actor from abil list
+        let split_vec: Vec<&str> = src.split('|').collect();
+
+        let actor_str = split_vec[0];
+        let abil_str = split_vec[1];
+
+        // Tokenize string on ":"
+        let data_vec: Vec<&str> = actor_str.split(':').collect();
+
+        let uid = match Uuid::from_str(data_vec[0]) {
+            Ok(uid)     => uid,
+            Err(_err)   => panic!("actor::from: Invalid uuid input string."),
+        };
+
+        let name = data_vec[1];
+
+        // trim parentheses and tokenize on ','
+        let parens: &[_] = &['(', ')']; //WTF: is this type?
+        let coord_vec: Vec<&str> = data_vec[2].trim_matches(parens).split(',').collect();
+        let pos = match Coords::new(
+            coord_vec[0].parse::<i32>().unwrap(),
+            coord_vec[1].parse::<i32>().unwrap(),
+            coord_vec[2].parse::<i32>().unwrap(),
+            ctx
+        ) {
+            Ok(pos)     => pos,
+            Err(_err)   => panic!("actor::from: Invalid Coords input string."),
+        };
+
+        let cur_fatigue = data_vec[3].parse::<u8>().unwrap();
+
+        // Check for empty ability list
+        let mut abil_vec: Vec<Ability> = Vec::new();
+        if abil_str != "\n" {
+            // Tokenize abil list on ";"
+            let abil_str_vec: Vec<&str> = abil_str.split(';').collect();
+
+            // Iterate through abil list, creating ability objects and dropping them in the vector
+            for i in 0 .. abil_str_vec.len() {
+                abil_vec.push(Ability::from(&abil_str_vec[i].to_string()));
+            }
+        }
+
+        Self {
+            uid:            uid,
+            name:           name.to_string(),
+            pos:            pos,
+            cur_fatigue:    cur_fatigue,
+            abilities:      abil_vec,
+        }
+    }
+
 
     ///
     // Mutator Methods
@@ -92,8 +146,8 @@ impl Actor {
     // Moves the object by vector
     //  _mag: number of "straightline" cells to move
     //  _dir: direction of movement in radians
-    pub fn move_vec(&mut self, _mag: i32, _dir: f32) {
-        self.pos.move_vec(_mag, _dir);
+    pub fn move_vec(&mut self, mag: i32, dir: f32, ctx: &Context) {
+        self.pos.move_vec(mag, dir, ctx).unwrap();
     }
 
     // Adds ability to actor's ability list
@@ -151,66 +205,6 @@ impl fmt::Display for Actor {
     }
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-//  Trait Implementations
-///////////////////////////////////////////////////////////////////////////////
-
-impl From<&String> for Actor {
-    fn from(src: &String) -> Self {
-        // Tokenize on "|" to separate actor from abil list
-        let split_vec: Vec<&str> = src.split('|').collect();
-
-        let actor_str = split_vec[0];
-        let abil_str = split_vec[1];
-
-        // Tokenize string on ":"
-        let data_vec: Vec<&str> = actor_str.split(':').collect();
-
-        let uid = match Uuid::from_str(data_vec[0]) {
-            Ok(uid)     => uid,
-            Err(_err)   => panic!("actor::from: Invalid uuid input string."),
-        };
-
-        let name = data_vec[1];
-
-        // trim parentheses and tokenize on ','
-        let parens: &[_] = &['(', ')']; //WTF: is this type?
-        let coord_vec: Vec<&str> = data_vec[2].trim_matches(parens).split(',').collect();
-        let pos = match Coords::new(
-            coord_vec[0].parse::<i32>().unwrap(),
-            coord_vec[1].parse::<i32>().unwrap(),
-            coord_vec[2].parse::<i32>().unwrap()
-        ) {
-            Ok(pos)     => pos,
-            Err(_err)   => panic!("actor::from: Invalid Coords input string."),
-        };
-
-        let cur_fatigue = data_vec[3].parse::<u8>().unwrap();
-
-        // Check for empty ability list
-        let mut abil_vec: Vec<Ability> = Vec::new();
-        if abil_str != "\n" {
-            // Tokenize abil list on ";"
-            let abil_str_vec: Vec<&str> = abil_str.split(';').collect();
-
-            // Iterate through abil list, creating ability objects and dropping them in the vector
-            for i in 0 .. abil_str_vec.len() {
-                abil_vec.push(Ability::from(&abil_str_vec[i].to_string()));
-            }
-        }
-
-        Self {
-            uid:            uid,
-            name:           name.to_string(),
-            pos:            pos,
-            cur_fatigue:    cur_fatigue,
-            abilities:      abil_vec,
-        }
-    }
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 //  Unit Tests
 ///////////////////////////////////////////////////////////////////////////////
@@ -249,13 +243,16 @@ mod tests {
 
     #[test]
     fn input() {
+        // Create a default game context for the test
+        let test_ctx = Context::default();
+
         // set up an actor object with one ability
         let mut player_one = Actor::new_name_only("CJ McAllister");
         let null_abil = Ability::new_name_only("Null");
         player_one.add_ability(null_abil);
 
         // feed the actor string into from() to "clone" the actor
-        let clone_one = Actor::from(&player_one.to_string());
+        let clone_one = Actor::from_string(&player_one.to_string(), &test_ctx);
 
         // output both actor strings for comparison
         println!("{}\n{}", player_one.to_string(), clone_one.to_string());

@@ -68,6 +68,7 @@ pub struct Coords {
     z: i32,
 }
 
+//FIXME: Needs more specificity - i.e, can be due to invalid composition, out of bounds, etc
 #[derive(Debug, Clone)]
 pub struct CoordsValidityError;
 
@@ -81,16 +82,26 @@ pub struct CoordsParamError;
 
 impl Coords {
     /// Fully-qualified constructor
-    pub fn new(x: i32, y: i32, z: i32) -> Result<Self, CoordsValidityError> {
-        if  x + y + z == 0 {
-            Ok(Self {
+    pub fn new(x: i32, y: i32, z: i32, ctx: &Context) -> Result<Self, CoordsValidityError> {
+        // Check coords composition
+        if x + y + z != 0 {
+            return Err(CoordsValidityError)
+        }
+
+        // Check for out-of-bounds
+        if i32::abs(x) > ctx.get_grid_radius() as i32 ||
+           i32::abs(y) > ctx.get_grid_radius() as i32 ||
+           i32::abs(z) > ctx.get_grid_radius() as i32 {
+            return Err(CoordsValidityError)
+        }
+
+        Ok(
+            Self {
                 x: x,
                 y: y,
                 z: z,
-            })
-        } else {
-            Err(CoordsValidityError)
-        }
+            }
+        )
     }
 
     /// Constructs a random, valid Coords object within the constraints of the game Context
@@ -107,7 +118,7 @@ impl Coords {
         };
         let calc_z: i32 = 0 - rand_x - calc_rand_y; // Coords must meet the x + y + z == 0 requirement
 
-        Self::new(rand_x, calc_rand_y, calc_z).unwrap()
+        Self::new(rand_x, calc_rand_y, calc_z, ctx).unwrap()
     }
 
     /// Constructs a random, valid Coords object within the constraints fo the game Context AND
@@ -130,7 +141,7 @@ impl Coords {
         };
         let calc_z: i32 = 0 - rand_x - calc_rand_y; // Coords must meet the x + y + z == 0 requirement
 
-        Ok(Self::new(rand_x, calc_rand_y, calc_z).unwrap())
+        Ok(Self::new(rand_x, calc_rand_y, calc_z, ctx).unwrap())
     }
 
 
@@ -141,9 +152,13 @@ impl Coords {
     // Moves the object by vector
     //  mag: number of "straightline" cells to move
     //  dir: direction of movement in radians
-    pub fn move_vec(&mut self, mag: i32, dir: f32) {
+    pub fn move_vec(&mut self, mag: i32, dir: f32, ctx: &Context) -> Result<(), CoordsValidityError>{
         debug_println!("START coord.move_vec()");
         debug_println!("mag: {}, dir: {:.4}", mag, dir);
+
+        let mut new_x = self.x;
+        let mut new_y = self.y;
+        let mut new_z = self.z;
 
         let flt_mag: f32 = mag as f32;
 
@@ -162,8 +177,8 @@ impl Coords {
             //    Ok( )
             //}
             // Set movement
-            self.x += lat_mag as i32;
-            self.y -= lat_mag as i32;
+            new_x += lat_mag as i32;
+            new_y -= lat_mag as i32;
             debug_println!("move_east by: {}", lat_mag as i32);
         }
 
@@ -182,14 +197,28 @@ impl Coords {
             let nw_mag = (vert_mag as i32) / 2;
 
             // Set movement
-            self.x += ne_mag;
-            self.y += nw_mag;
-            self.z -= ne_mag + nw_mag;
+            new_x += ne_mag;
+            new_y += nw_mag;
+            new_z -= ne_mag + nw_mag;
             debug_println!("move_ne by: {}", ne_mag);
             debug_println!("move_nw by: {}", nw_mag);
         }
 
-        debug_println!("END coord.move_vec()");
+        // Sanity check
+        match Coords::new(new_x, new_y, new_z, ctx) {
+            Ok(_coords) => {
+                self.x = new_x;
+                self.y = new_y;
+                self.z = new_z;
+
+                debug_println!("END coord.move_vec()");
+                Ok(())
+            }
+            Err(e)  => {
+                debug_println!("FAILED coord.move_vec()");
+                Err(e)
+            }
+        }
     }
 
 
@@ -274,6 +303,9 @@ mod tests {
 
     #[test]
     fn square_hemisphere() {
+        // Create a default game context for the test
+        let test_ctx = Context::default();
+
         // Initialize values
         let mut actual = Coords::default();
         let mut expected = Coords::default();
@@ -282,44 +314,47 @@ mod tests {
         assert_eq!(actual, expected);
 
         // Move 3 cells East
-        actual.move_vec(3, EAST);
-        if let Ok(expected) = Coords::new(3, -3, 0) {
+        actual.move_vec(3, EAST, &test_ctx).unwrap();
+        if let Ok(expected) = Coords::new(3, -3, 0, &test_ctx) {
             assert_eq!(actual, expected);
         }
 
         // Move 4 cells North
-        actual.move_vec(4, NORTH);
-        if let Ok(expected) = Coords::new(5, -1, -4) {
+        actual.move_vec(4, NORTH, &test_ctx).unwrap();
+        if let Ok(expected) = Coords::new(5, -1, -4, &test_ctx) {
             assert_eq!(actual, expected);
         }
 
         // Move 6 cells West
-        actual.move_vec(6, WEST);
-        if let Ok(expected) = Coords::new(-1, 5, -4) {
+        actual.move_vec(6, WEST, &test_ctx).unwrap();
+        if let Ok(expected) = Coords::new(-1, 5, -4, &test_ctx) {
             assert_eq!(actual, expected);
         }
 
         // Move 4 cells South
-        actual.move_vec(4, SOUTH);
-        if let Ok(expected) = Coords::new(-3, 3, 0) {
+        actual.move_vec(4, SOUTH, &test_ctx).unwrap();
+        if let Ok(expected) = Coords::new(-3, 3, 0, &test_ctx) {
             assert_eq!(actual, expected);
         }
 
         // Move 3 cells East
-        actual.move_vec(3, EAST);
+        actual.move_vec(3, EAST, &test_ctx).unwrap();
         expected = Coords::default();
         assert_eq!(actual, expected);
     }
 
     #[test]
     fn move_max_cardinal_dirs() {
+        // Create a default game context for the test
+        let test_ctx = Context::default();
+
         // Initialize values
         let mut actual = Coords::default();
 
         // Move East by INT_MAX
-        actual.move_vec(i32::max_value(), EAST);
+        actual.move_vec(i32::max_value(), EAST, &test_ctx).unwrap();
 
         // Move one more unit East
-        actual.move_vec(1, EAST);
+        actual.move_vec(1, EAST, &test_ctx).unwrap();
     }
 }

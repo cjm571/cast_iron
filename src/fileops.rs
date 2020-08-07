@@ -48,7 +48,8 @@ use std::{
 
 use crate::{
     ability::Ability,
-    actor::Actor
+    actor::Actor,
+    context::Context
 };
 
 use uuid::Uuid;
@@ -130,7 +131,7 @@ pub fn read_actor (_actor: &Actor) -> Result<String, IoError> {
 
 /// Reads all actor dat from CastIron data file
 /// Returns a HashMap of Actor objects, keyed by UUID
-pub fn read_actors () -> Result<HashMap<Uuid, Actor>, IoError> {
+pub fn read_actors (ctx: &Context) -> Result<HashMap<Uuid, Actor>, IoError> {
     // Open data file for reading
     let data_file = open_data_file();
 
@@ -162,10 +163,10 @@ pub fn read_actors () -> Result<HashMap<Uuid, Actor>, IoError> {
         }
 
         // read line into actor object
-        let _actor = Actor::from(&data_line);
+        let actor = Actor::from_string(&data_line, ctx);
 
         // add actor to hashmap
-        actor_map.insert(_actor.get_uid(), _actor);
+        actor_map.insert(actor.get_uid(), actor);
 
         // Clear line buffer and increment in prep for next line
         data_line.clear();
@@ -408,6 +409,9 @@ mod tests {
 
     #[test]
     fn full_read() {
+        // Create a default game context for the test
+        let test_ctx = Context::default();
+
         // Delete the file so we start clean
         match fs::remove_file(FILENAME) {
             _ => (), // ignore errors
@@ -425,7 +429,7 @@ mod tests {
         write_actor(&player_two).unwrap();
 
         // Read the data back into a map
-        let actor_map = read_actors().unwrap();
+        let actor_map = read_actors(&test_ctx).unwrap();
 
         // Assert that the data is the same
         let retrieved_p1 = actor_map.get(&player_one.get_uid()).unwrap();

@@ -22,20 +22,33 @@ Purpose:
 extern crate uuid;
 extern crate rand;
 
-///////////////////////////////////////////////////////////////////////////////
-//  Global Data Structures
-///////////////////////////////////////////////////////////////////////////////
+//FIXME: probably need to figure out preludes... real annoying to have to include the full macro dependcy chain
 
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Attribute Definitions
 ///////////////////////////////////////////////////////////////////////////////
 
+// Macro for retrieving the function name
+#[macro_export]
+macro_rules! function_name {
+    () => {{
+        fn f() {}
+        fn type_name_of<T>(_: T) -> &'static str {
+            std::any::type_name::<T>()
+        }
+        let name = type_name_of(f);
+        &name[..name.len() - 3]
+    }}
+}
+
+
 // Non-interruptive debug output
 #[cfg(debug_assertions)]
 #[macro_export]
 macro_rules! debug_println {
     ($( $args:expr ),*) => {
+        print!( "{}: ", function_name!());
         println!( $( $args ),* );
     };
 }
