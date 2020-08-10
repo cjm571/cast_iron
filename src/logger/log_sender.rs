@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-Filename : environment/mod.rs
+Filename : logger/log_sender.rs
 
-Copyright (C) 2017 CJ McAllister
+Copyright (C) 2020 CJ McAllister
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 3 of the License, or
@@ -15,19 +15,44 @@ Copyright (C) 2017 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    Defines the structures and interactions that make up the environment
-    in which the actors perform their actions. Provides functions pertaining
-    to both immediate and atmospheric conditions.
+    This module defines the Log Sender object, used to dispatch messages to
+    the Reciever, which will avoid blocking the main thread for logging
+    operations.
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+use std::sync::mpsc::{
+    Sender,
+    SendError
+};
+
+use crate::logger::LogTuple;
+
+
 ///////////////////////////////////////////////////////////////////////////////
-//  Module Declarations
+//  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
-#[macro_use]
-pub mod coords;
-pub mod element;
-pub mod obstacle;
-pub mod resource;
-pub mod weather;
+#[derive(Clone)]
+pub struct LogSender {
+    channel_tx: Sender<LogTuple>
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  Object Implementation
+///////////////////////////////////////////////////////////////////////////////
+
+impl LogSender {
+    /// Fully-qualified constructor
+    pub fn new(channel_tx: Sender<LogTuple>) -> Self {
+        Self {
+            channel_tx: channel_tx
+        }
+    }
+
+    pub fn send_log(&self, log_tuple: LogTuple) -> Result<(), SendError<LogTuple>> {
+        self.channel_tx.send(log_tuple)
+    }
+}
+

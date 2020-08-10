@@ -19,14 +19,15 @@ Purpose:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-extern crate uuid;
+extern crate chrono;
 extern crate rand;
+extern crate uuid;
 
 //FIXME: probably need to figure out preludes... real annoying to have to include the full macro dependcy chain
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Attribute Definitions
+//  Macro Definitions
 ///////////////////////////////////////////////////////////////////////////////
 
 // Macro for retrieving the function name
@@ -83,4 +84,5 @@ pub mod context;
 pub mod environment;
 pub mod fileops;
 pub mod hex_direction_provider;
+pub mod logger;
 pub mod polyfunc;

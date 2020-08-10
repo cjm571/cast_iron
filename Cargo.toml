@@ -1,8 +1,9 @@
 [package]
 name = "cast_iron"
-version = "0.3.3"
+version = "0.4.0"
 authors = ["CJ McAllister <cjm571@gmail.com>"]
 
 [dependencies]
-uuid = { version = "0.8.1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
 rand = "0.7.3"
+uuid = { version = "0.8.1", features = ["v4"] }

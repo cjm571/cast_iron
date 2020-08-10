@@ -19,6 +19,8 @@ Purpose:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+use crate::logger::LoggerInstance;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Named Constants
@@ -35,9 +37,10 @@ const DEFAULT_MAX_OBSTACLE_LENGTH:  usize = 5;
 ///////////////////////////////////////////////////////////////////////////////
 
 pub struct Context {
+    logger:                 LoggerInstance,
     grid_radius:            usize,
     max_resource_radius:    usize,
-    max_obstacle_len:       usize
+    max_obstacle_len:       usize,
 }
 
 
@@ -46,13 +49,24 @@ pub struct Context {
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Context {
-    //OPT: *STYLE*If this ends up having more than 4 params, make a builder class
+    //FIXME: *STYLE* Make a builder class
     /// Fully-qualified constructor
-    pub fn new(grid_radius: usize, max_resource_radius: usize, max_obstacle_len: usize) -> Self {
+    pub fn new(logger: LoggerInstance, grid_radius: usize, max_resource_radius: usize, max_obstacle_len: usize) -> Self {
         Self {
+            logger:                 logger,
             grid_radius:            grid_radius,
             max_resource_radius:    max_resource_radius,
-            max_obstacle_len:       max_obstacle_len
+            max_obstacle_len:       max_obstacle_len,
+        }
+    }
+    
+    /// Fully-qualified constructor
+    pub fn new_logger_only(logger: LoggerInstance) -> Self {
+        Self {
+            logger:                 logger,
+            grid_radius:            DEFAULT_GRID_RADIUS,
+            max_resource_radius:    DEFAULT_MAX_RESOURCE_RADIUS,
+            max_obstacle_len:       DEFAULT_MAX_OBSTACLE_LENGTH,
         }
     }
 
@@ -72,19 +86,24 @@ impl Context {
     pub fn get_max_obstacle_len(&self) -> usize {
         self.max_obstacle_len
     }
+
+    pub fn get_logger_ref(&self) -> &LoggerInstance {
+        &self.logger
+    }
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Trait Implimentations
+//  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Default for Context {
     fn default() -> Self {
         Self {
+            logger:                 LoggerInstance::default(),
             grid_radius:            DEFAULT_GRID_RADIUS,
             max_resource_radius:    DEFAULT_MAX_RESOURCE_RADIUS,
-            max_obstacle_len:       DEFAULT_MAX_OBSTACLE_LENGTH
+            max_obstacle_len:       DEFAULT_MAX_OBSTACLE_LENGTH,
         }
     }
 }

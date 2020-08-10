@@ -44,7 +44,11 @@ use std::{
     fmt
 };
 
-use crate::context::Context;
+use crate::{
+    context::Context,
+    logger::LogLevel,
+    ci_log
+};
 
 use rand::Rng;
 
@@ -153,8 +157,8 @@ impl Coords {
     //  mag: number of "straightline" cells to move
     //  dir: direction of movement in radians
     pub fn move_vec(&mut self, mag: i32, dir: f32, ctx: &Context) -> Result<(), CoordsValidityError>{
-        debug_println!("START coord.move_vec()");
-        debug_println!("mag: {}, dir: {:.4}", mag, dir);
+        ci_log!(ctx.get_logger_ref(), LogLevel::TRACE, "START coord.move_vec()");
+        ci_log!(ctx.get_logger_ref(), LogLevel::TRACE, "mag: {}, dir: {:.4}", mag, dir);
 
         let mut new_x = self.x;
         let mut new_y = self.y;
@@ -165,7 +169,7 @@ impl Coords {
         // Determine lateral movement
         if dir.cos().abs() > MIN_FRACTIONAL_MOVE {
             let mut lat_mag: f32 = flt_mag * dir.cos();
-            debug_println!("Lat mag: {:.2}", lat_mag);
+            ci_log!(ctx.get_logger_ref(), LogLevel::TRACE, "Lat mag: {:.2}", lat_mag);
 
             // Adjust such that non-negligible fractional movements round to next larger integer
             if lat_mag.fract().abs() > MIN_FRACTIONAL_MOVE {
@@ -179,13 +183,13 @@ impl Coords {
             // Set movement
             new_x += lat_mag as i32;
             new_y -= lat_mag as i32;
-            debug_println!("move_east by: {}", lat_mag as i32);
+            ci_log!(ctx.get_logger_ref(), LogLevel::TRACE, "move_east by: {}", lat_mag as i32);
         }
 
         // Approximate vertical movement with partial NE/NW movement
         if dir.sin().abs() > MIN_FRACTIONAL_MOVE {
             let mut vert_mag: f32 = flt_mag * dir.sin();
-            debug_println!("Vert mag: {:.2}", vert_mag);
+            ci_log!(ctx.get_logger_ref(), LogLevel::TRACE, "Vert mag: {:.2}", vert_mag);
 
             // Adjust such that non-negligible fractional movements round to next larger integer
             if vert_mag.fract().abs() > MIN_FRACTIONAL_MOVE {
@@ -200,8 +204,8 @@ impl Coords {
             new_x += ne_mag;
             new_y += nw_mag;
             new_z -= ne_mag + nw_mag;
-            debug_println!("move_ne by: {}", ne_mag);
-            debug_println!("move_nw by: {}", nw_mag);
+            ci_log!(ctx.get_logger_ref(), LogLevel::TRACE, "move_ne by: {}", ne_mag);
+            ci_log!(ctx.get_logger_ref(), LogLevel::TRACE, "move_nw by: {}", nw_mag);
         }
 
         // Sanity check
@@ -211,11 +215,11 @@ impl Coords {
                 self.y = new_y;
                 self.z = new_z;
 
-                debug_println!("END coord.move_vec()");
+                ci_log!(ctx.get_logger_ref(), LogLevel::TRACE, "END coord.move_vec()");
                 Ok(())
             }
             Err(e)  => {
-                debug_println!("FAILED coord.move_vec()");
+                ci_log!(ctx.get_logger_ref(), LogLevel::TRACE, "FAILED coord.move_vec()");
                 Err(e)
             }
         }
