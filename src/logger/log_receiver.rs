@@ -63,6 +63,7 @@ impl LogReceiver {
 
         loop {
             if let Ok(log_tuple) = self.channel_rx.recv() {
+                // Set label color based on level
                 let log_color = match log_tuple.level {
                     LogLevel::TRACE     => "\x1b[030;105m",
                     LogLevel::DEBUG     => "\x1b[030;106m",
@@ -72,6 +73,7 @@ impl LogReceiver {
                     LogLevel::FATAL     => "\x1b[031;040m",
                 };
 
+                // Log message to console
                 println!(
                     "{timestamp}: {colored_level:<label_width$} {msg}",
                     timestamp       = Local::now().format("%Y-%b-%d %T%.3f"),
@@ -84,6 +86,8 @@ impl LogReceiver {
                     msg             = log_tuple.msg,
                     label_width     = PADDING_FOR_LEVEL_LABEL
                 );
+
+                //TODO: Log message to file
             }
         }
     }

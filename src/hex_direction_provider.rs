@@ -55,7 +55,7 @@ pub trait HexDirection:
 ///////////////////////////////////////////////////////////////////////////////
 
 //OPT: *STYLE* Derive the HexDirection trait if it has no required methods
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum HexSides {
     NORTHEAST,
     NORTH,
@@ -66,7 +66,7 @@ pub enum HexSides {
 }
 
 //OPT: *STYLE* Derive the HexDirection trait if it has no required methods
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum HexVertices {
     EAST,
     NORTHEAST,
@@ -81,6 +81,7 @@ pub enum HexVertices {
 //  Object Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
+#[derive(Debug)]
 pub struct HexDirectionProvider<T: HexDirection > {
     cur_direction:  T,
     idx:            usize
@@ -131,7 +132,7 @@ impl<T: HexDirection> Iterator for HexDirectionProvider<T> {
 impl<T: HexDirection> Distribution<HexDirectionProvider<T>> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> HexDirectionProvider<T> {
         let rand_num: f32 = rng.gen();
-        let rand_dir: T = T::from(rand_num);
+        let rand_dir: T = T::from(rand_num * (2.0*PI));
 
         HexDirectionProvider::new(rand_dir)
     }

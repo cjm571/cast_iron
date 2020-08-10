@@ -23,8 +23,6 @@ extern crate chrono;
 extern crate rand;
 extern crate uuid;
 
-//FIXME: probably need to figure out preludes... real annoying to have to include the full macro dependcy chain
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Macro Definitions

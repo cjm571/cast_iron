@@ -28,7 +28,8 @@ use std::{
 use crate::{
     ability::Ability,
     context::Context,
-    environment::coords::Coords
+    environment::coords::Coords,
+    logger::LoggerInstance,
 };
 
 use uuid::Uuid;
@@ -146,8 +147,8 @@ impl Actor {
     // Moves the object by vector
     //  _mag: number of "straightline" cells to move
     //  _dir: direction of movement in radians
-    pub fn move_vec(&mut self, mag: i32, dir: f32, ctx: &Context) {
-        self.pos.move_vec(mag, dir, ctx).unwrap();
+    pub fn move_vec(&mut self, mag: i32, dir: f32, logger: &LoggerInstance, ctx: &Context) {
+        self.pos.move_vec(mag, dir, logger, ctx).unwrap();
     }
 
     // Adds ability to actor's ability list

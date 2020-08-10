@@ -18,10 +18,15 @@ Purpose:
     This module will provide data structures and functions for that provide
     1st-party logging functionality for game events.
 
-\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+!!!USAGE NOTE!!!
+    This module is meant to be created once in a top level, and then cloned
+    in each submodule's constructors from a reference to the original.
 
-//FIXME: Features to implement:
-// Asynchronous writing - i.e., nonblocking logging
+    Due to the nature of Rusts' "multiple producer, single consumer" model
+    of inter-thread communication, all clones will send their messages to
+    the single reciever spawned by the original LoggerInstance.
+
+\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 use std::sync::mpsc::{
     self,
@@ -44,6 +49,7 @@ use self::log_receiver::LogReceiver;
 //  Named Constants
 ///////////////////////////////////////////////////////////////////////////////
 
+/// Padding required to align text after LogLevel label
 const PADDING_FOR_LEVEL_LABEL: usize = 24;
 
 

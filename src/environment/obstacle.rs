@@ -31,7 +31,12 @@ use crate::{
         },
         coords::Coords
     },
-    hex_direction_provider::*
+    hex_direction_provider::*,
+    logger::{
+        LoggerInstance,
+        LogLevel
+    },
+    ci_log
 };
 
 use uuid::Uuid;
@@ -43,7 +48,7 @@ use rand::Rng;
 ///////////////////////////////////////////////////////////////////////////////
 
 /// Odds of terminating an obstacle on a given iteration
-const OBSTACLE_TERMINATION_ODDS: f32 = 0.05;
+const OBSTACLE_TERMINATION_ODDS: f32 = 0.01;
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
@@ -67,12 +72,12 @@ impl Obstacle {
         Self {
             uid:        Uuid::new_v4(),
             all_coords: all_coords, //FIXME: Need to validate that coords are contiguous
-            element:    element
+            element:    element,
         }
     }
 
     /// Constructs a random, valid Obstacle within the constraints of the game Context
-    pub fn rand(ctx: &Context) -> Self {
+    pub fn rand(logger: &LoggerInstance, ctx: &Context) -> Self {
         // Set UID
         let uid = Uuid::new_v4();
 
@@ -81,38 +86,48 @@ impl Obstacle {
         let rand_origin_coords = Coords::rand(ctx);
         let mut all_coords = Vec::new();
         all_coords.push(rand_origin_coords);
+        ci_log!(logger, LogLevel::DEBUG, "Origin of rand obstacle: {}", all_coords.last().unwrap());
 
         // Up to Context's constraint, make a randomly-snaking string of Coords objects
         let mut last_coord = rand_origin_coords;
-        for _i in 0 .. ctx.get_max_obstacle_len() {
+        let mut direction_provider: HexDirectionProvider<HexSides>;
+        for i in 0 .. ctx.get_max_obstacle_len() {
             // Long, snaking objects are cooler, so we want a bit better odds than a coinflip
             let obstacle_termination_roll: f32 = rng.gen_range(0.0, 1.0);
             if obstacle_termination_roll < OBSTACLE_TERMINATION_ODDS {
+                ci_log!(logger, LogLevel::DEBUG, "Obstacle terminated after adding {} cells.", i);
                 break;
             }
 
-            // Pick a random direction and ensure it will not double back
-            let direction_provider: HexDirectionProvider<HexSides> = rng.gen();
+            // Re-roll the direction provider on each iteration
+            direction_provider = rng.gen();
+            ci_log!(logger, LogLevel::DEBUG, "Re-Rolled dir provider: {:?}", direction_provider);
 
             // It's possible the current coords are completely surrounded, so use this flag to know
             // if we should stop the obstacle here
             let mut found_good_coords = false;
 
             for direction in direction_provider {
+                // Re-roll the direction provider in case we have to 
+
                 //OPT: *DESIGN* a "try_move_vec" function would be much cleaner here
                 // Attempt a move and then check for a double-back
-                match last_coord.move_vec(1, direction.into(), ctx) {
+                ci_log!(logger, LogLevel::DEBUG, "Checking for empty adject coords to the {:?}.", direction);
+                match last_coord.move_vec(1, direction.into(), logger, ctx) {
                     Ok(()) => {},       // Move succeeded, do nothing
                     Err(_e) => continue // Move failed, try another direction
                 };
 
+                ci_log!(logger, LogLevel::DEBUG, "Coords to the {:?} ({}) are unoccupied! Checking for double-back.", direction, last_coord);
                 if all_coords.contains(&last_coord) {
                     // Double-back detected! Undo the move, rotate the direction and try again
-                    last_coord.move_vec(-1, direction.into(), ctx).unwrap();
+                    ci_log!(logger, LogLevel::DEBUG, "Double-back detected, trying the next direction.");
+                    last_coord.move_vec(-1, direction.into(), logger, ctx).unwrap();
                     continue;
                 }
 
                 // All checks passed! Set the success flag and break
+                ci_log!(logger, LogLevel::DEBUG, "Cell passed all checks!");
                 found_good_coords = true;
                 break;
             }
@@ -121,6 +136,7 @@ impl Obstacle {
             if found_good_coords {
                 let new_coord = last_coord;
                 all_coords.push(new_coord);
+                ci_log!(logger, LogLevel::DEBUG, "{:?} pushed onto end of obstacle coords chain.", all_coords.last().unwrap());
             }
             else
             {
@@ -128,6 +144,7 @@ impl Obstacle {
                 break;
             }
         }
+        ci_log!(logger, LogLevel::DEBUG, "Finished assembling obstacle coords.");
 
         // Finally, generate a random element
         let rand_elem: Element = rng.gen();
