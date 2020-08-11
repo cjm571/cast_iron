@@ -46,6 +46,7 @@ use std::{
 
 use crate::{
     context::Context,
+    hex_direction_provider::HexSides,
     logger::{
         LoggerInstance,
         LogLevel
@@ -211,6 +212,7 @@ impl Coords {
             ci_log!(logger, LogLevel::TRACE, "move_nw by: {}", nw_mag);
         }
 
+        //OPT: *DESIGN* This is a dumb way to sanity-check
         // Sanity check
         match Coords::new(new_x, new_y, new_z, ctx) {
             Ok(_coords) => {
@@ -228,6 +230,38 @@ impl Coords {
         }
     }
 
+    pub fn move_one(&mut self, dir: HexSides, logger: &LoggerInstance, ctx: &Context) -> Result<(), CoordsValidityError> {
+        ci_log!(logger, LogLevel::DEBUG, "Attempting to move item at {:?} 1 cell {:?}", self, dir);
+        
+        //OPT: *DESIGN* Do some smart math here probably
+        // Decompose movement into x, y, and z components
+        let (x_delta, y_delta, z_delta) = match dir {
+            HexSides::NORTHEAST =>  (1, 0, -1),
+            HexSides::NORTH     =>  (0, 1, -1),
+            HexSides::NORTHWEST =>  (-1, 1, 0),
+            HexSides::SOUTHWEST =>  (-1, 0, 1),
+            HexSides::SOUTH     =>  (0, -1, 1),
+            HexSides::SOUTHEAST =>  (1, -1, 0)
+        };
+
+        //OPT: *DESIGN* This is a dumb way to sanity-check
+        // Sanity check
+        match Coords::new(self.x + x_delta, self.y + y_delta, self.z + z_delta, ctx) {
+            Ok(_coords) => {
+                self.x = self.x + x_delta;
+                self.y = self.y + y_delta;
+                self.z = self.z + z_delta;
+
+                ci_log!(logger, LogLevel::DEBUG, "Item successfully moved 1 cell {:?} to {:?}", dir, self);
+                Ok(())
+            }
+            Err(e)  => {
+                ci_log!(logger, LogLevel::DEBUG, "Failed to move item at {:?} 1 cell {:?}", self, dir);
+                Err(e)
+            }
+        }
+
+    }
 
     ///
     // Accessor Methods

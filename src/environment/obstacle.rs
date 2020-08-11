@@ -21,6 +21,7 @@ Purpose:
     Note - a single obstacle may occupy more than one hex cell.
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+use std::f32::consts::PI;
 
 use crate::{
     context::Context,
@@ -48,7 +49,7 @@ use rand::Rng;
 ///////////////////////////////////////////////////////////////////////////////
 
 /// Odds of terminating an obstacle on a given iteration
-const OBSTACLE_TERMINATION_ODDS: f32 = 0.01;
+const OBSTACLE_TERMINATION_ODDS: f32 = 0.05;
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
@@ -113,7 +114,7 @@ impl Obstacle {
                 //OPT: *DESIGN* a "try_move_vec" function would be much cleaner here
                 // Attempt a move and then check for a double-back
                 ci_log!(logger, LogLevel::DEBUG, "Checking for empty adject coords to the {:?}.", direction);
-                match last_coord.move_vec(1, direction.into(), logger, ctx) {
+                match last_coord.move_one(direction, logger, ctx) {
                     Ok(()) => {},       // Move succeeded, do nothing
                     Err(_e) => continue // Move failed, try another direction
                 };
@@ -122,7 +123,8 @@ impl Obstacle {
                 if all_coords.contains(&last_coord) {
                     // Double-back detected! Undo the move, rotate the direction and try again
                     ci_log!(logger, LogLevel::DEBUG, "Double-back detected, trying the next direction.");
-                    last_coord.move_vec(-1, direction.into(), logger, ctx).unwrap();
+                    //FIXME: *STYLE* Hate this undo shit...
+                    last_coord.move_one(HexSides::from(f32::from(direction) + PI), logger, ctx).unwrap();
                     continue;
                 }
 

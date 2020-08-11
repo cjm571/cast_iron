@@ -27,7 +27,7 @@ Purpose:
 /* CastIron Game Defaults */
 const DEFAULT_GRID_RADIUS:          usize = 10;
 const DEFAULT_MAX_RESOURCE_RADIUS:  usize = 4;
-const DEFAULT_MAX_OBSTACLE_LENGTH:  usize = 5;
+const DEFAULT_MAX_OBSTACLE_LENGTH:  usize = 10;
 
 
 ///////////////////////////////////////////////////////////////////////////////

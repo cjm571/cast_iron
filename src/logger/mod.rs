@@ -191,7 +191,7 @@ macro_rules! ci_log {
         $logger_instance.log_msg(
             $log_level,
             format!(
-                "\x1b[030;100m{fn_name}() Line: {line}:\x1b[0m\n{content:>padded_content_width$}",
+                "\x1b[030;100m{fn_name}() Line {line}:\x1b[0m\n{content:>padded_content_width$}",
                 fn_name = fn_name,
                 line    = line!(),
                 content = content,

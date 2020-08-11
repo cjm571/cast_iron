@@ -81,7 +81,7 @@ pub enum HexVertices {
 //  Object Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
-#[derive(Debug)]
+#[derive(Default, Debug)]
 pub struct HexDirectionProvider<T: HexDirection > {
     cur_direction:  T,
     idx:            usize
@@ -203,6 +203,11 @@ impl Distribution<HexSides> for Standard {
         HexSides::from(rand_num)
     }
 }
+impl Default for HexSides {
+    fn default() -> Self {
+        Self::NORTHEAST
+    }
+}
 
 
 ///
@@ -268,5 +273,131 @@ impl Distribution<HexVertices> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> HexVertices {
         let rand_num: f32 = rng.gen();
         HexVertices::from(rand_num)
+    }
+}
+impl Default for HexVertices {
+    fn default() -> Self {
+        Self::EAST
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  Unit Tests
+///////////////////////////////////////////////////////////////////////////////
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn hex_sides() {
+        // Setup correct value arrays
+        let correct_enum: [HexSides;NUM_HEX_DIRECTIONS] = [
+            HexSides::NORTHEAST,
+            HexSides::NORTH,
+            HexSides::NORTHWEST,
+            HexSides::SOUTHWEST,
+            HexSides::SOUTH,
+            HexSides::SOUTHEAST
+        ];
+        let correct_usize: [usize;NUM_HEX_DIRECTIONS] = [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+        ];
+        let correct_f32: [f32;NUM_HEX_DIRECTIONS] = [
+            PI/6.0,
+            PI/2.0,
+            5.0*PI/6.0,
+            7.0*PI/6.0,
+            3.0*PI/2.0,
+            11.0*PI/6.0
+        ];
+
+
+        // Verify default
+        let mut side_provider: HexDirectionProvider<HexSides> = HexDirectionProvider::default();
+        assert_eq!(side_provider.cur_direction, correct_enum[0]);
+        assert_eq!(usize::from(side_provider.cur_direction), correct_usize[0]);
+        assert_eq!(f32::from(side_provider.cur_direction), correct_f32[0]);
+
+        let mut i = 1;
+        for hex_side in side_provider {
+            assert_eq!(hex_side, correct_enum[i]);
+            assert_eq!(usize::from(hex_side), correct_usize[i]);
+            assert_eq!(f32::from(hex_side), correct_f32[i]);
+            i = (i + 1) % NUM_HEX_DIRECTIONS;
+        }
+
+        // Verify we iterated through all 6 sides
+        assert_eq!(i, 1);
+
+        // Verify conversions
+        side_provider = HexDirectionProvider::new(HexSides::SOUTHEAST);
+        for j in 0..NUM_HEX_DIRECTIONS {
+            let side = side_provider.next().unwrap();
+            assert_eq!(HexSides::from(correct_usize[j]), side);
+            assert_eq!(HexSides::from(correct_f32[j]), side);
+        }
+    }
+    
+
+    #[test]
+    fn hex_vertices() {
+        // Setup correct value arrays
+        let correct_enum: [HexVertices;NUM_HEX_DIRECTIONS] = [
+            HexVertices::EAST,
+            HexVertices::NORTHEAST,
+            HexVertices::NORTHWEST,
+            HexVertices::WEST,
+            HexVertices::SOUTHWEST,
+            HexVertices::SOUTHEAST
+        ];
+        let correct_usize: [usize;NUM_HEX_DIRECTIONS] = [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+        ];
+        let correct_f32: [f32;NUM_HEX_DIRECTIONS] = [
+            0.0,
+            PI/3.0,
+            2.0*PI/3.0,
+            PI,
+            4.0*PI/3.0,
+            5.0*PI/3.0
+        ];
+
+
+        // Verify default
+        let mut side_provider: HexDirectionProvider<HexVertices> = HexDirectionProvider::default();
+        assert_eq!(side_provider.cur_direction, correct_enum[0]);
+        assert_eq!(usize::from(side_provider.cur_direction), correct_usize[0]);
+        assert_eq!(f32::from(side_provider.cur_direction), correct_f32[0]);
+
+        let mut i = 1;
+        for hex_side in side_provider {
+            assert_eq!(hex_side, correct_enum[i]);
+            assert_eq!(usize::from(hex_side), correct_usize[i]);
+            assert_eq!(f32::from(hex_side), correct_f32[i]);
+            i = (i + 1) % NUM_HEX_DIRECTIONS;
+        }
+
+        // Verify we iterated through all 6 sides
+        assert_eq!(i, 1);
+
+        // Verify conversions
+        side_provider = HexDirectionProvider::new(HexVertices::SOUTHEAST);
+        for j in 0..NUM_HEX_DIRECTIONS {
+            let side = side_provider.next().unwrap();
+            assert_eq!(HexVertices::from(correct_usize[j]), side);
+            assert_eq!(HexVertices::from(correct_f32[j]), side);
+        }
     }
 }
