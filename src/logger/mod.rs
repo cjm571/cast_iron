@@ -46,14 +46,6 @@ use self::log_receiver::LogReceiver;
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Named Constants
-///////////////////////////////////////////////////////////////////////////////
-
-/// Padding required to align text after LogLevel label
-const PADDING_FOR_LEVEL_LABEL: usize = 24;
-
-
-///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -70,8 +62,10 @@ pub enum LogLevel {
 
 /// Tuple struct containing log message and its log level
 pub struct LogTuple {
-    pub msg:    String,
-    pub level:  LogLevel
+    pub level:      LogLevel,
+    pub fn_name:    String,
+    pub line:       u32,
+    pub msg:        String,
 }
 
 #[derive(Clone)]
@@ -110,14 +104,21 @@ impl LoggerInstance {
 
     /* Utility Methods */
 
-    pub fn log_msg(&self, level: LogLevel, msg: String) -> Result<(), SendError<LogTuple>> {
+    pub fn log_msg(
+        &self,
+        level: LogLevel,
+        fn_name: String,
+        line: u32,
+        msg: String) -> Result<(), SendError<LogTuple>> {
         //OPT: *DESIGN* Proper filter masking instead of greater-than check
         // Check filter and send message if it passes
         if level as u8 >= self.filter {
-            // Package log message into tuple
+            // Package log message into tuple and send
             let log_tuple = LogTuple {
-                msg:    msg,
-                level:  level
+                level:      level,
+                fn_name:    fn_name,
+                line:       line,
+                msg:        msg,
             };
             self.sender.send_log(log_tuple)
         }
@@ -140,9 +141,12 @@ impl Default for LoggerInstance {
         // Create the channel between log sender and reciever
         let (sender, receiver) = mpsc::channel::<LogTuple>();
 
-        // Initialize receiver struct and spawn thread
+        // Initialize receiver struct, build and spawn thread
         let log_receiver = LogReceiver::new(receiver);
-        thread::spawn(move || log_receiver.main());
+        thread::Builder::new()
+            .name("log_receiver".to_owned())
+            .spawn(move || log_receiver.main())
+            .unwrap();
 
         // Initialize sender struct
         let log_sender = LogSender::new(sender);
@@ -173,11 +177,10 @@ impl From<LogLevel> for String {
 //  Macro Definitions
 ///////////////////////////////////////////////////////////////////////////////
 
+//OPT: *PERFORMANCE* Are the string type conversions expensive?
 #[macro_export]
 macro_rules! ci_log {
     ($logger_instance:expr, $log_level:expr, $( $fmt_args:expr ),*) => {
-        let padding_len = 38; // PADDING_FOR_LEVEL_LABEL + 13 to align message with label
-        
         let fn_name = {
             fn f() {}
             fn type_name_of<T>(_: T) -> &'static str {
@@ -186,17 +189,38 @@ macro_rules! ci_log {
             let name = type_name_of(f);
             &name[..name.len() - 3]
         };
-        let content: String = format!($( $fmt_args ),*);
 
-        $logger_instance.log_msg(
-            $log_level,
-            format!(
-                "\x1b[030;100m{fn_name}() Line {line}:\x1b[0m\n{content:>padded_content_width$}",
-                fn_name = fn_name,
-                line    = line!(),
-                content = content,
-                padded_content_width=content.len() + padding_len
-            )
-        ).unwrap();
+        let msg_content: String = format!($( $fmt_args ),*);
+
+        $logger_instance.log_msg($log_level, fn_name.to_owned(), line!(), msg_content).unwrap();
     };
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  Unit Tests
+///////////////////////////////////////////////////////////////////////////////
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::{thread, time};
+
+    #[test]
+    fn visual_verification() {
+        // Create a logger instance that will log all messsages
+        let logger = LoggerInstance::new(LogLevel::TRACE as u8);
+
+        ci_log!(&logger, LogLevel::TRACE,   "This is a TRACE message.");
+        ci_log!(&logger, LogLevel::DEBUG,   "This is a DEBUG message.");
+        ci_log!(&logger, LogLevel::INFO,    "This is an INFO message.");
+        ci_log!(&logger, LogLevel::WARNING, "This is a WARNING message.");
+        ci_log!(&logger, LogLevel::ERROR,   "This is an ERROR message.");
+        ci_log!(&logger, LogLevel::FATAL,   "This is a FATAL message.");
+
+        // Sleep for 5 seconds to allow other thread to do stuff
+        println!("Sleeping for 5s...");
+        thread::sleep(time::Duration::from_secs(5));
+        println!("Done sleeping!");
+    }
 }
