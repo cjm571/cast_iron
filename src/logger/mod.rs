@@ -50,7 +50,7 @@ use self::log_receiver::LogReceiver;
 ///////////////////////////////////////////////////////////////////////////////
 
 /// Denotes the level or severity of the log message.
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum LogLevel {
     TRACE   = 0x01,
     DEBUG   = 0x02,
@@ -61,11 +61,24 @@ pub enum LogLevel {
 }
 
 /// Tuple struct containing log message and its log level
-pub struct LogTuple {
+pub struct LogMsgTuple {
     pub level:      LogLevel,
     pub fn_name:    String,
     pub line:       u32,
     pub msg:        String,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum LogOutputType {
+    NEITHER = 0x0,
+    CONSOLE = 0x1,
+    FILE    = 0x2,
+    BOTH    = 0x3,
+}
+
+pub enum LoggerCmd {
+    LogMsg(LogMsgTuple),
+    SetOutput(LogOutputType)
 }
 
 #[derive(Clone)]
@@ -80,9 +93,11 @@ pub struct LoggerInstance {
 ///////////////////////////////////////////////////////////////////////////////
 
 impl LoggerInstance {
-    pub fn new(filter: u8) -> Self {
+    pub fn new(filter: u8, output_type: LogOutputType) -> Self {
         let mut logger_instance = LoggerInstance::default();
         logger_instance.set_filter(filter);
+        //OPT: *DESIGN* hmmmmm, this may not be a great idea - relies on inter-thread messaging to do initialization stuff
+        logger_instance.log_cmd(LoggerCmd::SetOutput(output_type)).unwrap();
 
         logger_instance
     }
@@ -109,23 +124,27 @@ impl LoggerInstance {
         level: LogLevel,
         fn_name: String,
         line: u32,
-        msg: String) -> Result<(), SendError<LogTuple>> {
+        msg: String) -> Result<(), SendError<LoggerCmd>> {
         //OPT: *DESIGN* Proper filter masking instead of greater-than check
         // Check filter and send message if it passes
         if level as u8 >= self.filter {
             // Package log message into tuple and send
-            let log_tuple = LogTuple {
+            let log_tuple = LogMsgTuple {
                 level:      level,
                 fn_name:    fn_name,
                 line:       line,
                 msg:        msg,
             };
-            self.sender.send_log(log_tuple)
+            self.sender.send_log(LoggerCmd::LogMsg(log_tuple))
         }
         else
         {
             Ok(())
         }
+    }
+
+    pub fn log_cmd(&self, cmd: LoggerCmd) -> Result<(), SendError<LoggerCmd>> {
+        self.sender.send_cmd(cmd)
     }
 }
 
@@ -138,18 +157,19 @@ impl LoggerInstance {
 
 impl Default for LoggerInstance {
     fn default() -> Self {
-        // Create the channel between log sender and reciever
-        let (sender, receiver) = mpsc::channel::<LogTuple>();
+        // Create the log messaging and control channel
+        let (logger_tx, logger_rx) = mpsc::channel::<LoggerCmd>();
 
         // Initialize receiver struct, build and spawn thread
-        let log_receiver = LogReceiver::new(receiver);
+        let mut log_receiver = LogReceiver::new(logger_rx, LogOutputType::FILE);
         thread::Builder::new()
             .name("log_receiver".to_owned())
             .spawn(move || log_receiver.main())
             .unwrap();
+        //OPT: *DESIGN* Should we block until the thread is fully initialized?
 
         // Initialize sender struct
-        let log_sender = LogSender::new(sender);
+        let log_sender = LogSender::new(logger_tx);
 
         Self {
             sender: log_sender,
@@ -161,16 +181,15 @@ impl Default for LoggerInstance {
 impl From<LogLevel> for String {
     fn from(src: LogLevel) -> Self {
         match src {
-            LogLevel::TRACE   => String::from("TRACE"),
-            LogLevel::DEBUG   => String::from("DEBUG"),
-            LogLevel::INFO    => String::from("INFO"),
-            LogLevel::WARNING => String::from("WARNING"),
-            LogLevel::ERROR   => String::from("ERROR"),
-            LogLevel::FATAL   => String::from("FATAL")
+            LogLevel::TRACE     => "TRACE".to_owned(),
+            LogLevel::DEBUG     => "DEBUG".to_owned(),
+            LogLevel::INFO      => "INFO".to_owned(),
+            LogLevel::WARNING   => "WARNING".to_owned(),
+            LogLevel::ERROR     => "ERROR".to_owned(),
+            LogLevel::FATAL     => "FATAL".to_owned(),
         }
     }
 }
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -208,8 +227,8 @@ mod tests {
 
     #[test]
     fn visual_verification() {
-        // Create a logger instance that will log all messsages
-        let logger = LoggerInstance::new(LogLevel::TRACE as u8);
+        // Create a logger instance that will log all messsages to both outputs
+        let logger = LoggerInstance::new(LogLevel::TRACE as u8, LogOutputType::BOTH);
 
         ci_log!(&logger, LogLevel::TRACE,   "This is a TRACE message.");
         ci_log!(&logger, LogLevel::DEBUG,   "This is a DEBUG message.");
@@ -218,7 +237,36 @@ mod tests {
         ci_log!(&logger, LogLevel::ERROR,   "This is an ERROR message.");
         ci_log!(&logger, LogLevel::FATAL,   "This is a FATAL message.");
 
-        // Sleep for 5 seconds to allow other thread to do stuff
+        // Sleep for 5 seconds to allow the reciever thread to do stuff
+        println!("Sleeping for 5s...");
+        thread::sleep(time::Duration::from_secs(5));
+        println!("Done sleeping!");
+    }
+
+    #[test]
+    fn output_type_cmd_test() {
+        // Create a logger instance that will log messsages to BOTH outputs
+        let logger = LoggerInstance::new(LogLevel::TRACE as u8, LogOutputType::BOTH);
+
+        ci_log!(&logger, LogLevel::TRACE, "This message appears in BOTH console and file.");
+        ci_log!(&logger, LogLevel::FATAL, "This message appears in BOTH console and file.");
+
+        // Log messages to CONSOLE only
+        logger.log_cmd(LoggerCmd::SetOutput(LogOutputType::CONSOLE)).unwrap();
+        ci_log!(&logger, LogLevel::TRACE, "This message appears in CONSOLE ONLY.");
+        ci_log!(&logger, LogLevel::FATAL, "This message appears in CONSOLE ONLY.");
+
+        // Log messages to FILE only
+        logger.log_cmd(LoggerCmd::SetOutput(LogOutputType::FILE)).unwrap();
+        ci_log!(&logger, LogLevel::TRACE, "This message appears in FILE ONLY.");
+        ci_log!(&logger, LogLevel::FATAL, "This message appears in FILE ONLY.");
+
+        // Log messages to NEITHER output
+        logger.log_cmd(LoggerCmd::SetOutput(LogOutputType::NEITHER)).unwrap();
+        ci_log!(&logger, LogLevel::TRACE, "This message appears in NEITHER ONLY.");
+        ci_log!(&logger, LogLevel::FATAL, "This message appears in NEITHER ONLY.");
+
+        // Sleep for 5 seconds to allow the reciever thread to do stuff
         println!("Sleeping for 5s...");
         thread::sleep(time::Duration::from_secs(5));
         println!("Done sleeping!");

@@ -21,12 +21,9 @@ Purpose:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-use std::sync::mpsc::{
-    Sender,
-    SendError
-};
+use std::sync::mpsc;
 
-use crate::logger::LogTuple;
+use crate::logger::LoggerCmd;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,7 +32,7 @@ use crate::logger::LogTuple;
 
 #[derive(Clone)]
 pub struct LogSender {
-    channel_tx: Sender<LogTuple>
+    logger_tx: mpsc::Sender<LoggerCmd>,
 }
 
 
@@ -45,14 +42,21 @@ pub struct LogSender {
 
 impl LogSender {
     /// Fully-qualified constructor
-    pub fn new(channel_tx: Sender<LogTuple>) -> Self {
+    pub fn new(logger_tx: mpsc::Sender<LoggerCmd>) -> Self {
         Self {
-            channel_tx: channel_tx
+            logger_tx: logger_tx,
         }
     }
 
-    pub fn send_log(&self, log_tuple: LogTuple) -> Result<(), SendError<LogTuple>> {
-        self.channel_tx.send(log_tuple)
+
+    /* Utility Methods */
+
+    pub fn send_log(&self, logger_cmd: LoggerCmd) -> Result<(), mpsc::SendError<LoggerCmd>> {
+        self.logger_tx.send(logger_cmd)
+    }
+
+    pub fn send_cmd(&self, cmd: LoggerCmd) -> Result<(), mpsc::SendError<LoggerCmd>> {
+        self.logger_tx.send(cmd)
     }
 }
 
