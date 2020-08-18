@@ -93,6 +93,7 @@ pub struct LoggerInstance {
 ///////////////////////////////////////////////////////////////////////////////
 
 impl LoggerInstance {
+    /// Fully-qualified constructor
     pub fn new(filter: u8, output_type: LogOutputType) -> Self {
         let mut logger_instance = LoggerInstance::default();
         logger_instance.set_filter(filter);
@@ -102,6 +103,14 @@ impl LoggerInstance {
         logger_instance
     }
 
+    /// Default constructor for debugging
+    pub fn debug_default() -> Self {
+        let mut logger_instance = LoggerInstance::default();
+        logger_instance.set_filter(LogLevel::DEBUG as u8);
+        logger_instance.log_cmd(LoggerCmd::SetOutput(LogOutputType::BOTH)).unwrap();
+
+        logger_instance
+    }
 
     /* Accessor Methods */
 

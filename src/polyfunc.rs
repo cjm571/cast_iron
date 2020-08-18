@@ -28,13 +28,7 @@ Purpose:
 
 use std::fmt;
 
-use rand::{
-    Rng,
-    distributions::{
-        Distribution,
-        Standard
-    }
-};
+use rand::Rng;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,7 +39,7 @@ use rand::{
 pub struct PolyFunc {
     magnitude:  usize,
     duration:   usize,
-    start_time: usize
+    start_time: usize,
 }
 
 
@@ -63,9 +57,45 @@ impl PolyFunc {
         }
     }
 
-    ///
-    // Utility Methods
-    ///
+    /// Construct a random polynomial function within the given constraints
+    pub fn rand_constrained(max_magnitude: usize, max_duration: usize, start_time: usize) -> Self {
+        // Generate random values within constraints
+        let mut rng = rand::thread_rng();
+
+        let rand_magnitude: usize = rng.gen_range(0, max_magnitude);
+        let rand_duration: usize = rng.gen_range(0, max_duration);
+        
+        Self {
+            magnitude:  rand_magnitude,
+            duration:   rand_duration,
+            start_time: start_time,
+        }
+    }
+
+
+    /* Accessor Methods */
+
+    pub fn get_duration(&self) -> usize {
+        self.duration
+    }
+
+    pub fn get_start_time(&self) -> usize {
+        self.start_time
+    }
+    
+
+    /* Mutator Methods */
+
+    pub fn set_duration(&mut self, duration: usize) {
+        self.duration = duration;
+    }
+
+    pub fn set_start_time(&mut self, start_time: usize) {
+        self.start_time = start_time;
+    }
+
+    
+    /* Utility Methods */
 
     // Solves the polynomial function at the given game time tick
     pub fn solve(&self, tick: usize) -> i32 {
@@ -82,21 +112,6 @@ impl PolyFunc {
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-//OPT: *DESIGN* May need to account for start time differently
-// Distribution trait provides randomnization for this module
-impl Distribution<PolyFunc> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PolyFunc {
-        let rand_mag: usize = rng.gen();
-        let rand_dur: usize = rng.gen();
-        let rand_start_time: usize = rng.gen();
-
-        PolyFunc {
-            magnitude:  rand_mag,
-            duration:   rand_dur,
-            start_time: rand_start_time
-        }
-    }
-}
 impl fmt::Debug for PolyFunc {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "PolyFunc: y = -({}/({}/2)^2) * (x - {}) * (x - ({}+{}))",

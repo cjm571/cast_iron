@@ -76,7 +76,7 @@ pub struct Coords {
     z: i32,
 }
 
-//FIXME: Needs more specificity - i.e, can be due to invalid composition, out of bounds, etc
+//OPT: *DESIGN* Needs more specificity - i.e, can be due to invalid composition, out of bounds, etc
 #[derive(Debug, Clone)]
 pub struct CoordsValidityError;
 

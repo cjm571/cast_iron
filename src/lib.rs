@@ -57,19 +57,6 @@ macro_rules! debug_println {
     ($( $args:expr ),*) => {}
 }
 
-#[cfg(debug_assertions)]
-#[macro_export]
-macro_rules! debug_exec {
-    ($expr:expr) => {
-        $expr
-    };
-}
-#[cfg(not(debug_assertions))]
-#[macro_export]
-macro_rules! debug_exec {
-    ($expr:expr) => {};
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Module Declarations

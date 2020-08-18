@@ -32,14 +32,7 @@ use crate::{
     polyfunc::PolyFunc
 };
 
-use rand::{
-    Rng,
-    distributions::{
-        Distribution,
-        Standard
-    }
-};
-
+use rand::Rng;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,22 +40,26 @@ use rand::{
 ///////////////////////////////////////////////////////////////////////////////
 
 // Intensity limits
-const NONE_INTENSITY_RANGE_MIN: i32     = 0;
-const NONE_INTENSITY_RANGE_MAX: i32     = 63;
-const MILD_INTENSITY_RANGE_MIN: i32     = 64;
-const MILD_INTENSITY_RANGE_MAX: i32     = 127;
-const STRONG_INTENSITY_RANGE_MIN: i32   = 128;
-const STRONG_INTENSITY_RANGE_MAX: i32   = 191;
-const SEVERE_INTENSITY_RANGE_MIN: i32   = 192;
-const SEVERE_INTENSITY_RANGE_MAX: i32   = 255;
-const MAX_INTENSITY: i32                = 256;
+const NONE_INTENSITY_RANGE_MIN:     i32 = 0;
+const NONE_INTENSITY_RANGE_MAX:     i32 = 63;
+const MILD_INTENSITY_RANGE_MIN:     i32 = 64;
+const MILD_INTENSITY_RANGE_MAX:     i32 = 127;
+const STRONG_INTENSITY_RANGE_MIN:   i32 = 128;
+const STRONG_INTENSITY_RANGE_MAX:   i32 = 191;
+const SEVERE_INTENSITY_RANGE_MIN:   i32 = 192;
+const SEVERE_INTENSITY_RANGE_MAX:   i32 = 255;
+const MAX_INTENSITY:                i32 = 256;
+
+//OPT: *DESIGN* This should be configurable
+/// Maximum duration for a weather effect
+const MAX_DURATION: usize = 100000;
 
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Weather {
     element:    Element,
     function:   PolyFunc,
@@ -83,11 +80,24 @@ pub enum Intensity {
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Weather {
-    /// Fully-qualified constructor
+    /// Fully-qualified constructor. You probably don't want to use this.
     pub fn new(element: Element, function: PolyFunc) -> Self {
         Self {
             element:    element,
             function:   function,
+        }
+    }
+
+    /// Generate a random weather effect at the given tick
+    pub fn rand_starting_at(tick: usize) -> Self {
+        let mut rng = rand::thread_rng();
+
+        let rand_elem: Element = rng.gen();
+        let rand_func = PolyFunc::rand_constrained(MAX_INTENSITY as usize, MAX_DURATION, tick);
+
+        Self {
+            element:    rand_elem,
+            function:   rand_func,
         }
     }
 
@@ -96,7 +106,7 @@ impl Weather {
     // Mutator Methods
     ///
 
-    // Changes the kind of weather to the given Element
+    /// Changes the kind of weather to the given Element
     pub fn change(&mut self, element: Element) {
         self.element = element;
     }
@@ -109,6 +119,10 @@ impl Weather {
     pub fn get_intensity(&self, tick: usize) -> Intensity {
         Intensity::from(self.function.solve(tick))
     }
+
+    pub fn get_duration(&self) -> usize {
+        self.function.get_duration()
+    }
 }
 
 
@@ -116,9 +130,7 @@ impl Weather {
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-///
-// Intensity
-///
+/* Intensity */
 impl Default for Intensity {
     fn default() -> Self {
         Self::None
@@ -137,21 +149,8 @@ impl From<i32> for Intensity {
     }
 }
 
-///
-// Weather
-///
-// Distribution trait provides randomnization for this module
-impl Distribution<Weather> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Weather {
-        let rand_elem: Element = rng.gen();
-        let rand_polyfunc: PolyFunc = rng.gen();
 
-        Weather {
-            element:  rand_elem,
-            function: rand_polyfunc
-        }
-    }
-}
+/* Weather */
 impl Elemental for Weather {
     fn get_element(&self) -> Element {
         self.element
