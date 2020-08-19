@@ -97,7 +97,7 @@ impl LoggerInstance {
     pub fn new(filter: u8, output_type: LogOutputType) -> Self {
         let mut logger_instance = LoggerInstance::default();
         logger_instance.set_filter(filter);
-        //OPT: *DESIGN* hmmmmm, this may not be a great idea - relies on inter-thread messaging to do initialization stuff
+        
         logger_instance.log_cmd(LoggerCmd::SetOutput(output_type)).unwrap();
 
         logger_instance
@@ -175,7 +175,6 @@ impl Default for LoggerInstance {
             .name("log_receiver".to_owned())
             .spawn(move || log_receiver.main())
             .unwrap();
-        //OPT: *DESIGN* Should we block until the thread is fully initialized?
 
         // Initialize sender struct
         let log_sender = LogSender::new(logger_tx);

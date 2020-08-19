@@ -58,7 +58,7 @@ use uuid::Uuid;
 //  Named Constants
 ///////////////////////////////////////////////////////////////////////////////
 
-//OPT: *DESIGN* Migrate this to an install folder eventually
+//FEAT: *DESIGN* Migrate this to an install folder eventually
 const FILENAME: &'static str = "castiron.dat";
 const ACTOR_HEADER: &'static str = "_ACTORS_";
 const ABIL_HEADER: &'static str = "_ABILITIES_";

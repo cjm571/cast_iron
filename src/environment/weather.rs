@@ -50,7 +50,7 @@ const SEVERE_INTENSITY_RANGE_MIN:   i32 = 192;
 const SEVERE_INTENSITY_RANGE_MAX:   i32 = 255;
 const MAX_INTENSITY:                i32 = 256;
 
-//OPT: *DESIGN* This should be configurable
+//OPT: *DESIGN* This should be configurable, and also need to consider if we're tied to framerate
 /// Maximum duration for a weather effect
 const MAX_DURATION: usize = 100000;
 
