@@ -50,11 +50,7 @@ pub struct PolyFunc {
 impl PolyFunc {
     /// Fully-qualified constructor
     pub fn new(magnitude: usize, duration: usize, start_time: usize) -> Self {
-        Self {
-            magnitude:  magnitude,
-            duration:   duration,
-            start_time: start_time
-        }
+        Self {magnitude, duration, start_time}
     }
 
     /// Construct a random polynomial function within the given constraints
@@ -62,24 +58,20 @@ impl PolyFunc {
         // Generate random values within constraints
         let mut rng = rand::thread_rng();
 
-        let rand_magnitude: usize = rng.gen_range(0, max_magnitude);
-        let rand_duration: usize = rng.gen_range(0, max_duration);
+        let magnitude: usize = rng.gen_range(0, max_magnitude);
+        let duration: usize = rng.gen_range(0, max_duration);
         
-        Self {
-            magnitude:  rand_magnitude,
-            duration:   rand_duration,
-            start_time: start_time,
-        }
+        Self {magnitude, duration, start_time}
     }
 
 
     /* Accessor Methods */
 
-    pub fn get_duration(&self) -> usize {
+    pub fn duration(&self) -> usize {
         self.duration
     }
 
-    pub fn get_start_time(&self) -> usize {
+    pub fn start_time(&self) -> usize {
         self.start_time
     }
     

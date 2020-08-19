@@ -114,7 +114,7 @@ impl<T: HexDirection> Iterator for HexDirectionProvider<T> {
     fn next(&mut self) -> Option<Self::Item> {
         // Increment direction by PI/3 to get the next side/vertex, and iteration idx by 1
         let next_theta: f32 = self.cur_direction.into() + PI/3.0;
-        self.idx = self.idx + 1;
+        self.idx += 1;
 
         // Convert the new direction back into a side/vertex
         self.cur_direction = T::from(next_theta);

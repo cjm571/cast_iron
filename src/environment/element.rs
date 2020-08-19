@@ -56,7 +56,7 @@ pub enum Element {
 ///////////////////////////////////////////////////////////////////////////////
 
 pub trait Elemental {
-    fn get_element(&self) -> Element;
+    fn element(&self) -> Element;
 } 
 
 

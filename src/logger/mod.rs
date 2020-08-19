@@ -24,7 +24,7 @@ Purpose:
 
     Due to the nature of Rusts' "multiple producer, single consumer" model
     of inter-thread communication, all clones will send their messages to
-    the single reciever spawned by the original LoggerInstance.
+    the single reciever spawned by the original Instance.
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -51,38 +51,38 @@ use self::log_receiver::LogReceiver;
 
 /// Denotes the level or severity of the log message.
 #[derive(Debug, Copy, Clone)]
-pub enum LogLevel {
-    TRACE   = 0x01,
-    DEBUG   = 0x02,
-    INFO    = 0x04,
-    WARNING = 0x08,
-    ERROR   = 0x10,
-    FATAL   = 0x20,
+pub enum FilterLevel {
+    Trace   = 0x01,
+    Debug   = 0x02,
+    Info    = 0x04,
+    Warning = 0x08,
+    Error   = 0x10,
+    Fatal   = 0x20,
 }
 
 /// Tuple struct containing log message and its log level
-pub struct LogMsgTuple {
-    pub level:      LogLevel,
+pub struct MsgTuple {
+    pub level:      FilterLevel,
     pub fn_name:    String,
     pub line:       u32,
     pub msg:        String,
 }
 
 #[derive(Debug, Copy, Clone)]
-pub enum LogOutputType {
-    NEITHER = 0x0,
-    CONSOLE = 0x1,
-    FILE    = 0x2,
-    BOTH    = 0x3,
+pub enum OutputType {
+    Neither = 0x0,
+    Console = 0x1,
+    File    = 0x2,
+    Both    = 0x3,
 }
 
-pub enum LoggerCmd {
-    LogMsg(LogMsgTuple),
-    SetOutput(LogOutputType)
+pub enum Command {
+    LogMsg(MsgTuple),
+    SetOutput(OutputType)
 }
 
 #[derive(Clone)]
-pub struct LoggerInstance {
+pub struct Instance {
     sender: LogSender,
     filter: u8
 }
@@ -92,29 +92,29 @@ pub struct LoggerInstance {
 //  Object Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
-impl LoggerInstance {
+impl Instance {
     /// Fully-qualified constructor
-    pub fn new(filter: u8, output_type: LogOutputType) -> Self {
-        let mut logger_instance = LoggerInstance::default();
+    pub fn new(filter: u8, output_type: OutputType) -> Self {
+        let mut logger_instance = Instance::default();
         logger_instance.set_filter(filter);
         
-        logger_instance.log_cmd(LoggerCmd::SetOutput(output_type)).unwrap();
+        logger_instance.log_cmd(Command::SetOutput(output_type)).unwrap();
 
         logger_instance
     }
 
     /// Default constructor for debugging
     pub fn debug_default() -> Self {
-        let mut logger_instance = LoggerInstance::default();
-        logger_instance.set_filter(LogLevel::DEBUG as u8);
-        logger_instance.log_cmd(LoggerCmd::SetOutput(LogOutputType::BOTH)).unwrap();
+        let mut logger_instance = Instance::default();
+        logger_instance.set_filter(FilterLevel::Debug as u8);
+        logger_instance.log_cmd(Command::SetOutput(OutputType::Both)).unwrap();
 
         logger_instance
     }
 
     /* Accessor Methods */
 
-    pub fn get_filter(&self) -> u8 {
+    pub fn filter(&self) -> u8 {
         self.filter
     }
 
@@ -130,29 +130,27 @@ impl LoggerInstance {
 
     pub fn log_msg(
         &self,
-        level: LogLevel,
+        level: FilterLevel,
         fn_name: String,
         line: u32,
-        msg: String) -> Result<(), SendError<LoggerCmd>> {
+        msg: String) -> Result<(), SendError<Command>> {
         //OPT: *DESIGN* Proper filter masking instead of greater-than check
         // Check filter and send message if it passes
         if level as u8 >= self.filter {
             // Package log message into tuple and send
-            let log_tuple = LogMsgTuple {
-                level:      level,
-                fn_name:    fn_name,
-                line:       line,
-                msg:        msg,
+            let log_tuple = MsgTuple {
+                level,
+                fn_name,
+                line,
+                msg,
             };
-            self.sender.send_log(LoggerCmd::LogMsg(log_tuple))
-        }
-        else
-        {
+            self.sender.send_log(Command::LogMsg(log_tuple))
+        } else {
             Ok(())
         }
     }
 
-    pub fn log_cmd(&self, cmd: LoggerCmd) -> Result<(), SendError<LoggerCmd>> {
+    pub fn log_cmd(&self, cmd: Command) -> Result<(), SendError<Command>> {
         self.sender.send_cmd(cmd)
     }
 }
@@ -164,13 +162,13 @@ impl LoggerInstance {
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-impl Default for LoggerInstance {
+impl Default for Instance {
     fn default() -> Self {
         // Create the log messaging and control channel
-        let (logger_tx, logger_rx) = mpsc::channel::<LoggerCmd>();
+        let (logger_tx, logger_rx) = mpsc::channel::<Command>();
 
         // Initialize receiver struct, build and spawn thread
-        let mut log_receiver = LogReceiver::new(logger_rx, LogOutputType::FILE);
+        let mut log_receiver = LogReceiver::new(logger_rx, OutputType::File);
         thread::Builder::new()
             .name("log_receiver".to_owned())
             .spawn(move || log_receiver.main())
@@ -181,20 +179,20 @@ impl Default for LoggerInstance {
 
         Self {
             sender: log_sender,
-            filter: LogLevel::INFO as u8
+            filter: FilterLevel::Info as u8
         }
     }
 }
 
-impl From<LogLevel> for String {
-    fn from(src: LogLevel) -> Self {
+impl From<FilterLevel> for String {
+    fn from(src: FilterLevel) -> Self {
         match src {
-            LogLevel::TRACE     => "TRACE".to_owned(),
-            LogLevel::DEBUG     => "DEBUG".to_owned(),
-            LogLevel::INFO      => "INFO".to_owned(),
-            LogLevel::WARNING   => "WARNING".to_owned(),
-            LogLevel::ERROR     => "ERROR".to_owned(),
-            LogLevel::FATAL     => "FATAL".to_owned(),
+            FilterLevel::Trace     => "TRACE".to_owned(),
+            FilterLevel::Debug     => "DEBUG".to_owned(),
+            FilterLevel::Info      => "INFO".to_owned(),
+            FilterLevel::Warning   => "WARNING".to_owned(),
+            FilterLevel::Error     => "ERROR".to_owned(),
+            FilterLevel::Fatal     => "FATAL".to_owned(),
         }
     }
 }
@@ -235,15 +233,15 @@ mod tests {
 
     #[test]
     fn visual_verification() {
-        // Create a logger instance that will log all messsages to both outputs
-        let logger = LoggerInstance::new(LogLevel::TRACE as u8, LogOutputType::BOTH);
+        // Create a logger instance that will log all messsages to Both outputs
+        let logger = Instance::new(FilterLevel::Trace as u8, OutputType::Both);
 
-        ci_log!(&logger, LogLevel::TRACE,   "This is a TRACE message.");
-        ci_log!(&logger, LogLevel::DEBUG,   "This is a DEBUG message.");
-        ci_log!(&logger, LogLevel::INFO,    "This is an INFO message.");
-        ci_log!(&logger, LogLevel::WARNING, "This is a WARNING message.");
-        ci_log!(&logger, LogLevel::ERROR,   "This is an ERROR message.");
-        ci_log!(&logger, LogLevel::FATAL,   "This is a FATAL message.");
+        ci_log!(&logger, FilterLevel::Trace,   "This is a TRACE message.");
+        ci_log!(&logger, FilterLevel::Debug,   "This is a DEBUG message.");
+        ci_log!(&logger, FilterLevel::Info,    "This is an INFO message.");
+        ci_log!(&logger, FilterLevel::Warning, "This is a WARNING message.");
+        ci_log!(&logger, FilterLevel::Error,   "This is an ERROR message.");
+        ci_log!(&logger, FilterLevel::Fatal,   "This is a FATAL message.");
 
         // Sleep for 5 seconds to allow the reciever thread to do stuff
         println!("Sleeping for 5s...");
@@ -254,25 +252,25 @@ mod tests {
     #[test]
     fn output_type_cmd_test() {
         // Create a logger instance that will log messsages to BOTH outputs
-        let logger = LoggerInstance::new(LogLevel::TRACE as u8, LogOutputType::BOTH);
+        let logger = Instance::new(FilterLevel::Trace as u8, OutputType::Both);
 
-        ci_log!(&logger, LogLevel::TRACE, "This message appears in BOTH console and file.");
-        ci_log!(&logger, LogLevel::FATAL, "This message appears in BOTH console and file.");
+        ci_log!(&logger, FilterLevel::Trace, "This message appears in BOTH console and file.");
+        ci_log!(&logger, FilterLevel::Fatal, "This message appears in BOTH console and file.");
 
         // Log messages to CONSOLE only
-        logger.log_cmd(LoggerCmd::SetOutput(LogOutputType::CONSOLE)).unwrap();
-        ci_log!(&logger, LogLevel::TRACE, "This message appears in CONSOLE ONLY.");
-        ci_log!(&logger, LogLevel::FATAL, "This message appears in CONSOLE ONLY.");
+        logger.log_cmd(Command::SetOutput(OutputType::Console)).unwrap();
+        ci_log!(&logger, FilterLevel::Trace, "This message appears in CONSOLE ONLY.");
+        ci_log!(&logger, FilterLevel::Fatal, "This message appears in CONSOLE ONLY.");
 
         // Log messages to FILE only
-        logger.log_cmd(LoggerCmd::SetOutput(LogOutputType::FILE)).unwrap();
-        ci_log!(&logger, LogLevel::TRACE, "This message appears in FILE ONLY.");
-        ci_log!(&logger, LogLevel::FATAL, "This message appears in FILE ONLY.");
+        logger.log_cmd(Command::SetOutput(OutputType::File)).unwrap();
+        ci_log!(&logger, FilterLevel::Trace, "This message appears in FILE ONLY.");
+        ci_log!(&logger, FilterLevel::Fatal, "This message appears in FILE ONLY.");
 
         // Log messages to NEITHER output
-        logger.log_cmd(LoggerCmd::SetOutput(LogOutputType::NEITHER)).unwrap();
-        ci_log!(&logger, LogLevel::TRACE, "This message appears in NEITHER ONLY.");
-        ci_log!(&logger, LogLevel::FATAL, "This message appears in NEITHER ONLY.");
+        logger.log_cmd(Command::SetOutput(OutputType::Neither)).unwrap();
+        ci_log!(&logger, FilterLevel::Trace, "This message appears in NEITHER ONLY.");
+        ci_log!(&logger, FilterLevel::Fatal, "This message appears in NEITHER ONLY.");
 
         // Sleep for 5 seconds to allow the reciever thread to do stuff
         println!("Sleeping for 5s...");

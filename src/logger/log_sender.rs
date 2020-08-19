@@ -23,7 +23,7 @@ Purpose:
 
 use std::sync::mpsc;
 
-use crate::logger::LoggerCmd;
+use crate::logger;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ use crate::logger::LoggerCmd;
 
 #[derive(Clone)]
 pub struct LogSender {
-    logger_tx: mpsc::Sender<LoggerCmd>,
+    logger_tx: mpsc::Sender<logger::Command>,
 }
 
 
@@ -42,20 +42,18 @@ pub struct LogSender {
 
 impl LogSender {
     /// Fully-qualified constructor
-    pub fn new(logger_tx: mpsc::Sender<LoggerCmd>) -> Self {
-        Self {
-            logger_tx: logger_tx,
-        }
+    pub fn new(logger_tx: mpsc::Sender<logger::Command>) -> Self {
+        Self {logger_tx}
     }
 
 
     /* Utility Methods */
 
-    pub fn send_log(&self, logger_cmd: LoggerCmd) -> Result<(), mpsc::SendError<LoggerCmd>> {
+    pub fn send_log(&self, logger_cmd: logger::Command) -> Result<(), mpsc::SendError<logger::Command>> {
         self.logger_tx.send(logger_cmd)
     }
 
-    pub fn send_cmd(&self, cmd: LoggerCmd) -> Result<(), mpsc::SendError<LoggerCmd>> {
+    pub fn send_cmd(&self, cmd: logger::Command) -> Result<(), mpsc::SendError<logger::Command>> {
         self.logger_tx.send(cmd)
     }
 }

@@ -59,10 +59,10 @@ use uuid::Uuid;
 ///////////////////////////////////////////////////////////////////////////////
 
 //FEAT: *DESIGN* Migrate this to an install folder eventually
-const FILENAME: &'static str = "castiron.dat";
-const ACTOR_HEADER: &'static str = "_ACTORS_";
-const ABIL_HEADER: &'static str = "_ABILITIES_";
-const TEMPLATE: &'static str = "_ACTORS_\n_ABILITIES_";
+const FILENAME:     &str = "castiron.dat";
+const ACTOR_HEADER: &str = "_ACTORS_";
+const ABIL_HEADER:  &str = "_ABILITIES_";
+const TEMPLATE:     &str = "_ACTORS_\n_ABILITIES_";
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -118,14 +118,14 @@ pub fn read_actor (_actor: &Actor) -> Result<String, IoError> {
             return Err(IoError::new(ErrorKind::NotFound, "Actor data not found"))
         }
 
-        if data_line.contains(_actor.get_uid().to_string().as_str()) {
+        if data_line.contains(_actor.uid().to_string().as_str()) {
             println!("-- Actor UID found at line {}", line_num);
             return Ok(data_line)
         }
 
         // Clear line buffer and increment in prep for next line
         data_line.clear();
-        line_num = line_num + 1;
+        line_num += 1;
     }
 }
 
@@ -153,7 +153,7 @@ pub fn read_actors (ctx: &Context) -> Result<HashMap<Uuid, Actor>, IoError> {
         // Skip header
         if data_line.contains(ACTOR_HEADER) {
             data_line.clear();
-            line_num = line_num + 1;
+            line_num += 1;
             continue;
         }
 
@@ -166,11 +166,11 @@ pub fn read_actors (ctx: &Context) -> Result<HashMap<Uuid, Actor>, IoError> {
         let actor = Actor::from_string(&data_line, ctx);
 
         // add actor to hashmap
-        actor_map.insert(actor.get_uid(), actor);
+        actor_map.insert(actor.uid(), actor);
 
         // Clear line buffer and increment in prep for next line
         data_line.clear();
-        line_num = line_num + 1;
+        line_num += 1;
     }
 
     Ok(actor_map)
@@ -202,7 +202,7 @@ pub fn write_actor(actor: &Actor) -> Result<(), IoError> {
         }
 
         // Found actor, overwrite existing line
-        if data_lines[i].starts_with(actor.get_uid().to_string().as_str()) {
+        if data_lines[i].starts_with(actor.uid().to_string().as_str()) {
             data_lines[i] = actor.to_string();
             break;
         }
@@ -211,11 +211,11 @@ pub fn write_actor(actor: &Actor) -> Result<(), IoError> {
     // Push the data lines back together
     let mut upd_data_buf = String::new();
     for i in 0 .. data_lines.len() {
-        upd_data_buf = upd_data_buf + data_lines[i].as_str();
+        upd_data_buf += data_lines[i].as_str();
 
         // Avoid adding a trailing \n
         if i != (data_lines.len() - 1) {
-            upd_data_buf = upd_data_buf + "\n";
+            upd_data_buf += "\n";
         }
     }
 
@@ -244,7 +244,7 @@ pub fn write_ability(abil: &Ability) -> Result<(), IoError> {
     for i in 0 .. data_lines.len() {
 
         // Found ability, overwrite existing line
-        if data_lines[i].starts_with(abil.get_uid().to_string().as_str()) {
+        if data_lines[i].starts_with(abil.uid().to_string().as_str()) {
             data_lines[i] = abil.to_string();
             break;
         }
@@ -259,11 +259,11 @@ pub fn write_ability(abil: &Ability) -> Result<(), IoError> {
     // Push the data lines back together
     let mut upd_data_buf = String::new();
     for i in 0 .. data_lines.len() {
-        upd_data_buf = upd_data_buf + data_lines[i].as_str();
+        upd_data_buf += data_lines[i].as_str();
 
         // Avoid adding a trailing \n
         if i != (data_lines.len() - 1) {
-            upd_data_buf = upd_data_buf + "\n";
+            upd_data_buf += "\n";
         }
     }
 
@@ -400,7 +400,7 @@ mod tests {
         let player_two = Actor::new_name_only("John Public");
 
         write_actor(&player_one).unwrap();
-        for abil in player_one.get_abilities() {
+        for abil in player_one.abilities() {
             write_ability(abil).unwrap();
         }
 
@@ -422,7 +422,7 @@ mod tests {
         let player_two = Actor::new_name_only("John Public");
 
         write_actor(&player_one).unwrap();
-        for abil in player_one.get_abilities() {
+        for abil in player_one.abilities() {
             write_ability(abil).unwrap();
         }
 
@@ -432,8 +432,8 @@ mod tests {
         let actor_map = read_actors(&test_ctx).unwrap();
 
         // Assert that the data is the same
-        let retrieved_p1 = actor_map.get(&player_one.get_uid()).unwrap();
-        let retrieved_p2 = actor_map.get(&player_two.get_uid()).unwrap();
+        let retrieved_p1 = actor_map.get(&player_one.uid()).unwrap();
+        let retrieved_p2 = actor_map.get(&player_two.uid()).unwrap();
 
         assert_eq!(player_one.to_string(), retrieved_p1.to_string());
         assert_eq!(player_two.to_string(), retrieved_p2.to_string());

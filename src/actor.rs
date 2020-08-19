@@ -29,7 +29,7 @@ use crate::{
     ability::Ability,
     context::Context,
     environment::coords::Coords,
-    logger::LoggerInstance,
+    logger,
 };
 
 use uuid::Uuid;
@@ -61,11 +61,11 @@ impl Actor {
         abilities:      Vec<Ability>,
     ) -> Self {
         Self {
-            uid:            Uuid::new_v4(),
-            name:           name.to_string(),
-            pos:            pos,
-            cur_fatigue:    cur_fatigue,
-            abilities:      abilities,
+            uid:    Uuid::new_v4(),
+            name:   name.to_string(),
+            pos,
+            cur_fatigue,
+            abilities,
         }
     }
 
@@ -80,7 +80,7 @@ impl Actor {
         }
     }
 
-    pub fn from_string(src: &String, ctx: &Context) -> Self {
+    pub fn from_string(src: &str, ctx: &Context) -> Self {
         // Tokenize on "|" to separate actor from abil list
         let split_vec: Vec<&str> = src.split('|').collect();
 
@@ -119,17 +119,17 @@ impl Actor {
             let abil_str_vec: Vec<&str> = abil_str.split(';').collect();
 
             // Iterate through abil list, creating ability objects and dropping them in the vector
-            for i in 0 .. abil_str_vec.len() {
-                abil_vec.push(Ability::from(&abil_str_vec[i].to_string()));
+            for abil_str in abil_str_vec {
+                abil_vec.push(Ability::from(&abil_str.to_string()));
             }
         }
 
         Self {
-            uid:            uid,
-            name:           name.to_string(),
-            pos:            pos,
-            cur_fatigue:    cur_fatigue,
-            abilities:      abil_vec,
+            uid,
+            name:       name.to_string(),
+            pos,
+            cur_fatigue,
+            abilities:  abil_vec,
         }
     }
 
@@ -147,7 +147,7 @@ impl Actor {
     // Moves the object by vector
     //  _mag: number of "straightline" cells to move
     //  _dir: direction of movement in radians
-    pub fn move_vec(&mut self, mag: i32, dir: f32, logger: &LoggerInstance, ctx: &Context) {
+    pub fn move_vec(&mut self, mag: i32, dir: f32, logger: &logger::Instance, ctx: &Context) {
         self.pos.move_vec(mag, dir, logger, ctx).unwrap();
     }
 
@@ -162,27 +162,27 @@ impl Actor {
     ///
 
     // Returns a reference for the actor's unique ID
-    pub fn get_uid(&self) -> Uuid {
+    pub fn uid(&self) -> Uuid {
         self.uid
     }
 
     // Returns a reference for the actor's name
-    pub fn get_name(&self) -> &String {
+    pub fn name(&self) -> &String {
         &self.name
     }
 
     // Returns a reference for the actor's position
-    pub fn get_pos(&self) -> &Coords {
+    pub fn pos(&self) -> &Coords {
         &self.pos
     }
 
     // Returns a reference for the actor's current fatigue
-    pub fn get_cur_fatigue(&self) -> &u8 {
+    pub fn cur_fatigue(&self) -> &u8 {
         &self.cur_fatigue
     }
 
     // Returns a refernce to the vector of the actor's abilities
-    pub fn get_abilities(&self) -> &Vec<Ability>{
+    pub fn abilities(&self) -> &Vec<Ability>{
         &self.abilities
     }
 }

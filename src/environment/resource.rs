@@ -75,11 +75,11 @@ impl Resource {
     /// Fully-qualified constructor
     pub fn new(element: Element, state: State, coords: Coords, radius: usize) -> Self {
         Self {
-            uid:        Uuid::new_v4(),
-            element:    element,
-            state:      state,
-            coords:     coords,
-            radius:     radius,
+            uid: Uuid::new_v4(),
+            element,
+            state,
+            coords,
+            radius,
         }
     }
 
@@ -92,21 +92,21 @@ impl Resource {
         let mut rng = rand::thread_rng();
 
         // Generate random properties
-        let rand_elem: Element = rng.gen();
-        let rand_state: State = rng.gen();
+        let element: Element = rng.gen();
+        let state: State = rng.gen();
 
         // Constrain max resource radius to 1/4 of the total grid
-        let rand_radius: usize = rng.gen_range(0, ctx.get_max_resource_radius());
+        let radius: usize = rng.gen_range(0, ctx.max_resource_radius());
 
         // Generate a random Coords object that won't spill outside the grid
-        let rand_center_coords = Coords::rand_constrained(ctx, rand_radius).unwrap();
+        let coords = Coords::rand_constrained(ctx, radius).unwrap();
 
         Self {
-            uid:        uid,
-            element:    rand_elem,
-            state:      rand_state,
-            coords:     rand_center_coords,
-            radius:     rand_radius
+            uid,
+            element,
+            state,
+            coords,
+            radius,
         }
     }
 
@@ -153,12 +153,12 @@ impl Resource {
 
     // Increases the radius of the resource
     pub fn intensify(&mut self, mag: usize) {
-        self.radius = self.radius + mag;
+        self.radius += mag;
     }
 
     // Decreases the radius of the resource
     pub fn weaken(&mut self, mag: usize) {
-        self.radius = self.radius - mag;
+        self.radius -= mag;
     }
 
 
@@ -166,19 +166,19 @@ impl Resource {
     // Accessor Methods
     ///
 
-    pub fn get_uid(&self) -> Uuid {
+    pub fn uid(&self) -> Uuid {
         self.uid
     }
 
-    pub fn get_state(&self) -> State {
+    pub fn state(&self) -> State {
         self.state
     }
 
-    pub fn get_coords(&self) -> &Coords {
+    pub fn coords(&self) -> &Coords {
         &self.coords
     }
 
-    pub fn get_radius(&self) -> usize {
+    pub fn radius(&self) -> usize {
         self.radius
     }
 }
@@ -203,7 +203,7 @@ impl Default for Resource {
     }
 }
 impl Elemental for Resource {
-    fn get_element(&self) -> Element {
+    fn element(&self) -> Element {
         self.element
     }
 }

@@ -52,7 +52,7 @@ const MAX_INTENSITY:                i32 = 256;
 
 //OPT: *DESIGN* This should be configurable, and also need to consider if we're tied to framerate
 /// Maximum duration for a weather effect
-const MAX_DURATION: usize = 100000;
+const MAX_DURATION: usize = 100_000;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,23 +82,17 @@ pub enum Intensity {
 impl Weather {
     /// Fully-qualified constructor. You probably don't want to use this.
     pub fn new(element: Element, function: PolyFunc) -> Self {
-        Self {
-            element:    element,
-            function:   function,
-        }
+        Self {element, function}
     }
 
     /// Generate a random weather effect at the given tick
     pub fn rand_starting_at(tick: usize) -> Self {
         let mut rng = rand::thread_rng();
 
-        let rand_elem: Element = rng.gen();
-        let rand_func = PolyFunc::rand_constrained(MAX_INTENSITY as usize, MAX_DURATION, tick);
+        let element: Element = rng.gen();
+        let function = PolyFunc::rand_constrained(MAX_INTENSITY as usize, MAX_DURATION, tick);
 
-        Self {
-            element:    rand_elem,
-            function:   rand_func,
-        }
+        Self {element, function}
     }
 
 
@@ -116,12 +110,12 @@ impl Weather {
     // Accessor Methods
     ///
 
-    pub fn get_intensity(&self, tick: usize) -> Intensity {
+    pub fn intensity(&self, tick: usize) -> Intensity {
         Intensity::from(self.function.solve(tick))
     }
 
-    pub fn get_duration(&self) -> usize {
-        self.function.get_duration()
+    pub fn duration(&self) -> usize {
+        self.function.duration()
     }
 }
 
@@ -152,7 +146,7 @@ impl From<i32> for Intensity {
 
 /* Weather */
 impl Elemental for Weather {
-    fn get_element(&self) -> Element {
+    fn element(&self) -> Element {
         self.element
     }
 }

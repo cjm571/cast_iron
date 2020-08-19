@@ -107,11 +107,11 @@ impl Aspects {
         school:     School
     ) -> Self {
         Self {
-            aesthetics: aesthetics,
-            element:    element,
-            method:     method,
-            morality:   morality,
-            school:     school
+            aesthetics,
+            element,
+            method,
+            morality,
+            school
         }
     }
 }

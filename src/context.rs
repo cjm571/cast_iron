@@ -50,9 +50,9 @@ impl Context {
     /// Fully-qualified constructor
     pub fn new(grid_radius: usize, max_resource_radius: usize, max_obstacle_len: usize) -> Self {
         Self {
-            grid_radius:            grid_radius,
-            max_resource_radius:    max_resource_radius,
-            max_obstacle_len:       max_obstacle_len,
+            grid_radius,
+            max_resource_radius,
+            max_obstacle_len,
         }
     }
 
@@ -61,15 +61,15 @@ impl Context {
     // Accessor Methods
     ///
 
-    pub fn get_grid_radius(&self) -> usize {
+    pub fn grid_radius(&self) -> usize {
         self.grid_radius
     }
 
-    pub fn get_max_resource_radius(&self) -> usize {
+    pub fn max_resource_radius(&self) -> usize {
         self.max_resource_radius
     }
 
-    pub fn get_max_obstacle_len(&self) -> usize {
+    pub fn max_obstacle_len(&self) -> usize {
         self.max_obstacle_len
     }
 }
