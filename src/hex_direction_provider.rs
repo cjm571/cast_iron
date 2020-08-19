@@ -62,7 +62,7 @@ pub enum HexSides {
     NORTHWEST,
     SOUTHWEST,
     SOUTH,
-    SOUTHEAST
+    SOUTHEAST,
 }
 
 //OPT: *STYLE* Derive the HexDirection trait if it has no required methods
@@ -73,7 +73,7 @@ pub enum HexVertices {
     NORTHWEST,
     WEST,
     SOUTHWEST,
-    SOUTHEAST
+    SOUTHEAST,
 }
 
 
@@ -97,6 +97,34 @@ impl<T: HexDirection> HexDirectionProvider<T> {
 
     pub fn count(&self) -> usize {
         T::count()
+    }
+}
+
+impl HexSides {
+    /// Returns the adjacent vertices as a tuple in counter-clockwise order
+    pub fn get_adjacent_vertices(side: Self) -> (HexVertices, HexVertices) {
+        match side {
+            Self::NORTHEAST   => (HexVertices::EAST,        HexVertices::NORTHEAST),
+            Self::NORTH       => (HexVertices::NORTHEAST,   HexVertices::NORTHWEST),
+            Self::NORTHWEST   => (HexVertices::NORTHWEST,   HexVertices::WEST),
+            Self::SOUTHWEST   => (HexVertices::WEST,        HexVertices::SOUTHWEST),
+            Self::SOUTH       => (HexVertices::SOUTHWEST,   HexVertices::SOUTHEAST),
+            Self::SOUTHEAST   => (HexVertices::SOUTHEAST,   HexVertices::EAST),
+        }
+    }
+}
+
+impl HexVertices {
+    /// Returns the adjacent sides as a tuple in counter-clockwise order
+    pub fn get_adjacent_sides(vertex: Self) -> (HexSides, HexSides) {
+        match vertex {
+            Self::EAST      => (HexSides::SOUTHEAST,    HexSides::NORTHEAST),
+            Self::NORTHEAST => (HexSides::NORTHEAST,    HexSides::NORTH),
+            Self::NORTHWEST => (HexSides::NORTH,        HexSides::NORTHWEST),
+            Self::WEST      => (HexSides::NORTHWEST,    HexSides::SOUTHWEST),
+            Self::SOUTHWEST => (HexSides::SOUTHWEST,    HexSides::SOUTH),
+            Self::SOUTHEAST => (HexSides::SOUTH,        HexSides::SOUTHEAST),
+        }
     }
 }
 

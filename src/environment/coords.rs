@@ -41,7 +41,11 @@ Purpose:
 
 use std::{
     error::Error,
-    fmt
+    fmt,
+    ops::{
+        Add,
+        Sub,
+    },
 };
 
 use crate::{
@@ -66,7 +70,7 @@ const MIN_FRACTIONAL_MOVE: f32 = 0.01;
 //  Data structures
 ///////////////////////////////////////////////////////////////////////////////
 
-#[derive(Default, Clone, Copy)]
+#[derive(Default, Clone, Copy, PartialEq)]
 pub struct Coords {
     x: i32,
     y: i32,
@@ -290,9 +294,26 @@ impl fmt::Display for Coords {
         write!(f, "({},{},{})", self.x, self.y, self.z)
     }
 }
-impl PartialEq for Coords {
-    fn eq(&self, other: &Coords) -> bool {
-        (self.x == other.x) && (self.y == other.y) && (self.z == other.z)
+impl Add for Coords {
+    type Output = Self;
+    
+    fn add(self, other: Self) -> Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
+    }
+}
+impl Sub for Coords {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
     }
 }
 
