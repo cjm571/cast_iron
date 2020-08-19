@@ -95,7 +95,7 @@ impl PolyFunc {
         let b: f32 = self.start_time as f32;
         let c: f32 = (self.start_time + self.duration as usize) as f32;
 
-        (-1.0 * a * (tick as f32 - b) * (tick as f32 - c)) as i32
+        (-a * (tick as f32 - b) * (tick as f32 - c)) as i32
     }
 }
 

@@ -168,7 +168,7 @@ impl Coords {
 
             // Adjust such that non-negligible fractional movements round to next larger integer
             if lat_mag.fract().abs() > MIN_FRACTIONAL_MOVE {
-                lat_mag = lat_mag.trunc() + (1.0 * lat_mag.signum());
+                lat_mag = lat_mag.trunc() + lat_mag.signum();
             }
 
             //TODO:Check for overflow
@@ -188,7 +188,7 @@ impl Coords {
 
             // Adjust such that non-negligible fractional movements round to next larger integer
             if vert_mag.fract().abs() > MIN_FRACTIONAL_MOVE {
-                vert_mag = vert_mag.trunc() + (1.0 * vert_mag.signum());
+                vert_mag = vert_mag.trunc() + vert_mag.signum();
             }
 
             // move "NE" for half and "NW" for half of vert_mag, adding any odd moves to "NE"
