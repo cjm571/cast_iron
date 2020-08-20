@@ -62,6 +62,9 @@ macro_rules! debug_println {
 //  Module Declarations
 ///////////////////////////////////////////////////////////////////////////////
 
+//FEAT: Timer/performance module
+//FEAT: Thread to collect 'core dump' data?
+
 #[macro_use]
 pub mod ability;
 pub mod actor;

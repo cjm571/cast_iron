@@ -76,7 +76,7 @@ pub enum Intensity {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Object Implementation
+//  Object Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Weather {
@@ -114,8 +114,25 @@ impl Weather {
         Intensity::from(self.function.solve(tick))
     }
 
+    pub fn intensity_exact(&self, tick: usize) -> i32 {
+        self.function.solve(tick)
+    }
+
     pub fn duration(&self) -> usize {
         self.function.duration()
+    }
+}
+
+impl Intensity {
+    /// Provides the appropriate alpha level for the weather's intensity
+    pub fn to_alpha(&self) -> f32 {
+        match self {
+            Intensity::None     => 0.000,
+            Intensity::Mild     => 0.250,
+            Intensity::Strong   => 0.500,
+            Intensity::Severe   => 0.750,
+            Intensity::Max      => 1.000,
+        }
     }
 }
 
@@ -139,6 +156,17 @@ impl From<i32> for Intensity {
             STRONG_INTENSITY_RANGE_MIN  ..= STRONG_INTENSITY_RANGE_MAX  => Intensity::Strong,
             SEVERE_INTENSITY_RANGE_MIN  ..= SEVERE_INTENSITY_RANGE_MAX  => Intensity::Severe,
             MAX_INTENSITY               ..= std::i32::MAX               => Intensity::Max
+        }
+    }
+}
+impl From<Intensity> for String {
+    fn from(src: Intensity) -> Self {
+        match src {
+            Intensity::None     => Self::from("None"),
+            Intensity::Mild     => Self::from("Mild"),
+            Intensity::Strong   => Self::from("Strong"),
+            Intensity::Severe   => Self::from("Severe"),
+            Intensity::Max      => Self::from("Max"),
         }
     }
 }

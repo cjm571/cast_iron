@@ -70,7 +70,7 @@ impl LogReceiver {
     /// Main loop for recieving logger commands
     pub fn main(&mut self) {
         let start_time = Local::now();
-        println!("{}: Entered LogReceiver thread.", start_time.format("%Y-%b-%d %T%.3f"));
+        println!("{}: Entered LogReceiver thread.", start_time.format("%Y-%m-%d %T%.3f"));
 
         // Open a logfile, creating logs directory if necessary
         let logfile_dir = "logs";
@@ -93,7 +93,7 @@ impl LogReceiver {
         loop {
             // Check the channel for commands
             if let Ok(logger_cmd) = self.logger_rx.recv() {
-                let timestamp = Local::now().format("%Y-%b-%d %T%.3f");
+                let timestamp = Local::now().format("%Y-%m-%d %T%.3f");
 
                 // Handle command based on type
                 match logger_cmd {

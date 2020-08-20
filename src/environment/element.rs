@@ -34,7 +34,7 @@ use rand::{
 //////////////////////////////////////////////////////////////////////////////
 
 // Enumeration of all element types
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Element {
     Unset       = 0,
     Fire        = 1,
@@ -69,7 +69,21 @@ impl Default for Element {
         Self::Unset
     }
 }
-
+impl From<Element> for String {
+    fn from(src: Element) -> Self {
+        match src {
+            Element::Unset      => String::from("Unset"),
+            Element::Fire       => String::from("Fire"),
+            Element::Ice        => String::from("Ice"),
+            Element::Wind       => String::from("Wind"),
+            Element::Water      => String::from("Water"),
+            Element::Electric   => String::from("Electric"),
+            Element::Earth      => String::from("Earth"),
+            Element::Light      => String::from("Light"),
+            Element::Dark       => String::from("Dark"),
+        }
+    }
+}
 impl From<usize> for Element {
     fn from(src: usize) -> Self {
         match src {

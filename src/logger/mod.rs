@@ -167,6 +167,7 @@ impl Default for Instance {
         // Create the log messaging and control channel
         let (logger_tx, logger_rx) = mpsc::channel::<Command>();
 
+        //OPT: *PERFORMANCE* Would be better to set the receiver thread's priority as low as possible
         // Initialize receiver struct, build and spawn thread
         let mut log_receiver = LogReceiver::new(logger_rx, OutputType::File);
         thread::Builder::new()

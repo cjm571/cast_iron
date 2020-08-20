@@ -86,7 +86,7 @@ impl PolyFunc {
         self.start_time = start_time;
     }
 
-    
+    //FEAT: A find-max function could be very useful
     /* Utility Methods */
 
     // Solves the polynomial function at the given game time tick
