@@ -23,8 +23,8 @@ Purpose:
 
 use crate::{
     context::Context,
+    coords,
     environment::{
-        coords::Coords,
         element::{
             Element,
             Elemental
@@ -51,7 +51,7 @@ pub struct Resource {
     uid:        Uuid,
     element:    Element,
     state:      State,
-    coords:     Coords,
+    coords:     coords::Position,
     radius:     usize,
 }
 
@@ -73,7 +73,7 @@ pub enum State {
 
 impl Resource {
     /// Fully-qualified constructor
-    pub fn new(element: Element, state: State, coords: Coords, radius: usize) -> Self {
+    pub fn new(element: Element, state: State, coords: coords::Position, radius: usize) -> Self {
         Self {
             uid: Uuid::new_v4(),
             element,
@@ -98,8 +98,8 @@ impl Resource {
         // Constrain max resource radius to 1/4 of the total grid
         let radius: usize = rng.gen_range(0, ctx.max_resource_radius());
 
-        // Generate a random Coords object that won't spill outside the grid
-        let coords = Coords::rand_constrained(ctx, radius).unwrap();
+        // Generate a random coords::Position object that won't spill outside the grid
+        let coords = coords::Position::rand_constrained(ctx, radius).unwrap();
 
         Self {
             uid,
@@ -174,7 +174,7 @@ impl Resource {
         self.state
     }
 
-    pub fn coords(&self) -> &Coords {
+    pub fn coords(&self) -> &coords::Position {
         &self.coords
     }
 
@@ -197,7 +197,7 @@ impl Default for Resource {
             uid:        Uuid::new_v4(),
             element:    Element::default(),
             state:      State::default(),
-            coords:     Coords::default(),
+            coords:     coords::Position::default(),
             radius:     0,
         }
     }

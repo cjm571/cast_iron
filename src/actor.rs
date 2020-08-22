@@ -28,8 +28,8 @@ use std::{
 use crate::{
     ability::Ability,
     context::Context,
-    environment::coords::Coords,
-    logger,
+    coords,
+    hex_directions,
 };
 
 use uuid::Uuid;
@@ -42,10 +42,10 @@ use uuid::Uuid;
 // Struct containing state information for the Actor
 pub struct Actor {
     uid:            Uuid,
-    name:           String,         // Actor's name
-    pos:            Coords,         // Actor's 3D position in the environment
-    cur_fatigue:    u8,             // Actor's current fatigue level
-    abilities:      Vec<Ability>,   // List of Actor's Abilities
+    name:           String,             // Actor's name
+    pos:            coords::Position,   // Actor's 3D position in the environment
+    cur_fatigue:    u8,                 // Actor's current fatigue level
+    abilities:      Vec<Ability>,       // List of Actor's Abilities
 }
 
 
@@ -56,7 +56,7 @@ impl Actor {
     /// Fully-qualified constructor
     pub fn new(
         name:           &'static str,
-        pos:            Coords,
+        pos:            coords::Position,
         cur_fatigue:    u8,
         abilities:      Vec<Ability>,
     ) -> Self {
@@ -74,7 +74,7 @@ impl Actor {
         Self {
             uid:            Uuid::new_v4(),
             name:           name.to_string(),
-            pos:            Coords::default(),
+            pos:            coords::Position::default(),
             cur_fatigue:    0,
             abilities:      Vec::new(),
         }
@@ -100,14 +100,14 @@ impl Actor {
         // trim parentheses and tokenize on ','
         let parens: &[_] = &['(', ')']; //WTF: is this type?
         let coord_vec: Vec<&str> = data_vec[2].trim_matches(parens).split(',').collect();
-        let pos = match Coords::new(
+        let pos = match coords::Position::new(
             coord_vec[0].parse::<i32>().unwrap(),
             coord_vec[1].parse::<i32>().unwrap(),
             coord_vec[2].parse::<i32>().unwrap(),
             ctx
         ) {
             Ok(pos)     => pos,
-            Err(_err)   => panic!("actor::from: Invalid Coords input string."),
+            Err(_err)   => panic!("actor::from: Invalid coords::Position input string."),
         };
 
         let cur_fatigue = data_vec[3].parse::<u8>().unwrap();
@@ -144,11 +144,9 @@ impl Actor {
         self.name.push_str(_name);
     }
 
-    // Moves the object by vector
-    //  _mag: number of "straightline" cells to move
-    //  _dir: direction of movement in radians
-    pub fn move_vec(&mut self, mag: i32, dir: f32, logger: &logger::Instance, ctx: &Context) {
-        self.pos.move_vec(mag, dir, logger, ctx).unwrap();
+    /// Moves actor one cell in the given direction
+    pub fn move_one_cell(&mut self, dir: hex_directions::Side, ctx: &Context) {
+        self.pos.move_one_cell(dir, ctx).unwrap();
     }
 
     // Adds ability to actor's ability list
@@ -172,7 +170,7 @@ impl Actor {
     }
 
     // Returns a reference for the actor's position
-    pub fn pos(&self) -> &Coords {
+    pub fn pos(&self) -> &coords::Position {
         &self.pos
     }
 

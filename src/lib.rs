@@ -62,15 +62,18 @@ macro_rules! debug_println {
 //  Module Declarations
 ///////////////////////////////////////////////////////////////////////////////
 
+// FEATURES IDEAS! Coolest/most needed at the top
 //FEAT: Timer/performance module
+//FEAT: Multiple function types bound together with a 'function' trait or something awesome like that
 //FEAT: Thread to collect 'core dump' data?
 
 #[macro_use]
 pub mod ability;
 pub mod actor;
 pub mod context;
+pub mod coords;
 pub mod environment;
 pub mod fileops;
-pub mod hex_direction_provider;
+pub mod hex_directions;
 pub mod logger;
 pub mod polyfunc;

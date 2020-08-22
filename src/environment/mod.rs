@@ -26,7 +26,6 @@ Purpose:
 ///////////////////////////////////////////////////////////////////////////////
 
 #[macro_use]
-pub mod coords;
 pub mod element;
 pub mod obstacle;
 pub mod resource;

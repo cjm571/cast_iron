@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-Filename : hex_direction_provider.rs
+Filename : hex_directions.rs
 
 Copyright (C) 2017 CJ McAllister
     This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,8 @@ Purpose:
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 use std::f32::consts::PI;
+
+use crate::coords;
 
 use rand::{
     Rng,
@@ -56,7 +58,7 @@ pub trait HexDirection:
 
 //OPT: *STYLE* Derive the HexDirection trait if it has no required methods
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum HexSides {
+pub enum Side {
     NORTHEAST,
     NORTH,
     NORTHWEST,
@@ -67,7 +69,7 @@ pub enum HexSides {
 
 //OPT: *STYLE* Derive the HexDirection trait if it has no required methods
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum HexVertices {
+pub enum Vertex {
     EAST,
     NORTHEAST,
     NORTHWEST,
@@ -82,12 +84,12 @@ pub enum HexVertices {
 ///////////////////////////////////////////////////////////////////////////////
 
 #[derive(Default, Debug)]
-pub struct HexDirectionProvider<T: HexDirection > {
+pub struct Provider<T: HexDirection > {
     cur_direction:  T,
     idx:            usize
 }
 
-impl<T: HexDirection> HexDirectionProvider<T> {
+impl<T: HexDirection> Provider<T> {
     pub fn new(start_direction: T) -> Self {
         Self {
             cur_direction:  start_direction,
@@ -100,30 +102,30 @@ impl<T: HexDirection> HexDirectionProvider<T> {
     }
 }
 
-impl HexSides {
+impl Side {
     /// Returns the adjacent vertices as a tuple in counter-clockwise order
-    pub fn get_adjacent_vertices(side: Self) -> (HexVertices, HexVertices) {
+    pub fn get_adjacent_vertices(side: Self) -> (Vertex, Vertex) {
         match side {
-            Self::NORTHEAST   => (HexVertices::EAST,        HexVertices::NORTHEAST),
-            Self::NORTH       => (HexVertices::NORTHEAST,   HexVertices::NORTHWEST),
-            Self::NORTHWEST   => (HexVertices::NORTHWEST,   HexVertices::WEST),
-            Self::SOUTHWEST   => (HexVertices::WEST,        HexVertices::SOUTHWEST),
-            Self::SOUTH       => (HexVertices::SOUTHWEST,   HexVertices::SOUTHEAST),
-            Self::SOUTHEAST   => (HexVertices::SOUTHEAST,   HexVertices::EAST),
+            Self::NORTHEAST   => (Vertex::EAST,        Vertex::NORTHEAST),
+            Self::NORTH       => (Vertex::NORTHEAST,   Vertex::NORTHWEST),
+            Self::NORTHWEST   => (Vertex::NORTHWEST,   Vertex::WEST),
+            Self::SOUTHWEST   => (Vertex::WEST,        Vertex::SOUTHWEST),
+            Self::SOUTH       => (Vertex::SOUTHWEST,   Vertex::SOUTHEAST),
+            Self::SOUTHEAST   => (Vertex::SOUTHEAST,   Vertex::EAST),
         }
     }
 }
 
-impl HexVertices {
+impl Vertex {
     /// Returns the adjacent sides as a tuple in counter-clockwise order
-    pub fn get_adjacent_sides(vertex: Self) -> (HexSides, HexSides) {
+    pub fn get_adjacent_sides(vertex: Self) -> (Side, Side) {
         match vertex {
-            Self::EAST      => (HexSides::SOUTHEAST,    HexSides::NORTHEAST),
-            Self::NORTHEAST => (HexSides::NORTHEAST,    HexSides::NORTH),
-            Self::NORTHWEST => (HexSides::NORTH,        HexSides::NORTHWEST),
-            Self::WEST      => (HexSides::NORTHWEST,    HexSides::SOUTHWEST),
-            Self::SOUTHWEST => (HexSides::SOUTHWEST,    HexSides::SOUTH),
-            Self::SOUTHEAST => (HexSides::SOUTH,        HexSides::SOUTHEAST),
+            Self::EAST      => (Side::SOUTHEAST,    Side::NORTHEAST),
+            Self::NORTHEAST => (Side::NORTHEAST,    Side::NORTH),
+            Self::NORTHWEST => (Side::NORTH,        Side::NORTHWEST),
+            Self::WEST      => (Side::NORTHWEST,    Side::SOUTHWEST),
+            Self::SOUTHWEST => (Side::SOUTHWEST,    Side::SOUTH),
+            Self::SOUTHEAST => (Side::SOUTH,        Side::SOUTHEAST),
         }
     }
 }
@@ -134,9 +136,9 @@ impl HexVertices {
 ///////////////////////////////////////////////////////////////////////////////
 
 ///
-// HexDirectionProvider
+// Provider
 ///
-impl<T: HexDirection> Iterator for HexDirectionProvider<T> {
+impl<T: HexDirection> Iterator for Provider<T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -157,81 +159,94 @@ impl<T: HexDirection> Iterator for HexDirectionProvider<T> {
 
     }
 }
-impl<T: HexDirection> Distribution<HexDirectionProvider<T>> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> HexDirectionProvider<T> {
+impl<T: HexDirection> Distribution<Provider<T>> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Provider<T> {
         let rand_num: f32 = rng.gen();
         let rand_dir: T = T::from(rand_num * (2.0*PI));
 
-        HexDirectionProvider::new(rand_dir)
+        Provider::new(rand_dir)
     }
 }
 
 
 ///
-// HexSides
+// Side
 ///
-impl HexDirection for HexSides {}
-impl From<HexSides> for f32 {
-    fn from(src: HexSides) -> f32 {
+impl HexDirection for Side {}
+impl From<Side> for f32 {
+    fn from(src: Side) -> f32 {
         match src {
-            HexSides::NORTHEAST    => PI/6.0,
-            HexSides::NORTH        => PI/2.0,
-            HexSides::NORTHWEST    => 5.0*PI/6.0,
-            HexSides::SOUTHWEST    => 7.0*PI/6.0,
-            HexSides::SOUTH        => 3.0*PI/2.0,
-            HexSides::SOUTHEAST    => 11.0*PI/6.0
+            Side::NORTHEAST    => PI/6.0,
+            Side::NORTH        => PI/2.0,
+            Side::NORTHWEST    => 5.0*PI/6.0,
+            Side::SOUTHWEST    => 7.0*PI/6.0,
+            Side::SOUTH        => 3.0*PI/2.0,
+            Side::SOUTHEAST    => 11.0*PI/6.0
         }
     }
 }
-impl From<f32> for HexSides {
+impl From<f32> for Side {
     fn from(src: f32) -> Self {
         // Clamp value to 2*PI before comparison
         let clamped_val = src % (2.0*PI);
 
         match clamped_val {
-            x if x < PI/3.0         => HexSides::NORTHEAST,
-            x if x < 2.0*PI/3.0     => HexSides::NORTH,
-            x if x < PI             => HexSides::NORTHWEST,
-            x if x < 4.0*PI/3.0     => HexSides::SOUTHWEST,
-            x if x < 5.0*PI/3.0     => HexSides::SOUTH,
-            x if x < 2.0*PI         => HexSides::SOUTHEAST,
-            _ => panic!("Invalid value for f32->HexSides conversion")
+            x if x < PI/3.0         => Side::NORTHEAST,
+            x if x < 2.0*PI/3.0     => Side::NORTH,
+            x if x < PI             => Side::NORTHWEST,
+            x if x < 4.0*PI/3.0     => Side::SOUTHWEST,
+            x if x < 5.0*PI/3.0     => Side::SOUTH,
+            x if x < 2.0*PI         => Side::SOUTHEAST,
+            _ => panic!("Invalid value for f32->Side conversion")
         }
     }
 }
-impl From<HexSides> for usize {
-    fn from(src: HexSides) -> usize {
+impl From<Side> for usize {
+    fn from(src: Side) -> usize {
         match src {
-            HexSides::NORTHEAST    => 0,
-            HexSides::NORTH        => 1,
-            HexSides::NORTHWEST    => 2,
-            HexSides::SOUTHWEST    => 3,
-            HexSides::SOUTH        => 4,
-            HexSides::SOUTHEAST    => 5
+            Side::NORTHEAST    => 0,
+            Side::NORTH        => 1,
+            Side::NORTHWEST    => 2,
+            Side::SOUTHWEST    => 3,
+            Side::SOUTH        => 4,
+            Side::SOUTHEAST    => 5
         }
     }
 }
-impl From<usize> for HexSides {
+impl From<usize> for Side {
     fn from(src: usize) -> Self {
         match src {
-            0 => HexSides::NORTHEAST,
-            1 => HexSides::NORTH,
-            2 => HexSides::NORTHWEST,
-            3 => HexSides::SOUTHWEST,
-            4 => HexSides::SOUTH,
-            5 => HexSides::SOUTHEAST,
-            _ => panic!("Invalid value for usize->HexSides conversion")
+            0 => Side::NORTHEAST,
+            1 => Side::NORTH,
+            2 => Side::NORTHWEST,
+            3 => Side::SOUTHWEST,
+            4 => Side::SOUTH,
+            5 => Side::SOUTHEAST,
+            _ => panic!("Invalid value for usize->Side conversion")
+        }
+    }
+}
+impl From<coords::Translation> for Side {
+    fn from(src: coords::Translation) -> Self {
+        match (src.x(), src.y(), src.z()) {
+            (1, 0, -1)  => Side::NORTHEAST,
+            (0, 1, -1)  => Side::NORTH,
+            (-1, 1, 0)  => Side::NORTHWEST,
+            (-1, 0, 1)  => Side::SOUTHWEST,
+            (0, -1, 1)  => Side::SOUTH,
+            (1, -1, 0)  => Side::SOUTHEAST,
+            _           => panic!("Invalid Coords Translation for conversion to HexSide"),
         }
     }
 }
 // Distribution trait provides randomization for this module
-impl Distribution<HexSides> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> HexSides {
+impl Distribution<Side> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Side {
         let rand_num: f32 = rng.gen();
-        HexSides::from(rand_num)
+        Side::from(rand_num)
     }
 }
-impl Default for HexSides {
+impl Default for Side {
     fn default() -> Self {
         Self::NORTHEAST
     }
@@ -239,71 +254,71 @@ impl Default for HexSides {
 
 
 ///
-// HexVertices
+// Vertex
 ///
-impl HexDirection for HexVertices {}
-impl From<HexVertices> for f32 {
-    fn from(src: HexVertices) -> f32 {
+impl HexDirection for Vertex {}
+impl From<Vertex> for f32 {
+    fn from(src: Vertex) -> f32 {
         match src {
-            HexVertices::EAST       => 0.0,
-            HexVertices::NORTHEAST  => PI/3.0,
-            HexVertices::NORTHWEST  => 2.0*PI/3.0,
-            HexVertices::WEST       => PI,
-            HexVertices::SOUTHWEST  => 4.0*PI/3.0,
-            HexVertices::SOUTHEAST  => 5.0*PI/3.0
+            Vertex::EAST       => 0.0,
+            Vertex::NORTHEAST  => PI/3.0,
+            Vertex::NORTHWEST  => 2.0*PI/3.0,
+            Vertex::WEST       => PI,
+            Vertex::SOUTHWEST  => 4.0*PI/3.0,
+            Vertex::SOUTHEAST  => 5.0*PI/3.0
         }
     }
 }
-impl From<f32> for HexVertices {
+impl From<f32> for Vertex {
     fn from(src: f32) -> Self {
         // Clamp value to 2*PI before comparison
         let clamped_val = src % (2.0*PI);
 
         match clamped_val {
-            x if x < PI/6.0         => HexVertices::EAST,
-            x if x < PI/2.0         => HexVertices::NORTHEAST,
-            x if x < 5.0*PI/6.0     => HexVertices::NORTHWEST,
-            x if x < 7.0*PI/6.0     => HexVertices::WEST,
-            x if x < 3.0*PI/2.0     => HexVertices::SOUTHWEST,
-            x if x < 11.0*PI/6.0    => HexVertices::SOUTHEAST,
-            x if x < 2.0*PI         => HexVertices::EAST,
-            _ => panic!("Invalid value for HexVertices conversion")
+            x if x < PI/6.0         => Vertex::EAST,
+            x if x < PI/2.0         => Vertex::NORTHEAST,
+            x if x < 5.0*PI/6.0     => Vertex::NORTHWEST,
+            x if x < 7.0*PI/6.0     => Vertex::WEST,
+            x if x < 3.0*PI/2.0     => Vertex::SOUTHWEST,
+            x if x < 11.0*PI/6.0    => Vertex::SOUTHEAST,
+            x if x < 2.0*PI         => Vertex::EAST,
+            _ => panic!("Invalid value for Vertex conversion")
         }
     }
 }
-impl From<HexVertices> for usize {
-    fn from(src: HexVertices) -> usize {
+impl From<Vertex> for usize {
+    fn from(src: Vertex) -> usize {
         match src {
-            HexVertices::EAST       => 0,
-            HexVertices::NORTHEAST  => 1,
-            HexVertices::NORTHWEST  => 2,
-            HexVertices::WEST       => 3,
-            HexVertices::SOUTHWEST  => 4,
-            HexVertices::SOUTHEAST  => 5
+            Vertex::EAST       => 0,
+            Vertex::NORTHEAST  => 1,
+            Vertex::NORTHWEST  => 2,
+            Vertex::WEST       => 3,
+            Vertex::SOUTHWEST  => 4,
+            Vertex::SOUTHEAST  => 5
         }
     }
 }
-impl From<usize> for HexVertices {
+impl From<usize> for Vertex {
     fn from(src: usize) -> Self {
         match src {
-            0 => HexVertices::EAST,
-            1 => HexVertices::NORTHEAST,
-            2 => HexVertices::NORTHWEST,
-            3 => HexVertices::WEST,
-            4 => HexVertices::SOUTHWEST,
-            5 => HexVertices::SOUTHEAST,
-            _ => panic!("Invalid value for usize->HexVertices conversion")
+            0 => Vertex::EAST,
+            1 => Vertex::NORTHEAST,
+            2 => Vertex::NORTHWEST,
+            3 => Vertex::WEST,
+            4 => Vertex::SOUTHWEST,
+            5 => Vertex::SOUTHEAST,
+            _ => panic!("Invalid value for usize->Vertex conversion")
         }
     }
 }
 // Distribution trait provides randomization for this module
-impl Distribution<HexVertices> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> HexVertices {
+impl Distribution<Vertex> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Vertex {
         let rand_num: f32 = rng.gen();
-        HexVertices::from(rand_num)
+        Vertex::from(rand_num)
     }
 }
-impl Default for HexVertices {
+impl Default for Vertex {
     fn default() -> Self {
         Self::EAST
     }
@@ -321,13 +336,13 @@ mod tests {
     #[test]
     fn hex_sides() {
         // Setup correct value arrays
-        let correct_enum: [HexSides;NUM_HEX_DIRECTIONS] = [
-            HexSides::NORTHEAST,
-            HexSides::NORTH,
-            HexSides::NORTHWEST,
-            HexSides::SOUTHWEST,
-            HexSides::SOUTH,
-            HexSides::SOUTHEAST
+        let correct_enum: [Side;NUM_HEX_DIRECTIONS] = [
+            Side::NORTHEAST,
+            Side::NORTH,
+            Side::NORTHWEST,
+            Side::SOUTHWEST,
+            Side::SOUTH,
+            Side::SOUTHEAST
         ];
         let correct_usize: [usize;NUM_HEX_DIRECTIONS] = [
             0,
@@ -348,7 +363,7 @@ mod tests {
 
 
         // Verify default
-        let mut side_provider: HexDirectionProvider<HexSides> = HexDirectionProvider::default();
+        let mut side_provider: Provider<Side> = Provider::default();
         assert_eq!(side_provider.cur_direction, correct_enum[0]);
         assert_eq!(usize::from(side_provider.cur_direction), correct_usize[0]);
         assert_eq!(f32::from(side_provider.cur_direction), correct_f32[0]);
@@ -365,11 +380,11 @@ mod tests {
         assert_eq!(i, 1);
 
         // Verify conversions
-        side_provider = HexDirectionProvider::new(HexSides::SOUTHEAST);
+        side_provider = Provider::new(Side::SOUTHEAST);
         for j in 0..NUM_HEX_DIRECTIONS {
             let side = side_provider.next().unwrap();
-            assert_eq!(HexSides::from(correct_usize[j]), side);
-            assert_eq!(HexSides::from(correct_f32[j]), side);
+            assert_eq!(Side::from(correct_usize[j]), side);
+            assert_eq!(Side::from(correct_f32[j]), side);
         }
     }
     
@@ -377,13 +392,13 @@ mod tests {
     #[test]
     fn hex_vertices() {
         // Setup correct value arrays
-        let correct_enum: [HexVertices;NUM_HEX_DIRECTIONS] = [
-            HexVertices::EAST,
-            HexVertices::NORTHEAST,
-            HexVertices::NORTHWEST,
-            HexVertices::WEST,
-            HexVertices::SOUTHWEST,
-            HexVertices::SOUTHEAST
+        let correct_enum: [Vertex;NUM_HEX_DIRECTIONS] = [
+            Vertex::EAST,
+            Vertex::NORTHEAST,
+            Vertex::NORTHWEST,
+            Vertex::WEST,
+            Vertex::SOUTHWEST,
+            Vertex::SOUTHEAST
         ];
         let correct_usize: [usize;NUM_HEX_DIRECTIONS] = [
             0,
@@ -404,7 +419,7 @@ mod tests {
 
 
         // Verify default
-        let mut side_provider: HexDirectionProvider<HexVertices> = HexDirectionProvider::default();
+        let mut side_provider: Provider<Vertex> = Provider::default();
         assert_eq!(side_provider.cur_direction, correct_enum[0]);
         assert_eq!(usize::from(side_provider.cur_direction), correct_usize[0]);
         assert_eq!(f32::from(side_provider.cur_direction), correct_f32[0]);
@@ -421,11 +436,11 @@ mod tests {
         assert_eq!(i, 1);
 
         // Verify conversions
-        side_provider = HexDirectionProvider::new(HexVertices::SOUTHEAST);
+        side_provider = Provider::new(Vertex::SOUTHEAST);
         for j in 0..NUM_HEX_DIRECTIONS {
             let side = side_provider.next().unwrap();
-            assert_eq!(HexVertices::from(correct_usize[j]), side);
-            assert_eq!(HexVertices::from(correct_f32[j]), side);
+            assert_eq!(Vertex::from(correct_usize[j]), side);
+            assert_eq!(Vertex::from(correct_f32[j]), side);
         }
     }
 }
