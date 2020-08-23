@@ -48,11 +48,12 @@ const STRONG_INTENSITY_RANGE_MIN:   i32 = 128;
 const STRONG_INTENSITY_RANGE_MAX:   i32 = 191;
 const SEVERE_INTENSITY_RANGE_MIN:   i32 = 192;
 const SEVERE_INTENSITY_RANGE_MAX:   i32 = 255;
-const MAX_INTENSITY:                i32 = 256;
 
 //OPT: *DESIGN* This should be configurable, and also need to consider if we're tied to framerate
-/// Maximum duration for a weather effect
-const MAX_DURATION: usize = 100_000;
+/// Maximum duration for a weather event
+pub const MAX_DURATION:     usize   = 10_000;
+/// Maximum intensity of a weather event
+pub const MAX_INTENSITY:    i32     = 256;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,7 +61,7 @@ const MAX_DURATION: usize = 100_000;
 ///////////////////////////////////////////////////////////////////////////////
 
 #[derive(Debug, Default)]
-pub struct Weather {
+pub struct Event {
     element:    Element,
     function:   PolyFunc,
 }
@@ -79,7 +80,7 @@ pub enum Intensity {
 //  Object Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-impl Weather {
+impl Event {
     /// Fully-qualified constructor. You probably don't want to use this.
     pub fn new(element: Element, function: PolyFunc) -> Self {
         Self {element, function}
@@ -172,8 +173,8 @@ impl From<Intensity> for String {
 }
 
 
-/* Weather */
-impl Elemental for Weather {
+/* Event */
+impl Elemental for Event {
     fn element(&self) -> Element {
         self.element
     }
