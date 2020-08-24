@@ -66,6 +66,7 @@ macro_rules! debug_println {
 //FEAT: Timer/performance module
 //FEAT: Multiple function types bound together with a 'function' trait or something awesome like that
 //FEAT: Thread to collect 'core dump' data?
+//FEAT: Procedurally-generated art assets
 
 #[macro_use]
 pub mod ability;

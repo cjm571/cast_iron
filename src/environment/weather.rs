@@ -24,6 +24,7 @@ Purpose:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+//FEAT: Regional (and global?) weather events
 use crate::{
     environment::element::{
         Element,
@@ -40,20 +41,20 @@ use rand::Rng;
 ///////////////////////////////////////////////////////////////////////////////
 
 // Intensity limits
-const NONE_INTENSITY_RANGE_MIN:     i32 = 0;
-const NONE_INTENSITY_RANGE_MAX:     i32 = 63;
-const MILD_INTENSITY_RANGE_MIN:     i32 = 64;
-const MILD_INTENSITY_RANGE_MAX:     i32 = 127;
-const STRONG_INTENSITY_RANGE_MIN:   i32 = 128;
-const STRONG_INTENSITY_RANGE_MAX:   i32 = 191;
-const SEVERE_INTENSITY_RANGE_MIN:   i32 = 192;
-const SEVERE_INTENSITY_RANGE_MAX:   i32 = 255;
+const NONE_INTENSITY_RANGE_MIN:     i64 = 0;
+const NONE_INTENSITY_RANGE_MAX:     i64 = 63;
+const MILD_INTENSITY_RANGE_MIN:     i64 = 64;
+const MILD_INTENSITY_RANGE_MAX:     i64 = 127;
+const STRONG_INTENSITY_RANGE_MIN:   i64 = 128;
+const STRONG_INTENSITY_RANGE_MAX:   i64 = 191;
+const SEVERE_INTENSITY_RANGE_MIN:   i64 = 192;
+const SEVERE_INTENSITY_RANGE_MAX:   i64 = 255;
 
 //OPT: *DESIGN* This should be configurable, and also need to consider if we're tied to framerate
-/// Maximum duration for a weather event
-pub const MAX_DURATION:     usize   = 10_000;
+/// Maximum duration for a weather event (in seconds)
+pub const MAX_DURATION:             f64 = 10.0;
 /// Maximum intensity of a weather event
-pub const MAX_INTENSITY:    i32     = 256;
+pub const MAX_INTENSITY:            f64 = 256.0;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,11 +88,11 @@ impl Event {
     }
 
     /// Generate a random weather effect at the given tick
-    pub fn rand_starting_at(tick: usize) -> Self {
+    pub fn rand_starting_at(tick: f64) -> Self {
         let mut rng = rand::thread_rng();
 
         let element: Element = rng.gen();
-        let function = PolyFunc::rand_constrained(MAX_INTENSITY as usize, MAX_DURATION, tick);
+        let function = PolyFunc::rand_constrained(MAX_INTENSITY, MAX_DURATION, tick);
 
         Self {element, function}
     }
@@ -111,15 +112,15 @@ impl Event {
     // Accessor Methods
     ///
 
-    pub fn intensity(&self, tick: usize) -> Intensity {
-        Intensity::from(self.function.solve(tick))
+    pub fn intensity(&self, tick: f64) -> Intensity {
+        Intensity::from(self.function.solve(tick) as i64)
     }
 
-    pub fn intensity_exact(&self, tick: usize) -> i32 {
+    pub fn intensity_exact(&self, tick: f64) -> f64 {
         self.function.solve(tick)
     }
 
-    pub fn duration(&self) -> usize {
+    pub fn duration(&self) -> f64 {
         self.function.duration()
     }
 }
@@ -148,15 +149,15 @@ impl Default for Intensity {
         Self::None
     }
 }
-impl From<i32> for Intensity {
-    fn from(src: i32) -> Self {
+impl From<i64> for Intensity {
+    fn from(src: i64) -> Self {
         match src {
-            std::i32::MIN               ..= -1                          => Intensity::None,
+            std::i64::MIN               ..= -1                          => Intensity::None,
             NONE_INTENSITY_RANGE_MIN    ..= NONE_INTENSITY_RANGE_MAX    => Intensity::None,
             MILD_INTENSITY_RANGE_MIN    ..= MILD_INTENSITY_RANGE_MAX    => Intensity::Mild,
             STRONG_INTENSITY_RANGE_MIN  ..= STRONG_INTENSITY_RANGE_MAX  => Intensity::Strong,
             SEVERE_INTENSITY_RANGE_MIN  ..= SEVERE_INTENSITY_RANGE_MAX  => Intensity::Severe,
-            MAX_INTENSITY               ..= std::i32::MAX               => Intensity::Max
+            _                                                           => Intensity::Max
         }
     }
 }

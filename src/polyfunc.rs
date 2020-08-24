@@ -37,9 +37,9 @@ use rand::Rng;
 
 #[derive(Default)]
 pub struct PolyFunc {
-    magnitude:  usize,
-    duration:   usize,
-    start_time: usize,
+    magnitude:  f64,
+    duration:   f64,
+    start_time: f64,
 }
 
 
@@ -49,17 +49,17 @@ pub struct PolyFunc {
 
 impl PolyFunc {
     /// Fully-qualified constructor
-    pub fn new(magnitude: usize, duration: usize, start_time: usize) -> Self {
+    pub fn new(magnitude: f64, duration: f64, start_time: f64) -> Self {
         Self {magnitude, duration, start_time}
     }
 
     /// Construct a random polynomial function within the given constraints
-    pub fn rand_constrained(max_magnitude: usize, max_duration: usize, start_time: usize) -> Self {
+    pub fn rand_constrained(max_magnitude: f64, max_duration: f64, start_time: f64) -> Self {
         // Generate random values within constraints
         let mut rng = rand::thread_rng();
 
-        let magnitude: usize = rng.gen_range(0, max_magnitude);
-        let duration: usize = rng.gen_range(0, max_duration);
+        let magnitude: f64 = rng.gen_range(0.0, max_magnitude);
+        let duration: f64 = rng.gen_range(0.0, max_duration);
         
         Self {magnitude, duration, start_time}
     }
@@ -67,22 +67,22 @@ impl PolyFunc {
 
     /* Accessor Methods */
 
-    pub fn duration(&self) -> usize {
+    pub fn duration(&self) -> f64 {
         self.duration
     }
 
-    pub fn start_time(&self) -> usize {
+    pub fn start_time(&self) -> f64 {
         self.start_time
     }
     
 
     /* Mutator Methods */
 
-    pub fn set_duration(&mut self, duration: usize) {
+    pub fn set_duration(&mut self, duration: f64) {
         self.duration = duration;
     }
 
-    pub fn set_start_time(&mut self, start_time: usize) {
+    pub fn set_start_time(&mut self, start_time: f64) {
         self.start_time = start_time;
     }
 
@@ -90,12 +90,12 @@ impl PolyFunc {
     /* Utility Methods */
 
     // Solves the polynomial function at the given game time tick
-    pub fn solve(&self, tick: usize) -> i32 {
-        let a: f32 = self.magnitude as f32 / (self.duration as f32 / 2.0).powi(2);
-        let b: f32 = self.start_time as f32;
-        let c: f32 = (self.start_time + self.duration as usize) as f32;
+    pub fn solve(&self, tick: f64) -> f64 {
+        let a: f64 = self.magnitude / (self.duration / 2.0).powi(2);
+        let b: f64 = self.start_time;
+        let c: f64 = self.start_time + self.duration;
 
-        (-a * (tick as f32 - b) * (tick as f32 - c)) as i32
+        -a * (tick - b) * (tick - c)
     }
 }
 
@@ -125,29 +125,29 @@ mod tests {
     #[test]
     // Confirm that start, stop, and peak values are correct
     fn solving() {
-        let func_a: PolyFunc = PolyFunc::new(10, 4, 0);
-        let func_b: PolyFunc = PolyFunc::new(255, 16, 10);
-        let func_c: PolyFunc = PolyFunc::new(150, 10, 30);
-        let func_d: PolyFunc = PolyFunc::new(100, 5, 0);
+        let func_a: PolyFunc = PolyFunc::new(10.0, 4.0, 0.0);
+        let func_b: PolyFunc = PolyFunc::new(255.0, 16.0, 10.0);
+        let func_c: PolyFunc = PolyFunc::new(150.0, 10.0, 30.0);
+        let func_d: PolyFunc = PolyFunc::new(100.0, 5.0, 0.0);
 
         // Check function A's solutions
-        assert_eq!(func_a.solve(0), 0);
-        assert_eq!(func_a.solve(4), 0);
-        assert_eq!(func_a.solve(2), 10);
+        assert_eq!(func_a.solve(0.0), 0);
+        assert_eq!(func_a.solve(4.0), 0);
+        assert_eq!(func_a.solve(2.0), 10);
 
         // Check function B's solutions
-        assert_eq!(func_b.solve(10), 0);
-        assert_eq!(func_b.solve(26), 0);
-        assert_eq!(func_b.solve(18), 255);
+        assert_eq!(func_b.solve(10.0), 0);
+        assert_eq!(func_b.solve(26.0), 0);
+        assert_eq!(func_b.solve(18.0), 255);
 
         // Check function C's solutions
-        assert_eq!(func_c.solve(30), 0);
-        assert_eq!(func_c.solve(40), 0);
-        assert_eq!(func_c.solve(35), 150);
+        assert_eq!(func_c.solve(30.0), 0);
+        assert_eq!(func_c.solve(40.0), 0);
+        assert_eq!(func_c.solve(35.0), 150);
 
         // Check function D's solutions
-        assert_eq!(func_d.solve(0), 0);
-        assert_eq!(func_d.solve(5), 0);
-        assert_eq!(func_d.solve(2), 96);
+        assert_eq!(func_d.solve(0.0), 0);
+        assert_eq!(func_d.solve(5.0), 0);
+        assert_eq!(func_d.solve(2.0), 96);
     }
 }
