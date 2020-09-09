@@ -52,6 +52,7 @@ use std::{
 use crate::{
     context::Context,
     hex_directions,
+    Randomizable,
 };
 
 use rand::Rng;
@@ -97,23 +98,6 @@ impl Position {
             Ok(()) => Ok(pos),
             Err(e) => Err(e),
         }
-    }
-
-    /// Constructs a random, valid Position object within the constraints of the game Context
-    pub fn rand(ctx: &Context) -> Self {
-        let max_dist = ctx.grid_radius() as i32;
-
-        let mut rng = rand::thread_rng();
-
-        let rand_x: i32 = rng.gen_range(-max_dist, max_dist);
-        let calc_rand_y = match rand_x {
-            i32::MIN..=-1   => rng.gen_range(0,         rand_x.abs()),  // X is negative, generate a bounded-positive Y
-            0               => rng.gen_range(-max_dist, max_dist),      // X is 0, generate an unbounded Y
-            1..=i32::MAX    => rng.gen_range(-rand_x,   0)              // X is positive, generate a bounded-negative Y
-        };
-        let calc_z: i32 = 0 - rand_x - calc_rand_y; // Position must meet the x + y + z == 0 requirement
-
-        Self::new(rand_x, calc_rand_y, calc_z, ctx).unwrap()
     }
 
     /// Constructs a random, valid Position object within the constraints fo the game Context AND
@@ -245,16 +229,6 @@ impl Translation {
 ///
 // Position
 ///
-impl fmt::Debug for Position {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Position: {{X: {} Y: {} Z: {}}}", self.x, self.y, self.z)
-    }
-}
-impl fmt::Display for Position {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({},{},{})", self.x, self.y, self.z)
-    }
-}
 impl Add<Translation> for Position {
     type Output = Self;
 
@@ -269,6 +243,33 @@ impl Add<Translation> for Position {
 impl AddAssign<Translation> for Position {
     fn add_assign(&mut self, other: Translation) {
         *self = self.add(other);
+    }
+}
+impl fmt::Debug for Position {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Position: {{X: {} Y: {} Z: {}}}", self.x, self.y, self.z)
+    }
+}
+impl fmt::Display for Position {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({},{},{})", self.x, self.y, self.z)
+    }
+}
+impl Randomizable for Position {
+    fn rand(ctx: &Context) -> Self {
+        let max_dist = ctx.grid_radius() as i32;
+
+        let mut rng = rand::thread_rng();
+
+        let rand_x: i32 = rng.gen_range(-max_dist, max_dist);
+        let calc_rand_y = match rand_x {
+            i32::MIN..=-1   => rng.gen_range(0,         rand_x.abs()),  // X is negative, generate a bounded-positive Y
+            0               => rng.gen_range(-max_dist, max_dist),      // X is 0, generate an unbounded Y
+            1..=i32::MAX    => rng.gen_range(-rand_x,   0)              // X is positive, generate a bounded-negative Y
+        };
+        let calc_z: i32 = 0 - rand_x - calc_rand_y; // Position must meet the x + y + z == 0 requirement
+
+        Self::new(rand_x, calc_rand_y, calc_z, ctx).unwrap()
     }
 }
 impl Sub<Translation> for Position {
@@ -313,20 +314,20 @@ impl From<hex_directions::Side> for Translation {
 ///
 // ValidityError
 ///
+impl Error for ValidityError {}
 impl fmt::Display for ValidityError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Invalid Coordinates. Sum must equal 0.")
     }
 }
-impl Error for ValidityError {}
 
 //OPT: *STYLE* Should be more general
 ///
 // ParamError
 ///
+impl Error for ParamError {}
 impl fmt::Display for ParamError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Invalid Param. dist_from_edge >= ctx.grid_radius")
     }
 }
-impl Error for ParamError {}

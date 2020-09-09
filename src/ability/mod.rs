@@ -27,7 +27,7 @@ use std::{
     str::FromStr
 };
 
-use crate::environment::element::Element;
+use crate::element::Element;
 
 use uuid::Uuid;
 

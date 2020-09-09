@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-Filename : environment/resource.rs
+Filename : mechanics/resource.rs
 
 Copyright (C) 2017 CJ McAllister
     This program is free software; you can redistribute it and/or modify
@@ -24,12 +24,12 @@ Purpose:
 use crate::{
     context::Context,
     coords,
-    environment::{
-        element::{
-            Element,
-            Elemental
-        }
-    }
+    element::{
+        Element,
+        Elemental
+    },
+    Locatable,
+    Randomizable,
 };
 
 use uuid::Uuid;
@@ -51,7 +51,7 @@ pub struct Resource {
     uid:        Uuid,
     element:    Element,
     state:      State,
-    coords:     coords::Position,
+    coords:     Vec<coords::Position>,
     radius:     usize,
 }
 
@@ -73,7 +73,7 @@ pub enum State {
 
 impl Resource {
     /// Fully-qualified constructor
-    pub fn new(element: Element, state: State, coords: coords::Position, radius: usize) -> Self {
+    pub fn new(element: Element, state: State, coords: Vec<coords::Position>, radius: usize) -> Self {
         Self {
             uid: Uuid::new_v4(),
             element,
@@ -83,32 +83,6 @@ impl Resource {
         }
     }
 
-    // Creates a random, valid Resource object within the constraints of the game Context
-    pub fn rand(ctx: &Context) -> Self {
-        // Set UID
-        let uid = Uuid::new_v4();
-
-        //  Get RNG thread handle and generate random centerpoint
-        let mut rng = rand::thread_rng();
-
-        // Generate random properties
-        let element: Element = rng.gen();
-        let state: State = rng.gen();
-
-        // Constrain max resource radius to 1/4 of the total grid
-        let radius: usize = rng.gen_range(0, ctx.max_resource_radius());
-
-        // Generate a random coords::Position object that won't spill outside the grid
-        let coords = coords::Position::rand_constrained(ctx, radius).unwrap();
-
-        Self {
-            uid,
-            element,
-            state,
-            coords,
-            radius,
-        }
-    }
 
     ///
     // Mutator Methods
@@ -174,8 +148,9 @@ impl Resource {
         self.state
     }
 
+    //OPT: *DESIGN* maybe this should be center_coords
     pub fn coords(&self) -> &coords::Position {
-        &self.coords
+        self.coords.last().unwrap()
     }
 
     pub fn radius(&self) -> usize {
@@ -193,11 +168,14 @@ impl Resource {
 ///
 impl Default for Resource {
     fn default() -> Self {
+        let mut default_coords = Vec::new();
+        default_coords.push(coords::Position::default());
+        
         Self {
             uid:        Uuid::new_v4(),
             element:    Element::default(),
             state:      State::default(),
-            coords:     coords::Position::default(),
+            coords:     default_coords,
             radius:     0,
         }
     }
@@ -205,6 +183,39 @@ impl Default for Resource {
 impl Elemental for Resource {
     fn element(&self) -> Element {
         self.element
+    }
+}
+impl Locatable for Resource {
+    fn all_coords(&self) -> &Vec<coords::Position> {
+        &self.coords
+    }
+}
+impl Randomizable for Resource {
+    fn rand(ctx: &Context) -> Self {
+        // Set UID
+        let uid = Uuid::new_v4();
+
+        //  Get RNG thread handle and generate random centerpoint
+        let mut rng = rand::thread_rng();
+
+        // Generate random properties
+        let element: Element = rng.gen();
+        let state: State = rng.gen();
+
+        // Constrain max resource radius to 1/4 of the total grid
+        let radius: usize = rng.gen_range(0, ctx.max_resource_radius());
+
+        // Generate a random coords::Position object that won't spill outside the grid
+        let mut coords = Vec::new();
+        coords.push(coords::Position::rand_constrained(ctx, radius).unwrap());
+
+        Self {
+            uid,
+            element,
+            state,
+            coords,
+            radius,
+        }
     }
 }
 

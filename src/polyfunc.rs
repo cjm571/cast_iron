@@ -54,14 +54,24 @@ impl PolyFunc {
     }
 
     /// Construct a random polynomial function within the given constraints
-    pub fn rand_constrained(max_magnitude: f64, max_duration: f64, start_time: f64) -> Self {
+    pub fn rand_constrained(max_magnitude: f64, max_duration: f64) -> Self {
         // Generate random values within constraints
         let mut rng = rand::thread_rng();
 
         let magnitude: f64 = rng.gen_range(0.0, max_magnitude);
         let duration: f64 = rng.gen_range(0.0, max_duration);
+        let start_time: f64 = rng.gen();
         
         Self {magnitude, duration, start_time}
+    }
+
+
+    /* Builder Methods */
+    
+    pub fn starting_at(mut self, start_time: f64) -> Self {
+        self.start_time = start_time;
+        
+        self
     }
 
 

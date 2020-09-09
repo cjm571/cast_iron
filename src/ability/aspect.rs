@@ -24,7 +24,7 @@ Purpose:
 
 use std::fmt;
 
-use crate::environment::element::Element;
+use crate::element::Element;
 
 
 ///////////////////////////////////////////////////////////////////////////////

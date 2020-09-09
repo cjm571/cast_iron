@@ -284,7 +284,7 @@ mod tests {
     use super::*;
     use ::ability::Ability;
     use ::ability::aspect::*;
-    use ::environment::element::Element;
+    use ::element::Element;
 
     // Helper functions
     fn create_p1() -> Actor{

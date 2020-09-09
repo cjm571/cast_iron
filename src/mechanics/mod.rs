@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-Filename : environment/mod.rs
+Filename : mechanics/mod.rs
 
 Copyright (C) 2017 CJ McAllister
     This program is free software; you can redistribute it and/or modify
@@ -15,18 +15,16 @@ Copyright (C) 2017 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    Defines the structures and interactions that make up the environment
-    in which the actors perform their actions. Provides functions pertaining
-    to both immediate and atmospheric conditions.
+    Defines the various mechanics that will interact within the CastIron engine.
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Module Declarations
 ///////////////////////////////////////////////////////////////////////////////
 
 #[macro_use]
-pub mod element;
 pub mod obstacle;
 pub mod resource;
 pub mod weather;

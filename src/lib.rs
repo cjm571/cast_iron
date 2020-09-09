@@ -73,8 +73,28 @@ pub mod ability;
 pub mod actor;
 pub mod context;
 pub mod coords;
-pub mod environment;
+pub mod element;
 pub mod fileops;
 pub mod hex_directions;
 pub mod logger;
+pub mod mechanics;
 pub mod polyfunc;
+
+use crate::context::Context;
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  Trait Declarations
+///////////////////////////////////////////////////////////////////////////////
+
+
+//OPT: *STYLE* This needs a better name...
+pub trait Locatable {
+    /// Implementor-defined function to return all coordinate positions associated with the instance.
+    fn all_coords(&self) -> &Vec<coords::Position>;
+}
+
+pub trait Randomizable {
+    /// Implementor-defined function to generate a random instance of itself.
+    fn rand(ctx: &Context) -> Self;
+}

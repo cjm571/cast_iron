@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-Filename : environment/weather.rs
+Filename : mechanics/weather.rs
 
 Copyright (C) 2017 CJ McAllister
     This program is free software; you can redistribute it and/or modify
@@ -26,11 +26,13 @@ Purpose:
 
 //FEAT: Regional (and global?) weather events
 use crate::{
-    environment::element::{
+    context::Context,
+    element::{
         Element,
-        Elemental
+        Elemental,
     },
-    polyfunc::PolyFunc
+    polyfunc::PolyFunc,
+    Randomizable,
 };
 
 use rand::Rng;
@@ -49,12 +51,6 @@ const STRONG_INTENSITY_RANGE_MIN:   i64 = 128;
 const STRONG_INTENSITY_RANGE_MAX:   i64 = 191;
 const SEVERE_INTENSITY_RANGE_MIN:   i64 = 192;
 const SEVERE_INTENSITY_RANGE_MAX:   i64 = 255;
-
-//OPT: *DESIGN* This should be configurable, and also need to consider if we're tied to framerate
-/// Maximum duration for a weather event (in seconds)
-pub const MAX_DURATION:             f64 = 10.0;
-/// Maximum intensity of a weather event
-pub const MAX_INTENSITY:            f64 = 256.0;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,16 +83,14 @@ impl Event {
         Self {element, function}
     }
 
-    /// Generate a random weather effect at the given tick
-    pub fn rand_starting_at(tick: f64) -> Self {
-        let mut rng = rand::thread_rng();
 
-        let element: Element = rng.gen();
-        let function = PolyFunc::rand_constrained(MAX_INTENSITY, MAX_DURATION, tick);
-
-        Self {element, function}
+    /* Builder Methods */
+    
+    pub fn starting_at(mut self, start_time: f64) -> Self {
+        self.function = self.function.starting_at(start_time);
+        
+        self
     }
-
 
     ///
     // Mutator Methods
@@ -143,7 +137,9 @@ impl Intensity {
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-/* Intensity */
+/*  *  *  *  *  *\
+ *  Intensity   *
+\*  *  *  *  *  */
 impl Default for Intensity {
     fn default() -> Self {
         Self::None
@@ -174,9 +170,21 @@ impl From<Intensity> for String {
 }
 
 
-/* Event */
+/*  *  *  *  *\
+ *  Event    *
+\*  *  *  *  */
 impl Elemental for Event {
     fn element(&self) -> Element {
         self.element
+    }
+}
+impl Randomizable for Event {
+    fn rand(ctx: &Context) -> Self {
+        let mut rng = rand::thread_rng();
+
+        let element: Element = rng.gen();
+        let function = PolyFunc::rand_constrained(ctx.max_weather_intensity(), ctx.max_weather_duration());
+
+        Self {element, function}
     }
 }

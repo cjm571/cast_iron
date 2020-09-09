@@ -25,19 +25,37 @@ Purpose:
 ///////////////////////////////////////////////////////////////////////////////
 
 /* CastIron Game Defaults */
-const DEFAULT_GRID_RADIUS:          usize = 10;
-const DEFAULT_MAX_RESOURCE_RADIUS:  usize = 4;
-const DEFAULT_MAX_OBSTACLE_LENGTH:  usize = 10;
+/// Default hexagonal grid radius (in cells)
+const DEFAULT_GRID_RADIUS:              usize = 10;
+
+/// Default maximum number of attempts before considering random mechanic generation a failure
+const DEFAULT_MAX_RAND_ATTEMPTS:        usize = 10;
+
+/// Default maximum for the radius of resources (in cells)
+const DEFAULT_MAX_RESOURCE_RADIUS:      usize = 4;
+
+/// Default maximum for the length of an obstacle (in cells)
+const DEFAULT_MAX_OBSTACLE_LENGTH:      usize = 10;
+
+/// Default maximum intensity of a weather event
+const DEFAULT_MAX_WEATHER_INTENSITY:    f64 = 256.0;
+
+/// Default maximum duration for a weather event (in seconds)
+const DEFAULT_MAX_WEATHER_DURATION:     f64 = 10.0;
 
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data structures
 ///////////////////////////////////////////////////////////////////////////////
 
+#[derive(Clone)]
 pub struct Context {
     grid_radius:            usize,
+    max_rand_attempts:      usize,
     max_resource_radius:    usize,
     max_obstacle_len:       usize,
+    max_weather_intensity:  f64,
+    max_weather_duration:   f64,
 }
 
 
@@ -48,11 +66,19 @@ pub struct Context {
 impl Context {
     //OPT: *STYLE* Make a builder class
     /// Fully-qualified constructor
-    pub fn new(grid_radius: usize, max_resource_radius: usize, max_obstacle_len: usize) -> Self {
+    pub fn new(grid_radius: usize,
+               max_resource_radius: usize,
+               max_rand_attempts: usize,
+               max_obstacle_len: usize,
+               max_weather_intensity: f64,
+               max_weather_duration: f64,) -> Self {
         Self {
             grid_radius,
+            max_rand_attempts,
             max_resource_radius,
             max_obstacle_len,
+            max_weather_intensity,
+            max_weather_duration,
         }
     }
 
@@ -65,12 +91,24 @@ impl Context {
         self.grid_radius
     }
 
+    pub fn max_rand_attempts(&self) -> usize {
+        self.max_rand_attempts
+    }
+
     pub fn max_resource_radius(&self) -> usize {
         self.max_resource_radius
     }
 
     pub fn max_obstacle_len(&self) -> usize {
         self.max_obstacle_len
+    }
+
+    pub fn max_weather_intensity(&self) -> f64 {
+        self.max_weather_intensity
+    }
+
+    pub fn max_weather_duration(&self) -> f64 {
+        self.max_weather_duration
     }
 }
 
@@ -83,8 +121,11 @@ impl Default for Context {
     fn default() -> Self {
         Self {
             grid_radius:            DEFAULT_GRID_RADIUS,
+            max_rand_attempts:      DEFAULT_MAX_RAND_ATTEMPTS,
             max_resource_radius:    DEFAULT_MAX_RESOURCE_RADIUS,
             max_obstacle_len:       DEFAULT_MAX_OBSTACLE_LENGTH,
+            max_weather_intensity:  DEFAULT_MAX_WEATHER_INTENSITY,
+            max_weather_duration:   DEFAULT_MAX_WEATHER_DURATION,
         }
     }
 }
