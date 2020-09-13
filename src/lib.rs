@@ -90,8 +90,8 @@ use crate::context::Context;
 
 //OPT: *STYLE* This needs a better name...
 pub trait Locatable {
-    /// Implementor-defined function to return all coordinate positions associated with the instance.
-    fn all_coords(&self) -> &Vec<coords::Position>;
+    /// Implementor-defined function to return the origin (center/starting) point of the object.
+    fn origin(&self) -> &coords::Position;
 }
 
 pub trait Randomizable {

@@ -30,11 +30,17 @@ use crate::{
     context::Context,
     coords,
     hex_directions,
+    Locatable,
+    Randomizable,
 };
 
+use rand::{
+    Rng,
+    distributions::Alphanumeric,
+};
 use uuid::Uuid;
 
-
+//FEAT: Full phylogeny for actor? could be cool way to procedurally generate enemies using features of KPCOFGS hierarchy
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,14 +58,13 @@ pub struct Actor {
 ///////////////////////////////////////////////////////////////////////////////
 //  Object Implementatoin
 ///////////////////////////////////////////////////////////////////////////////
+
 impl Actor {
     /// Fully-qualified constructor
-    pub fn new(
-        name:           &'static str,
-        pos:            coords::Position,
-        cur_fatigue:    u8,
-        abilities:      Vec<Ability>,
-    ) -> Self {
+    pub fn new(name:        &'static str,
+               pos:         coords::Position,
+               cur_fatigue: u8,
+               abilities:   Vec<Ability>) -> Self {
         Self {
             uid:    Uuid::new_v4(),
             name:   name.to_string(),
@@ -185,6 +190,10 @@ impl Actor {
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//  Trait Implementations
+///////////////////////////////////////////////////////////////////////////////
+
 // Display output format for actors
 // [UID]:[Name]:[Position]:[Fatigue]:[Abilities (CSV)]
 impl fmt::Display for Actor {
@@ -201,6 +210,44 @@ impl fmt::Display for Actor {
         }
 
         res
+    }
+}
+impl Locatable for Actor {
+    fn origin(&self) -> &coords::Position {
+        &self.pos
+    }
+}
+impl Randomizable for Actor {
+    fn rand(ctx: &Context) -> Self {
+        // Generate UUID
+        let uid = Uuid::new_v4();
+
+        //OPT: *DESIGN* Pull from list of actual names or something
+        // Generate random name
+        let name: String = rand::thread_rng().sample_iter(&Alphanumeric)
+                                             .take(10)
+                                             .collect();
+
+        // Generate a random position
+        let pos: coords::Position = coords::Position::rand(ctx);
+
+        // New actor, so fatigue should be 0
+        let cur_fatigue = 0;
+
+        //OPT: *DESIGN* Make the count random as well
+        // Generate random abilities
+        let mut abilities: Vec<Ability> = Vec::new();
+        for _i in 0 .. 5 {
+            abilities.push(Ability::rand(ctx));
+        }
+
+        Self {
+            uid,
+            name,
+            pos,
+            cur_fatigue,
+            abilities,
+        }
     }
 }
 

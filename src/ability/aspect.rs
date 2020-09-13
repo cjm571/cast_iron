@@ -24,7 +24,13 @@ Purpose:
 
 use std::fmt;
 
-use crate::element::Element;
+use crate::{
+    context::Context,
+    element::Element,
+    Randomizable,
+};
+
+use rand::Rng;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,6 +39,8 @@ use crate::element::Element;
 
 // Difference between numerical and ASCII value of a number character
 const ASCII_TO_VAL_CONVERSION_VAL: usize = 48;
+
+//OPT: *DESIGN* Could use an explicit declaration of enum min/maxes
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,19 +107,17 @@ pub struct Aspects {
 
 impl Aspects {
     /// Fully-qualified constructor
-    pub fn new(
-        aesthetics: Aesthetics,
-        element:    Element,
-        method:     Method,
-        morality:   Morality,
-        school:     School
-    ) -> Self {
+    pub fn new(aesthetics: Aesthetics,
+               element:    Element,
+               method:     Method,
+               morality:   Morality,
+               school:     School) -> Self {
         Self {
             aesthetics,
             element,
             method,
             morality,
-            school
+            school,
         }
     }
 }
@@ -237,5 +243,26 @@ impl fmt::Display for Aspects {
 impl fmt::Debug for Aspects {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Aspects: {{{:?}, {:?}, {:?}, {:?}, {:?}}}", self.aesthetics, self.element, self.method, self.morality, self.school)
+    }
+}
+impl Randomizable for Aspects {
+    fn rand(_ctx: &Context) -> Self {
+        // Start randomization thread
+        let mut rng = rand::thread_rng();
+        
+        //OPT: *STYLE* magic numbers! and these should just be rand() calls
+        let aesthetics  = Aesthetics::from(rng.gen_range(0, 6) as usize);
+        let element     = Element::from(rng.gen_range(1, 9) as usize);
+        let method      = Method::from(rng.gen_range(0, 5) as usize);
+        let morality    = Morality::from(rng.gen_range(0, 4) as usize);
+        let school      = School::from(rng.gen_range(0, 8) as usize);
+
+        Self {
+            aesthetics,
+            element,
+            method,
+            morality,
+            school,
+        }
     }
 }

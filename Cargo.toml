@@ -1,6 +1,6 @@
 [package]
 name = "cast_iron"
-version = "0.5.0"
+version = "0.5.1"
 authors = ["CJ McAllister <cjm571@gmail.com>"]
 
 [dependencies]

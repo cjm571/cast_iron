@@ -27,8 +27,16 @@ use std::{
     str::FromStr
 };
 
-use crate::element::Element;
+use crate::{
+    context::Context,
+    element::Element,
+    Randomizable,
+};
 
+use rand::{
+    Rng,
+    distributions::Alphanumeric,
+};
 use uuid::Uuid;
 
 
@@ -174,6 +182,11 @@ impl Ability {
 
 /* NOTE: Default trait intentionally omitted for this object */
 
+impl fmt::Display for Ability {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}:{}:{}:{}", self.uid(), self.name(), self.potency(), self.aspects())
+    }
+}
 impl From<&String> for Ability {
     fn from (src: &String) -> Self {
         // Tokenize on ":"
@@ -204,8 +217,27 @@ impl PartialEq for Ability {
         self.uid == other.uid
     }
 }
-impl fmt::Display for Ability {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}:{}:{}:{}", self.uid(), self.name(), self.potency(), self.aspects())
+impl Randomizable for Ability {
+    fn rand(ctx: &Context) -> Self {
+        // Generate UUID
+        let uid = Uuid::new_v4();
+
+        //OPT: *DESIGN* Pull from list of actual names or something
+        // Generate random name
+        let mut rng = rand::thread_rng();
+        let name: String = rng.sample_iter(&Alphanumeric).take(10).collect();
+
+        // Generate random potency
+        let potency: usize = rng.gen();
+
+        // Generate random aspects
+        let aspects = Aspects::rand(ctx);
+
+        Self {
+            uid,
+            name,
+            potency,
+            aspects,
+        }
     }
 }

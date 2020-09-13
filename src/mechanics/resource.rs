@@ -51,7 +51,7 @@ pub struct Resource {
     uid:        Uuid,
     element:    Element,
     state:      State,
-    coords:     Vec<coords::Position>,
+    origin:     coords::Position,
     radius:     usize,
 }
 
@@ -73,12 +73,12 @@ pub enum State {
 
 impl Resource {
     /// Fully-qualified constructor
-    pub fn new(element: Element, state: State, coords: Vec<coords::Position>, radius: usize) -> Self {
+    pub fn new(element: Element, state: State, origin: coords::Position, radius: usize) -> Self {
         Self {
             uid: Uuid::new_v4(),
             element,
             state,
-            coords,
+            origin,
             radius,
         }
     }
@@ -148,11 +148,6 @@ impl Resource {
         self.state
     }
 
-    //OPT: *DESIGN* maybe this should be center_coords
-    pub fn coords(&self) -> &coords::Position {
-        self.coords.last().unwrap()
-    }
-
     pub fn radius(&self) -> usize {
         self.radius
     }
@@ -168,14 +163,11 @@ impl Resource {
 ///
 impl Default for Resource {
     fn default() -> Self {
-        let mut default_coords = Vec::new();
-        default_coords.push(coords::Position::default());
-        
         Self {
             uid:        Uuid::new_v4(),
             element:    Element::default(),
             state:      State::default(),
-            coords:     default_coords,
+            origin:     coords::Position::default(),
             radius:     0,
         }
     }
@@ -186,8 +178,8 @@ impl Elemental for Resource {
     }
 }
 impl Locatable for Resource {
-    fn all_coords(&self) -> &Vec<coords::Position> {
-        &self.coords
+    fn origin(&self) -> &coords::Position {
+        &self.origin
     }
 }
 impl Randomizable for Resource {
@@ -206,14 +198,13 @@ impl Randomizable for Resource {
         let radius: usize = rng.gen_range(0, ctx.max_resource_radius());
 
         // Generate a random coords::Position object that won't spill outside the grid
-        let mut coords = Vec::new();
-        coords.push(coords::Position::rand_constrained(ctx, radius).unwrap());
+        let origin = coords::Position::rand_constrained(ctx, radius).unwrap();
 
         Self {
             uid,
             element,
             state,
-            coords,
+            origin,
             radius,
         }
     }

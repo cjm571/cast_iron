@@ -72,12 +72,16 @@ impl Obstacle {
     }
     
     
-    ///
-    //  Accessor Methods
-    ///
+    /*  *  *  *  *  *  *\
+     * Accessor Methods *
+    \*  *  *  *  *  *  */
     
     pub fn uid(&self) -> Uuid {
         self.uid
+    }
+    
+    pub fn all_coords(&self) -> &Vec<coords::Position> {
+        &self.all_coords
     }
 }
 
@@ -92,8 +96,8 @@ impl Elemental for Obstacle {
     }
 }
 impl Locatable for Obstacle {
-    fn all_coords(&self) -> &Vec<coords::Position> {
-        &self.all_coords
+    fn origin(&self) -> &coords::Position {
+        self.all_coords.first().unwrap()
     }
 }
 impl Randomizable for Obstacle {

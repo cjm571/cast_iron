@@ -95,7 +95,7 @@ impl From<usize> for Element {
             6 => Element::Earth,
             7 => Element::Light,
             8 => Element::Dark,
-            _ => panic!("environment::Element::from: Element value out of range")
+            _ => panic!("environment::Element::from: Element value ({}) out of range", src)
         }
     }
 }
