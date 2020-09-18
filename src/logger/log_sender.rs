@@ -47,7 +47,9 @@ impl LogSender {
     }
 
 
-    /* Utility Methods */
+    /*  *  *  *  *  *  *  *
+     *  Utility Methods   *
+     *  *  *  *  *  *  *  */
 
     pub fn send_log(&self, logger_cmd: logger::Command) -> Result<(), mpsc::SendError<logger::Command>> {
         self.logger_tx.send(logger_cmd)

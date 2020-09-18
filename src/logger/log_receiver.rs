@@ -63,9 +63,9 @@ impl LogReceiver {
     }
 
 
-    /*  *  *  *  *  *  *\
+    /*  *  *  *  *  *  *
      * Utility Methods *
-    \*  *  *  *  *  *  */
+     *  *  *  *  *  *  */
 
     /// Main loop for recieving logger commands
     pub fn main(&mut self) {

@@ -99,6 +99,7 @@ impl PolyFunc {
     //FEAT: A find-max function could be very useful
     /* Utility Methods */
 
+    //OPT: *STYLE* "tick" isn't a good name
     // Solves the polynomial function at the given game time tick
     pub fn solve(&self, tick: f64) -> f64 {
         let a: f64 = self.magnitude / (self.duration / 2.0).powi(2);

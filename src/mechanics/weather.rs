@@ -24,7 +24,8 @@ Purpose:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-//FEAT: Regional (and global?) weather events
+use std::time::Duration;
+
 use crate::{
     context::Context,
     element::{
@@ -57,6 +58,7 @@ const SEVERE_INTENSITY_RANGE_MAX:   i64 = 255;
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
+//FEAT: Regional (and global?) weather events
 #[derive(Debug, Default)]
 pub struct Event {
     element:    Element,
@@ -84,17 +86,20 @@ impl Event {
     }
 
 
-    /* Builder Methods */
+    /*  *  *  *  *  *  *  *
+     *  Builder Methods   *
+     *  *  *  *  *  *  *  */
     
-    pub fn starting_at(mut self, start_time: f64) -> Self {
-        self.function = self.function.starting_at(start_time);
+    pub fn starting_at(mut self, start_time: Duration) -> Self {
+        self.function = self.function.starting_at(start_time.as_secs_f64());
         
         self
     }
 
-    ///
-    // Mutator Methods
-    ///
+
+    /*  *  *  *  *  *  *  *
+     *  Mutator Methods   *
+     *  *  *  *  *  *  *  */
 
     /// Changes the kind of weather to the given Element
     pub fn change(&mut self, element: Element) {
@@ -102,10 +107,11 @@ impl Event {
     }
 
 
-    ///
-    // Accessor Methods
-    ///
+    /*  *  *  *  *  *  *  *
+     *  Accesspr Methods  *
+     *  *  *  *  *  *  *  */
 
+    //OPT: *STYLE* "tick" isn't a good name
     pub fn intensity(&self, tick: f64) -> Intensity {
         Intensity::from(self.function.solve(tick) as i64)
     }
@@ -114,8 +120,8 @@ impl Event {
         self.function.solve(tick)
     }
 
-    pub fn duration(&self) -> f64 {
-        self.function.duration()
+    pub fn duration(&self) -> Duration {
+        Duration::from_secs_f64(self.function.duration())
     }
 }
 

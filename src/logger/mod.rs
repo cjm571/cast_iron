@@ -15,7 +15,7 @@ Copyright (C) 2020 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    This module will provide data structures and functions for that provide
+    This module will provide data structures and functions that provide
     1st-party logging functionality for game events.
 
 !!!USAGE NOTE!!!
