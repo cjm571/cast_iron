@@ -83,8 +83,9 @@ pub enum Command {
 
 #[derive(Clone)]
 pub struct Instance {
-    sender: LogSender,
-    filter: u8
+    enabled:    bool,
+    sender:     LogSender,
+    filter:     u8
 }
 
 
@@ -112,31 +113,57 @@ impl Instance {
         logger_instance
     }
 
-    /* Accessor Methods */
+    //OPT: *DESIGN* Would be cool to make a Disablable trait
+    pub fn disabled() -> Self {
+        // Create dummy channel handles
+        let (dummy_tx, _dummy_rx) = mpsc::channel::<Command>();
+        
+        // Initialize dummy sender struct
+        let dummy_sender = LogSender::new(dummy_tx);
+
+        Self {
+            enabled:    false,
+            sender:     dummy_sender,
+            filter:     FilterLevel::Fatal as u8,
+        }
+    }
+
+    
+    /*  *  *  *  *  *  *  *
+     *  Accessor Methods  *
+     *  *  *  *  *  *  *  */
 
     pub fn filter(&self) -> u8 {
         self.filter
     }
 
 
-    /* Mutator Methods */
+    /*  *  *  *  *  *  *  *
+     *  Mutator Methods   *
+     *  *  *  *  *  *  *  */
 
     pub fn set_filter(&mut self, new_filter: u8) {
         self.filter = new_filter;
     }
+    
+    /// Disables the logger instance
+    pub fn disable(&mut self) {
+        self.enabled = false;
+    }
 
 
-    /* Utility Methods */
+    /*  *  *  *  *  *  *  *
+     *  Utility Methods   *
+     *  *  *  *  *  *  *  */
 
-    pub fn log_msg(
-        &self,
-        level: FilterLevel,
-        fn_name: String,
-        line: u32,
-        msg: String) -> Result<(), SendError<Command>> {
+    pub fn log_msg(&self,
+                   level: FilterLevel,
+                   fn_name: String,
+                   line: u32,
+                   msg: String) -> Result<(), SendError<Command>> {
         //OPT: *DESIGN* Proper filter masking instead of greater-than check
         // Check filter and send message if it passes
-        if level as u8 >= self.filter {
+        if self.enabled && level as u8 >= self.filter {
             // Package log message into tuple and send
             let log_tuple = MsgTuple {
                 level,
@@ -151,7 +178,12 @@ impl Instance {
     }
 
     pub fn log_cmd(&self, cmd: Command) -> Result<(), SendError<Command>> {
-        self.sender.send_cmd(cmd)
+        if self.enabled {
+            self.sender.send_cmd(cmd)
+        }
+        else {
+            Ok(())
+        }
     }
 }
 
@@ -179,8 +211,9 @@ impl Default for Instance {
         let log_sender = LogSender::new(logger_tx);
 
         Self {
-            sender: log_sender,
-            filter: FilterLevel::Info as u8
+            enabled:    true,
+            sender:     log_sender,
+            filter:     FilterLevel::Info as u8
         }
     }
 }
