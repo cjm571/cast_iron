@@ -62,14 +62,14 @@ use rand::Rng;
 //  Data structures
 ///////////////////////////////////////////////////////////////////////////////
 
-#[derive(Default, Copy, Clone, PartialEq)]
+#[derive(Default, Copy, Clone, Hash, Eq, PartialEq)]
 pub struct Position {
     x: i32,
     y: i32,
     z: i32,
 }
 
-#[derive(Default, Copy, Clone, PartialEq)]
+#[derive(Default, Copy, Clone, Eq, PartialEq)]
 pub struct Translation {
     x: i32,
     y: i32,
@@ -124,9 +124,9 @@ impl Position {
     }
 
 
-    ///
-    // Accessor Methods
-    ///
+    /*  *  *  *  *  *  *  *\
+     *  Accessor Methods  *
+    \*  *  *  *  *  *  *  */
 
     pub fn x(&self) -> i32
     {
@@ -142,9 +142,9 @@ impl Position {
     }
 
 
-    ///
-    // Mutator Methods
-    ///
+    /*  *  *  *  *  *  *  *\
+     *  Mutator Methods   *
+    \*  *  *  *  *  *  *  */
 
     /// Moves the position one cell in the given direction
     pub fn move_one_cell(&mut self, dir: hex_directions::Side, ctx: &Context) -> Result<(), ValidityError> {
@@ -159,9 +159,9 @@ impl Position {
     }
 
 
-    ///
-    // Utility Methods
-    ///
+    /*  *  *  *  *  *  *  *\
+     *  Utility Methods   *
+    \*  *  *  *  *  *  *  */
 
     /// Determines if moving one cell in the given direction is valid
     pub fn can_move_one_cell(&self, dir: hex_directions::Side, ctx: &Context) -> Result<(), ValidityError> {
@@ -170,9 +170,9 @@ impl Position {
     }
 
 
-    ///
-    // Helper Methods
-    ///
+    /*  *  *  *  *  *  *  *\
+     *  Helper Methods    *
+    \*  *  *  *  *  *  *  */
 
     /// Sanity check
     fn is_sane(&self, ctx: &Context) -> Result<(), ValidityError> {
@@ -203,18 +203,21 @@ impl Translation {
         }
     }
 
-    ///
-    // Accessor Methods
-    ///
+
+    /*  *  *  *  *  *  *  *\
+     *  Accessor Methods  *
+    \*  *  *  *  *  *  *  */
 
     pub fn x(&self) -> i32
     {
         self.x
     }
+
     pub fn y(&self) -> i32
     {
         self.y
     }
+
     pub fn z(&self) -> i32
     {
         self.z

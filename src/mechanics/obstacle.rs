@@ -66,7 +66,7 @@ impl Obstacle {
     pub fn new(all_coords: Vec<coords::Position>, element: Element) -> Self {
         Self {
             uid: Uuid::new_v4(),
-            all_coords, //FIXME: Need to validate that coords are contiguous
+            all_coords, //TODO: Need to validate that coords are contiguous
             element,
         }
     }

@@ -201,7 +201,7 @@ impl Default for Instance {
 
         //OPT: *PERFORMANCE* Would be better to set the receiver thread's priority as low as possible
         // Initialize receiver struct, build and spawn thread
-        let mut log_receiver = LogReceiver::new(logger_rx, OutputType::File);
+        let mut log_receiver = LogReceiver::new(logger_rx, OutputType::Both);
         thread::Builder::new()
             .name("log_receiver".to_owned())
             .spawn(move || log_receiver.main())
