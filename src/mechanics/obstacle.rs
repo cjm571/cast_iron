@@ -52,9 +52,13 @@ const OBSTACLE_TERMINATION_ODDS: f32 = 0.05;
 #[derive(Debug)]
 pub struct Obstacle {
     uid:        Uuid,
-    all_coords: Vec<coords::Position>,
+    positions:  Vec<coords::Position>,
     element:    Element
 }
+
+//OPT: *DESIGN* Proper error implementation
+#[derive(Debug)]
+pub struct ObstacleError;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,25 +67,37 @@ pub struct Obstacle {
 
 impl Obstacle {
     /// Fully-qualified constructor
-    pub fn new(all_coords: Vec<coords::Position>, element: Element) -> Self {
-        Self {
-            uid: Uuid::new_v4(),
-            all_coords, //TODO: Need to validate that coords are contiguous
-            element,
+    pub fn new(positions: Vec<coords::Position>, element: Element) -> Result<Self, ObstacleError> {
+        // Verify that all positions in list are contiguous
+        let mut prev_pos = positions.first().unwrap();
+        for pos in positions.iter() {
+            if pos.is_neighbor(prev_pos) {
+                prev_pos = pos;
+            }
+            else { // Noncontiguity detected!
+                return Err(ObstacleError)
+            }
         }
+        
+
+        Ok(Self {
+            uid: Uuid::new_v4(),
+            positions,
+            element,
+        })
     }
     
     
-    /*  *  *  *  *  *  *\
-     * Accessor Methods *
-    \*  *  *  *  *  *  */
+    /*  *  *  *  *  *  *  *\
+     *  Accessor Methods  *
+    \*  *  *  *  *  *  *  */
     
     pub fn uid(&self) -> Uuid {
         self.uid
     }
     
-    pub fn all_coords(&self) -> &Vec<coords::Position> {
-        &self.all_coords
+    pub fn positions(&self) -> &Vec<coords::Position> {
+        &self.positions
     }
 }
 
@@ -97,7 +113,7 @@ impl Elemental for Obstacle {
 }
 impl Locatable for Obstacle {
     fn origin(&self) -> &coords::Position {
-        self.all_coords.first().unwrap()
+        self.positions.first().unwrap()
     }
 }
 impl Randomizable for Obstacle {
@@ -107,12 +123,12 @@ impl Randomizable for Obstacle {
 
         //  Get RNG thread handle and generate random origin
         let mut rng = rand::thread_rng();
-        let rand_origin_coords = coords::Position::rand(ctx);
-        let mut all_coords = Vec::new();
-        all_coords.push(rand_origin_coords);
+        let rand_origin = coords::Position::rand(ctx);
+        let mut positions = Vec::new();
+        positions.push(rand_origin);
 
         // Up to Context's constraint, make a randomly-snaking string of coords::Position objects
-        let mut last_coord = rand_origin_coords;
+        let mut trial_pos = rand_origin;
         let mut direction_provider: hex_directions::Provider<hex_directions::Side>;
         for _i in 0 .. ctx.max_obstacle_len() {
             // Long, snaking objects are cooler, so we want a bit better odds than a coinflip
@@ -124,34 +140,36 @@ impl Randomizable for Obstacle {
             // Re-roll the direction provider on each iteration so we don't keep turning in the same pattern
             direction_provider = rng.gen();
 
-            // It's possible the current coords are completely surrounded, so use this flag to determine
+            // It's possible the current position is completely surrounded, so use this flag to determine
             // if we should stop the obstacle here
-            let mut found_good_coords = false;
+            let mut found_good_position = false;
 
             for direction in direction_provider {
-                // Create a temporary copy of the last position, to check if the current direction is a valid destination
-                let mut trial_coord = last_coord;
-                match trial_coord.move_one_cell(direction, ctx) {
-                    Ok(()) => {},       // Move succeeded, do nothing
-                    Err(_e) => continue // Move failed, try another direction
+                //OPT: *DESIGN* Could really use a one-stop "can i move here?" method here...
+                // Determine if we can move in the current direction
+                let trans = coords::Translation::from(direction);
+                match trial_pos.can_translate(&trans, ctx) {
+                    Ok(())  => trial_pos = trial_pos + trans,   // Translation is valid, perform it and carry on
+                    Err(_e) => continue                         // Translation is invalid, try another direction
                 };
 
                 //FEAT: Need to do a global collision check here?
 
                 // Ensure the new position does not double-back on an existing obstacle cell 
-                if all_coords.contains(&trial_coord) {
+                if positions.contains(&trial_pos) {
+                    // Undo the translation and continue
+                    trial_pos = trial_pos - trans;
                     continue;
                 }
 
                 // All checks passed!
-                last_coord = trial_coord;
-                found_good_coords = true;
+                found_good_position = true;
                 break;
             }
 
             // If we were able to find good Position, create an object and push it into the collection
-            if found_good_coords {
-                all_coords.push(coords::Position::new(last_coord.x(), last_coord.y(), last_coord.z(), ctx).unwrap());
+            if found_good_position {
+                positions.push(coords::Position::new(trial_pos.x(), trial_pos.y(), trial_pos.z(), ctx).unwrap());
             } else {
                 // Nowhere left to go! Stop the obstacle here
                 break;
@@ -161,6 +179,6 @@ impl Randomizable for Obstacle {
         // Finally, generate a random element
         let element: Element = rng.gen();
 
-        Self {uid, all_coords, element}
+        Self {uid, positions, element}
     }
 }

@@ -44,7 +44,6 @@ use std::{
     fmt,
     ops::{
         Add,
-        AddAssign,
         Sub,
     },
 };
@@ -69,7 +68,7 @@ pub struct Position {
     z: i32,
 }
 
-#[derive(Default, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
 pub struct Translation {
     x: i32,
     y: i32,
@@ -143,33 +142,104 @@ impl Position {
 
 
     /*  *  *  *  *  *  *  *\
-     *  Mutator Methods   *
+     *  Utility Methods   *
     \*  *  *  *  *  *  *  */
 
-    /// Moves the position one cell in the given direction
-    pub fn move_one_cell(&mut self, dir: hex_directions::Side, ctx: &Context) -> Result<(), ValidityError> {
-        // If the move can be made, do it
-        match self.can_move_one_cell(dir, ctx) {
-            Ok(()) => {
-                *self += Translation::from(dir);
-                Ok(())
-            },
+    /// Determines if the given translation is valid
+    pub fn can_translate(&self, trans: &Translation, ctx: &Context) -> Result<(), ValidityError> {
+        // Simulate the translation and return sanity check result
+        (self + trans).is_sane(ctx)
+    }
+
+    /// Determines if the given position is a neighbor of this position
+    pub fn is_neighbor(&self, other: &Self) -> bool {
+        let translation = self - other;
+
+        // A translation magnitude of one means the other position is adjacent to this one
+        translation.magnitude() == 1
+    }
+
+
+    /*  *  *  *  *  *  *  *\
+     *  Helper Methods    *
+    \*  *  *  *  *  *  *  */
+
+    /// Sanity check
+    fn is_sane(&self, ctx: &Context) -> Result<(), ValidityError> {
+        // Coordinate validity check
+        if self.x + self.y + self.z != 0 {
+            //TODO: Needs to be a different kind of error than below
+            return Err(ValidityError);
+        }
+
+        // Bounds check
+        if i32::abs(self.x) > ctx.grid_radius() as i32 ||
+           i32::abs(self.y) > ctx.grid_radius() as i32 ||
+           i32::abs(self.z) > ctx.grid_radius() as i32 {
+            return Err(ValidityError)
+        }
+
+        Ok(())
+    }
+}
+
+
+impl Translation {
+    /// Fully-qualified constructor
+    pub fn new(x: i32, y: i32, z: i32, ctx: &Context) -> Result<Self, ValidityError> {
+        let translation = Self {x, y, z};
+
+        // Sanity check
+        match translation.is_sane(ctx) {
+            Ok(()) => Ok(translation),
             Err(e) => Err(e),
         }
     }
 
 
     /*  *  *  *  *  *  *  *\
+     *  Accessor Methods  *
+    \*  *  *  *  *  *  *  */
+
+    pub fn x(&self) -> i32
+    {
+        self.x
+    }
+
+    pub fn y(&self) -> i32
+    {
+        self.y
+    }
+
+    pub fn z(&self) -> i32
+    {
+        self.z
+    }
+
+    
+    /*  *  *  *  *  *  *  *\
      *  Utility Methods   *
     \*  *  *  *  *  *  *  */
 
-    /// Determines if moving one cell in the given direction is valid
-    pub fn can_move_one_cell(&self, dir: hex_directions::Side, ctx: &Context) -> Result<(), ValidityError> {
-        // Simulate the translation and return sanity check result
-        (*self + Translation::from(dir)).is_sane(ctx)
+    /// Calculates and returns the magnitude of the translation i.e., the minimum number of hops required to accomplish it.
+    pub fn magnitude(&self) -> u32 {
+        let x_abs_mag = i32::abs(self.x) as u32;
+        let y_abs_mag = i32::abs(self.y) as u32;
+        let z_abs_mag = i32::abs(self.z) as u32;
+
+        // Return the coord component with the largest absolute value
+        if x_abs_mag > y_abs_mag && x_abs_mag > z_abs_mag {
+            x_abs_mag
+        }
+        else if y_abs_mag > z_abs_mag {
+            y_abs_mag
+        }
+        else {
+            z_abs_mag
+        }
     }
 
-
+    
     /*  *  *  *  *  *  *  *\
      *  Helper Methods    *
     \*  *  *  *  *  *  *  */
@@ -193,45 +263,14 @@ impl Position {
 }
 
 
-impl Translation {
-    /// Fully-qualified constructor
-    pub fn new(x: i32, y: i32, z: i32) -> Self {
-        Self {
-            x,
-            y,
-            z,
-        }
-    }
-
-
-    /*  *  *  *  *  *  *  *\
-     *  Accessor Methods  *
-    \*  *  *  *  *  *  *  */
-
-    pub fn x(&self) -> i32
-    {
-        self.x
-    }
-
-    pub fn y(&self) -> i32
-    {
-        self.y
-    }
-
-    pub fn z(&self) -> i32
-    {
-        self.z
-    }
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-///
-// Position
-///
+/*  *  *  *  *  *  *  *\
+ *  Position          *
+\*  *  *  *  *  *  *  */
+//OPT: *DESIGN* These should sanity-check the result, but that would require access to the context from within these functions...
 impl Add<Translation> for Position {
     type Output = Self;
 
@@ -243,9 +282,26 @@ impl Add<Translation> for Position {
         }
     }
 }
-impl AddAssign<Translation> for Position {
-    fn add_assign(&mut self, other: Translation) {
-        *self = self.add(other);
+impl Add<Translation> for &Position {
+    type Output = Position;
+
+    fn add(self, other: Translation) -> Self::Output {
+        Self::Output {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
+    }
+}
+impl Add<&Translation> for &Position {
+    type Output = Position;
+
+    fn add(self, other: &Translation) -> Self::Output {
+        Self::Output {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
     }
 }
 impl fmt::Debug for Position {
@@ -297,10 +353,23 @@ impl Sub for Position {
         }
     }
 }
+impl Sub for &Position {
+    type Output = Translation;
 
-///
-// Translation
-///
+    fn sub(self, other: Self) -> Self::Output {
+        Self::Output {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
+    }
+}
+
+
+/*  *  *  *  *  *  *  *\
+ *  Translation       *
+\*  *  *  *  *  *  *  */
+//OPT: *DESIGN* Would be better if this took an angle and a magnitude (what would the units of magnitude be though?)
 impl From<hex_directions::Side> for Translation {
     fn from(src: hex_directions::Side) -> Self {
         match src {

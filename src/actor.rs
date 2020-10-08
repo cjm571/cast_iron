@@ -149,9 +149,19 @@ impl Actor {
         self.name.push_str(_name);
     }
 
+    //OPT: *DESIGN* Replace with translatable trait or something
     /// Moves actor one cell in the given direction
-    pub fn move_one_cell(&mut self, dir: hex_directions::Side, ctx: &Context) {
-        self.pos.move_one_cell(dir, ctx).unwrap();
+    pub fn move_one_cell(&mut self, dir: hex_directions::Side, ctx: &Context) -> Result<(), coords::ValidityError> {
+        let trans = coords::Translation::from(dir);
+        
+        //OPT: *DESIGN* Violation of encapsulation - should not have to do sanity check here
+        match self.pos.can_translate(&trans, ctx) {
+            Ok(()) => {
+                self.pos = self.pos + trans;
+                Ok(())
+            },
+            Err(e) => Err(e),
+        }
     }
 
     // Adds ability to actor's ability list
