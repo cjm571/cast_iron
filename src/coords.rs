@@ -42,10 +42,7 @@ Purpose:
 use std::{
     error::Error,
     fmt,
-    ops::{
-        Add,
-        Sub,
-    },
+    ops::Neg,
 };
 
 use crate::{
@@ -159,15 +156,45 @@ impl Position {
      *  Utility Methods   *
     \*  *  *  *  *  *  *  */
 
-    /// Determines if the given translation is valid
-    pub fn can_translate(&self, trans: &Translation, ctx: &Context) -> Result<(), CoordsError> {
-        // Simulate the translation and return sanity check result
-        (self + trans).is_sane(ctx)
+    /// Determine the translation required to move from the given position to the current position.
+    pub fn delta_from(&self, other: &Self) -> Translation {
+        let x_delta = self.x - other.x();
+        let y_delta = self.y - other.y();
+        let z_delta = self.z - other.z();
+
+        Translation {
+            x: x_delta,
+            y: y_delta,
+            z: z_delta,
+        }
+    }
+    
+    /// Determine the translation required to move from the current position to the given position.
+    pub fn delta_to(&self, other: &Self) -> Translation {
+        let x_delta = other.x() - self.x;
+        let y_delta = other.y() - self.y;
+        let z_delta = other.z() - self.z;
+
+        Translation {
+            x: x_delta,
+            y: y_delta,
+            z: z_delta,
+        }
     }
 
+    /// Attempts to move the position by the given translation, returning an error if the translation
+    /// or the resulting position is invalid.
+    pub fn translate(&mut self, trans: &Translation, ctx: &Context) -> Result<(), CoordsError>  {
+        // Sanity check, propagate on failure
+        self.can_translate(trans, ctx)?;
+
+        // Check passed, perform translation
+        self.blind_translate(trans);
+        Ok(())
+    }
     /// Determines if the given position is a neighbor of this position
     pub fn is_neighbor(&self, other: &Self) -> bool {
-        let translation = self - other;
+        let translation = self.delta_from(other);
 
         // A translation magnitude of one means the other position is adjacent to this one
         translation.magnitude() == 1
@@ -178,7 +205,7 @@ impl Position {
      *  Helper Methods    *
     \*  *  *  *  *  *  *  */
 
-    /// Sanity check
+    /// Sanity check.
     fn is_sane(&self, ctx: &Context) -> Result<(), CoordsError> {
         // Coordinate validity check
         if self.x + self.y + self.z != 0 {
@@ -193,6 +220,23 @@ impl Position {
         }
 
         Ok(())
+    }
+
+    /// Blindly translates the position without sanity checking.
+    fn blind_translate(&mut self, trans: &Translation) {
+        self.x += trans.x();
+        self.y += trans.y();
+        self.z += trans.z();
+    }
+    
+    /// Determines if the given translation is valid
+    fn can_translate(&self, trans: &Translation, ctx: &Context) -> Result<(), CoordsError> {
+        // Simulate the translation and return sanity check result
+        let mut pos_clone = *self;
+        pos_clone.blind_translate(trans);
+        
+        //FEAT: Need to do a global collision check here?
+        pos_clone.is_sane(ctx)
     }
 }
 
@@ -283,40 +327,6 @@ impl Translation {
 /*  *  *  *  *  *  *  *\
  *  Position          *
 \*  *  *  *  *  *  *  */
-//OPT: *DESIGN* These should sanity-check the result, but that would require access to the context from within these functions...
-impl Add<Translation> for Position {
-    type Output = Self;
-
-    fn add(self, other: Translation) -> Self::Output {
-        Self::Output {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-        }
-    }
-}
-impl Add<Translation> for &Position {
-    type Output = Position;
-
-    fn add(self, other: Translation) -> Self::Output {
-        Self::Output {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-        }
-    }
-}
-impl Add<&Translation> for &Position {
-    type Output = Position;
-
-    fn add(self, other: &Translation) -> Self::Output {
-        Self::Output {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-        }
-    }
-}
 impl fmt::Debug for Position {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Position: {{X: {} Y: {} Z: {}}}", self.x, self.y, self.z)
@@ -344,39 +354,6 @@ impl Randomizable for Position {
         Self::new(rand_x, calc_rand_y, calc_z, ctx).unwrap()
     }
 }
-impl Sub<Translation> for Position {
-    type Output = Self;
-
-    fn sub(self, other: Translation) -> Self::Output {
-        Self::Output {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-        }
-    }
-}
-impl Sub for Position {
-    type Output = Translation;
-
-    fn sub(self, other: Self) -> Self::Output {
-        Self::Output {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-        }
-    }
-}
-impl Sub for &Position {
-    type Output = Translation;
-
-    fn sub(self, other: Self) -> Self::Output {
-        Self::Output {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-        }
-    }
-}
 
 
 /*  *  *  *  *  *  *  *\
@@ -392,6 +369,17 @@ impl From<hex_directions::Side> for Translation {
             hex_directions::Side::SOUTHWEST =>  Self {x: -1,    y: 0,   z: 1},
             hex_directions::Side::SOUTH     =>  Self {x: 0,     y: -1,  z: 1},
             hex_directions::Side::SOUTHEAST =>  Self {x: 1,     y: -1,  z: 0},
+        }
+    }
+}
+impl Neg for Translation {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
         }
     }
 }

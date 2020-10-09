@@ -145,20 +145,17 @@ impl Randomizable for Obstacle {
             let mut found_good_position = false;
 
             for direction in direction_provider {
-                //OPT: *DESIGN* Could really use a one-stop "can i move here?" method here...
                 // Determine if we can move in the current direction
                 let trans = coords::Translation::from(direction);
-                match trial_pos.can_translate(&trans, ctx) {
-                    Ok(())  => trial_pos = trial_pos + trans,   // Translation is valid, perform it and carry on
-                    Err(_e) => continue                         // Translation is invalid, try another direction
+                match trial_pos.translate(&trans, ctx) {
+                    Ok(())  => {},      // Translation is valid, carry on
+                    Err(_e) => continue // Translation is invalid, try another direction
                 };
-
-                //FEAT: Need to do a global collision check here?
 
                 // Ensure the new position does not double-back on an existing obstacle cell 
                 if positions.contains(&trial_pos) {
-                    // Undo the translation and continue
-                    trial_pos = trial_pos - trans;
+                    // Undo the translation and try another direction
+                    trial_pos.translate(&(-trans), ctx).expect("Could not undo translation after double-back detection.");
                     continue;
                 }
 

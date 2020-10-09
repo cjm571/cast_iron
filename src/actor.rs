@@ -96,19 +96,11 @@ impl Actor {
         self.name.push_str(_name);
     }
 
-    //OPT: *DESIGN* Replace with translatable trait or something
     /// Moves actor one cell in the given direction
     pub fn move_one_cell(&mut self, dir: hex_directions::Side, ctx: &Context) -> Result<(), coords::CoordsError> {
         let trans = coords::Translation::from(dir);
         
-        //OPT: *DESIGN* Violation of encapsulation - should not have to do sanity check here
-        match self.pos.can_translate(&trans, ctx) {
-            Ok(()) => {
-                self.pos = self.pos + trans;
-                Ok(())
-            },
-            Err(e) => Err(e),
-        }
+        self.pos.translate(&trans, ctx)
     }
 
     // Adds ability to actor's ability list
@@ -179,7 +171,7 @@ impl Randomizable for Actor {
         // Generate UUID
         let uid = *Uuid::new_v4().as_bytes();
 
-        //OPT: *DESIGN* Pull from list of actual names or something
+        //FEAT: Pull from list of actual names or something
         // Generate random name
         let name: String = rand::thread_rng().sample_iter(&Alphanumeric)
                                              .take(10)
