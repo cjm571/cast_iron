@@ -55,20 +55,33 @@ use crate::{
 };
 
 use rand::Rng;
+use serde::{Serialize, Deserialize};
 
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Data structures
 ///////////////////////////////////////////////////////////////////////////////
 
-#[derive(Default, Copy, Clone, Hash, Eq, PartialEq)]
+#[derive(
+    Default,
+    Copy, Clone,
+    Eq, PartialEq,
+    Hash,
+    Serialize, Deserialize
+)]
 pub struct Position {
     x: i32,
     y: i32,
     z: i32,
 }
 
-#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
+#[derive(
+    Default,
+    Copy, Clone,
+    Eq, PartialEq,
+    Hash,
+    Serialize, Deserialize
+)]
 pub struct Translation {
     x: i32,
     y: i32,
@@ -76,11 +89,12 @@ pub struct Translation {
 }
 
 //OPT: *DESIGN* Needs more specificity - i.e, can be due to invalid composition, out of bounds, etc
-#[derive(Debug, Clone)]
-pub struct ValidityError;
-
-#[derive(Debug, Clone)]
-pub struct ParamError;
+#[derive(Debug)]
+pub enum CoordsError {
+    InvalidComponents(i32, i32, i32),
+    InvalidParam(String),
+    OutOfBounds,
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,7 +103,7 @@ pub struct ParamError;
 
 impl Position {
     /// Fully-qualified constructor
-    pub fn new(x: i32, y: i32, z: i32, ctx: &Context) -> Result<Self, ValidityError> {
+    pub fn new(x: i32, y: i32, z: i32, ctx: &Context) -> Result<Self, CoordsError> {
         let pos = Self {x, y, z};
 
         // Sanity check
@@ -101,10 +115,10 @@ impl Position {
 
     /// Constructs a random, valid Position object within the constraints fo the game Context AND
     /// constrained the given number cells away from the edge of the hex grid
-    pub fn rand_constrained(ctx: &Context, dist_from_edge: usize) -> Result<Self, ParamError> {
+    pub fn rand_constrained(ctx: &Context, dist_from_edge: usize) -> Result<Self, CoordsError> {
         // Ensure that the distance from the edge is less than the Context's grid radius
         if dist_from_edge >= ctx.grid_radius() {
-            return Err(ParamError)
+            return Err(CoordsError::InvalidParam(String::from("dist_from_edge")))
         }
 
         let max_dist = (ctx.grid_radius() - dist_from_edge) as i32;
@@ -146,7 +160,7 @@ impl Position {
     \*  *  *  *  *  *  *  */
 
     /// Determines if the given translation is valid
-    pub fn can_translate(&self, trans: &Translation, ctx: &Context) -> Result<(), ValidityError> {
+    pub fn can_translate(&self, trans: &Translation, ctx: &Context) -> Result<(), CoordsError> {
         // Simulate the translation and return sanity check result
         (self + trans).is_sane(ctx)
     }
@@ -165,18 +179,17 @@ impl Position {
     \*  *  *  *  *  *  *  */
 
     /// Sanity check
-    fn is_sane(&self, ctx: &Context) -> Result<(), ValidityError> {
+    fn is_sane(&self, ctx: &Context) -> Result<(), CoordsError> {
         // Coordinate validity check
         if self.x + self.y + self.z != 0 {
-            //TODO: Needs to be a different kind of error than below
-            return Err(ValidityError);
+            return Err(CoordsError::InvalidComponents(self.x, self.y, self.z));
         }
 
         // Bounds check
         if i32::abs(self.x) > ctx.grid_radius() as i32 ||
            i32::abs(self.y) > ctx.grid_radius() as i32 ||
            i32::abs(self.z) > ctx.grid_radius() as i32 {
-            return Err(ValidityError)
+            return Err(CoordsError::OutOfBounds)
         }
 
         Ok(())
@@ -186,7 +199,7 @@ impl Position {
 
 impl Translation {
     /// Fully-qualified constructor
-    pub fn new(x: i32, y: i32, z: i32, ctx: &Context) -> Result<Self, ValidityError> {
+    pub fn new(x: i32, y: i32, z: i32, ctx: &Context) -> Result<Self, CoordsError> {
         let translation = Self {x, y, z};
 
         // Sanity check
@@ -245,17 +258,17 @@ impl Translation {
     \*  *  *  *  *  *  *  */
 
     /// Sanity check
-    fn is_sane(&self, ctx: &Context) -> Result<(), ValidityError> {
+    fn is_sane(&self, ctx: &Context) -> Result<(), CoordsError> {
         // Coordinate validity check
         if self.x + self.y + self.z != 0 {
-            return Err(ValidityError);
+            return Err(CoordsError::InvalidComponents(self.x, self.y, self.z));
         }
 
         // Bounds check
         if i32::abs(self.x) > ctx.grid_radius() as i32 ||
            i32::abs(self.y) > ctx.grid_radius() as i32 ||
            i32::abs(self.z) > ctx.grid_radius() as i32 {
-            return Err(ValidityError)
+            return Err(CoordsError::OutOfBounds)
         }
 
         Ok(())
@@ -383,23 +396,23 @@ impl From<hex_directions::Side> for Translation {
     }
 }
 
-///
-// ValidityError
-///
-impl Error for ValidityError {}
-impl fmt::Display for ValidityError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Invalid Coordinates. Sum must equal 0.")
-    }
-}
 
-//OPT: *STYLE* Should be more general
-///
-// ParamError
-///
-impl Error for ParamError {}
-impl fmt::Display for ParamError {
+/*  *  *  *  *  *  *  *\
+ *  CoordsError       *
+\*  *  *  *  *  *  *  */
+impl Error for CoordsError {}
+impl fmt::Display for CoordsError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Invalid Param. dist_from_edge >= ctx.grid_radius")
+        match self {
+            CoordsError::InvalidComponents(x, y, z) => {
+                write!(f, "Position components ({}, {}, {}) do not add up to 0.", x, y, z)
+            }
+            CoordsError::InvalidParam(param_name)   => {
+                write!(f, "Invalid Parameter: {}", param_name)
+            },
+            CoordsError::OutOfBounds                => {
+                write!(f, "Position out of bounds")
+            }
+        }
     }
 }

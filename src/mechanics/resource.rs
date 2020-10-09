@@ -48,7 +48,7 @@ use rand::{
 
 #[derive(Debug)]
 pub struct Resource {
-    uid:        Uuid,
+    uid:        [u8; 16],
     element:    Element,
     state:      State,
     origin:     coords::Position,
@@ -75,7 +75,7 @@ impl Resource {
     /// Fully-qualified constructor
     pub fn new(element: Element, state: State, origin: coords::Position, radius: usize) -> Self {
         Self {
-            uid: Uuid::new_v4(),
+            uid:        *Uuid::new_v4().as_bytes(),
             element,
             state,
             origin,
@@ -140,8 +140,8 @@ impl Resource {
     // Accessor Methods
     ///
 
-    pub fn uid(&self) -> Uuid {
-        self.uid
+    pub fn uid(&self) -> &[u8; 16] {
+        &self.uid
     }
 
     pub fn state(&self) -> State {
@@ -164,7 +164,7 @@ impl Resource {
 impl Default for Resource {
     fn default() -> Self {
         Self {
-            uid:        Uuid::new_v4(),
+            uid:        *Uuid::new_v4().as_bytes(),
             element:    Element::default(),
             state:      State::default(),
             origin:     coords::Position::default(),
@@ -185,7 +185,7 @@ impl Locatable for Resource {
 impl Randomizable for Resource {
     fn rand(ctx: &Context) -> Self {
         // Set UID
-        let uid = Uuid::new_v4();
+        let uid = *Uuid::new_v4().as_bytes();
 
         //  Get RNG thread handle and generate random centerpoint
         let mut rng = rand::thread_rng();

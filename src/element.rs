@@ -27,6 +27,7 @@ use rand::{
         Standard
     }
 };
+use serde::{Serialize, Deserialize};
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -34,7 +35,12 @@ use rand::{
 //////////////////////////////////////////////////////////////////////////////
 
 // Enumeration of all element types
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(
+    Debug,
+    Copy, Clone,
+    Eq, PartialEq,
+    Serialize, Deserialize
+)]
 pub enum Element {
     Unset       = 0,
     Fire        = 1,

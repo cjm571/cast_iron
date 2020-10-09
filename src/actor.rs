@@ -20,10 +20,7 @@ Purpose:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-use std::{
-    fmt,
-    str::FromStr
-};
+use std::fmt;
 
 use crate::{
     ability::Ability,
@@ -38,16 +35,19 @@ use rand::{
     Rng,
     distributions::Alphanumeric,
 };
+use serde::{Serialize, Deserialize};
 use uuid::Uuid;
+
 
 //FEAT: Full phylogeny for actor? could be cool way to procedurally generate enemies using features of KPCOFGS hierarchy
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
-// Struct containing state information for the Actor
+/// Struct containing state information for the Actor
+#[derive(Serialize, Deserialize)]
 pub struct Actor {
-    uid:            Uuid,
+    uid:            [u8; 16],
     name:           String,             // Actor's name
     pos:            coords::Position,   // Actor's 3D position in the environment
     cur_fatigue:    u8,                 // Actor's current fatigue level
@@ -66,7 +66,7 @@ impl Actor {
                cur_fatigue: u8,
                abilities:   Vec<Ability>) -> Self {
         Self {
-            uid:    Uuid::new_v4(),
+            uid:    *Uuid::new_v4().as_bytes(),
             name:   name.to_string(),
             pos,
             cur_fatigue,
@@ -77,64 +77,11 @@ impl Actor {
     /// Name-only constructor
     pub fn new_name_only(name: &'static str) -> Self {
         Self {
-            uid:            Uuid::new_v4(),
+            uid:            *Uuid::new_v4().as_bytes(),
             name:           name.to_string(),
             pos:            coords::Position::default(),
             cur_fatigue:    0,
             abilities:      Vec::new(),
-        }
-    }
-
-    pub fn from_string(src: &str, ctx: &Context) -> Self {
-        // Tokenize on "|" to separate actor from abil list
-        let split_vec: Vec<&str> = src.split('|').collect();
-
-        let actor_str = split_vec[0];
-        let abil_str = split_vec[1];
-
-        // Tokenize string on ":"
-        let data_vec: Vec<&str> = actor_str.split(':').collect();
-
-        let uid = match Uuid::from_str(data_vec[0]) {
-            Ok(uid)     => uid,
-            Err(_err)   => panic!("actor::from: Invalid uuid input string."),
-        };
-
-        let name = data_vec[1];
-
-        // trim parentheses and tokenize on ','
-        let parens: &[_] = &['(', ')']; //WTF: is this type?
-        let coord_vec: Vec<&str> = data_vec[2].trim_matches(parens).split(',').collect();
-        let pos = match coords::Position::new(
-            coord_vec[0].parse::<i32>().unwrap(),
-            coord_vec[1].parse::<i32>().unwrap(),
-            coord_vec[2].parse::<i32>().unwrap(),
-            ctx
-        ) {
-            Ok(pos)     => pos,
-            Err(_err)   => panic!("actor::from: Invalid coords::Position input string."),
-        };
-
-        let cur_fatigue = data_vec[3].parse::<u8>().unwrap();
-
-        // Check for empty ability list
-        let mut abil_vec: Vec<Ability> = Vec::new();
-        if abil_str != "\n" {
-            // Tokenize abil list on ";"
-            let abil_str_vec: Vec<&str> = abil_str.split(';').collect();
-
-            // Iterate through abil list, creating ability objects and dropping them in the vector
-            for abil_str in abil_str_vec {
-                abil_vec.push(Ability::from(&abil_str.to_string()));
-            }
-        }
-
-        Self {
-            uid,
-            name:       name.to_string(),
-            pos,
-            cur_fatigue,
-            abilities:  abil_vec,
         }
     }
 
@@ -151,7 +98,7 @@ impl Actor {
 
     //OPT: *DESIGN* Replace with translatable trait or something
     /// Moves actor one cell in the given direction
-    pub fn move_one_cell(&mut self, dir: hex_directions::Side, ctx: &Context) -> Result<(), coords::ValidityError> {
+    pub fn move_one_cell(&mut self, dir: hex_directions::Side, ctx: &Context) -> Result<(), coords::CoordsError> {
         let trans = coords::Translation::from(dir);
         
         //OPT: *DESIGN* Violation of encapsulation - should not have to do sanity check here
@@ -175,8 +122,8 @@ impl Actor {
     ///
 
     // Returns a reference for the actor's unique ID
-    pub fn uid(&self) -> Uuid {
-        self.uid
+    pub fn uid(&self) -> &[u8; 16] {
+        &self.uid
     }
 
     // Returns a reference for the actor's name
@@ -208,13 +155,13 @@ impl Actor {
 // [UID]:[Name]:[Position]:[Fatigue]:[Abilities (CSV)]
 impl fmt::Display for Actor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut res = write!(f, "{}:{}:{}:{}:|", self.uid, self.name, self.pos, self.cur_fatigue);
+        let mut res = write!(f, "{}:{}:{}:{}:|", Uuid::from_bytes(self.uid), self.name, self.pos, self.cur_fatigue);
 
-        for abil in &self.abilities {
+        for (i, abil) in self.abilities.iter().enumerate() {
             res = write!(f, "{}", abil.to_string());
 
             // Avoid adding a trailing semicolon
-            if abil != self.abilities.last().unwrap() {
+            if i == self.abilities.len()-1 {
                 res = write!(f, ";");
             }
         }
@@ -230,7 +177,7 @@ impl Locatable for Actor {
 impl Randomizable for Actor {
     fn rand(ctx: &Context) -> Self {
         // Generate UUID
-        let uid = Uuid::new_v4();
+        let uid = *Uuid::new_v4().as_bytes();
 
         //OPT: *DESIGN* Pull from list of actual names or something
         // Generate random name
@@ -258,62 +205,5 @@ impl Randomizable for Actor {
             cur_fatigue,
             abilities,
         }
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//  Unit Tests
-///////////////////////////////////////////////////////////////////////////////
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn output_single() {
-        // set up an actor object with one ability
-        let mut player_one = Actor::new_name_only("CJ McAllister");
-        let null_abil = Ability::new_name_only("Null");
-        player_one.add_ability(null_abil);
-
-        // output the actor as a string
-        println!("{}", player_one.to_string());
-
-        assert_eq!(1,1);
-    }
-
-    #[test]
-    fn output_multi() {
-        // set up an actor object with one ability
-        let mut player_one = Actor::new_name_only("CJ McAllister");
-        let tbolt = Ability::new_name_only("Thunderbolt");
-        let fstorm = Ability::new_name_only("Fire Storm");
-        player_one.add_ability(tbolt);
-        player_one.add_ability(fstorm);
-
-        // output the actor as a string
-        println!("{}", player_one.to_string());
-
-        assert_eq!(1,1);
-    }
-
-    #[test]
-    fn input() {
-        // Create a default game context for the test
-        let test_ctx = Context::default();
-
-        // set up an actor object with one ability
-        let mut player_one = Actor::new_name_only("CJ McAllister");
-        let null_abil = Ability::new_name_only("Null");
-        player_one.add_ability(null_abil);
-
-        // feed the actor string into from() to "clone" the actor
-        let clone_one = Actor::from_string(&player_one.to_string(), &test_ctx);
-
-        // output both actor strings for comparison
-        println!("{}\n{}", player_one.to_string(), clone_one.to_string());
-
-        // assert that the strings are identical
-        assert_eq!(player_one.to_string(), clone_one.to_string());
     }
 }

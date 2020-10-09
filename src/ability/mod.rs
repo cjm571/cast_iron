@@ -22,10 +22,7 @@ Purpose:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-use std::{
-    fmt,
-    str::FromStr
-};
+use std::fmt;
 
 use crate::{
     context::Context,
@@ -37,6 +34,7 @@ use rand::{
     Rng,
     distributions::Alphanumeric,
 };
+use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
 
@@ -53,8 +51,9 @@ use self::aspect::*;
 ///////////////////////////////////////////////////////////////////////////////
 
 /// Struct containing all necessary data fields to define an ability for use in CastIron
+#[derive(Serialize, Deserialize)]
 pub struct Ability {
-    uid:        Uuid,
+    uid:        [u8; 16],
     name:       String,
     aspects:    Aspects,
     potency:    usize,
@@ -69,7 +68,7 @@ impl Ability {
     /// Fully-qualified constructor
     pub fn new(name: &'static str, potency: usize, aspects: Aspects) -> Self {
         Self {
-            uid:        Uuid::new_v4(),
+            uid:        *Uuid::new_v4().as_bytes(),
             name:       name.to_string(),
             potency,
             aspects,
@@ -78,7 +77,7 @@ impl Ability {
     /// Name-only constructor
     pub fn new_name_only(name: &'static str) -> Self {
         Self {
-            uid:        Uuid::new_v4(),
+            uid:        *Uuid::new_v4().as_bytes(),
             name:       name.to_string(),
             potency:    0,
             aspects:    Aspects::default(),
@@ -86,9 +85,9 @@ impl Ability {
     }
 
 
-    ///
-    // Mutator Methods
-    ///
+    /*  *  *  *  *  *  *  *\
+     *  Mutator Methods   *
+    \*  *  *  *  *  *  *  */
 
     // Name the ability
     pub fn set_name (&mut self, name: &'static str) {
@@ -125,12 +124,12 @@ impl Ability {
     }
 
 
-    ///
-    // Accessor Methods
-    ///
+    /*  *  *  *  *  *  *  *\
+     *  Accessor Methods  *
+    \*  *  *  *  *  *  *  */
 
     // Returns a reference to the name of the ability
-    pub fn uid (&self) -> &Uuid {
+    pub fn uid (&self) -> &[u8; 16] {
         &self.uid
     }
 
@@ -184,32 +183,7 @@ impl Ability {
 
 impl fmt::Display for Ability {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}:{}:{}:{}", self.uid(), self.name(), self.potency(), self.aspects())
-    }
-}
-impl From<&String> for Ability {
-    fn from (src: &String) -> Self {
-        // Tokenize on ":"
-        let data_vec: Vec<&str> = src.split(':').collect();
-
-        let uid = match Uuid::from_str(data_vec[0]) {
-            Ok(uid)     => uid,
-            Err(_err)   => panic!("actor::from: Invalid uuid input string."),
-        };
-
-        let name = data_vec[1].to_string();
-
-        let potency = data_vec[2].parse::<usize>().unwrap();
-
-        let aspects = Aspects::from(&data_vec[3].to_string());
-
-        Self {
-            uid,
-            name,
-            potency,
-            aspects,
-        }
-
+        write!(f, "{}:{}:{}:{}", Uuid::from_bytes(self.uid), self.name, self.potency, self.aspects)
     }
 }
 impl PartialEq for Ability {
@@ -220,7 +194,7 @@ impl PartialEq for Ability {
 impl Randomizable for Ability {
     fn rand(ctx: &Context) -> Self {
         // Generate UUID
-        let uid = Uuid::new_v4();
+        let uid = *Uuid::new_v4().as_bytes();
 
         //OPT: *DESIGN* Pull from list of actual names or something
         // Generate random name

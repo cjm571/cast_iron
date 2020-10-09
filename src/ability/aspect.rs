@@ -31,6 +31,7 @@ use crate::{
 };
 
 use rand::Rng;
+use serde::{Serialize, Deserialize};
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,7 +49,11 @@ const ASCII_TO_VAL_CONVERSION_VAL: usize = 48;
 ///////////////////////////////////////////////////////////////////////////////
 
 // Enumeration of the aesthetics (coolness) of an ability
-#[derive(Debug, Copy, Clone)]
+#[derive(
+    Debug,
+    Copy, Clone,
+    Serialize, Deserialize
+)]
 pub enum Aesthetics {
     Unset       = 0,
     Beautiful   = 1,
@@ -59,7 +64,11 @@ pub enum Aesthetics {
 }
 
 // Enumeration of method by which an ability is performed
-#[derive(Debug, Copy, Clone)]
+#[derive(
+    Debug,
+    Copy, Clone,
+    Serialize, Deserialize
+)]
 pub enum Method {
     Unset       = 0,
     Staff       = 1,
@@ -69,7 +78,11 @@ pub enum Method {
 }
 
 // Enumeration of morality aspect of an ability
-#[derive(Debug, Copy, Clone)]
+#[derive(
+    Debug,
+    Copy, Clone,
+    Serialize, Deserialize
+)]
 pub enum Morality {
     Unset       = 0,
     Good        = 1,
@@ -78,7 +91,11 @@ pub enum Morality {
 }
 
 // Enumeration of all schools of an ability
-#[derive(Debug, Copy, Clone)]
+#[derive(
+    Debug,
+    Copy, Clone,
+    Serialize, Deserialize
+)]
 pub enum School {
     Unset       = 0,
     Destruction = 1,
@@ -91,7 +108,10 @@ pub enum School {
 }
 
 // Structure containing all aspect classifications
-#[derive(Default)]
+#[derive(
+    Default,
+    Serialize, Deserialize
+)]
 pub struct Aspects {
     pub aesthetics: Aesthetics,
     pub element:    Element,

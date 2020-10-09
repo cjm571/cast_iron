@@ -51,7 +51,7 @@ const OBSTACLE_TERMINATION_ODDS: f32 = 0.05;
 
 #[derive(Debug)]
 pub struct Obstacle {
-    uid:        Uuid,
+    uid:        [u8; 16],
     positions:  Vec<coords::Position>,
     element:    Element
 }
@@ -81,7 +81,7 @@ impl Obstacle {
         
 
         Ok(Self {
-            uid: Uuid::new_v4(),
+            uid:        *Uuid::new_v4().as_bytes(),
             positions,
             element,
         })
@@ -92,8 +92,8 @@ impl Obstacle {
      *  Accessor Methods  *
     \*  *  *  *  *  *  *  */
     
-    pub fn uid(&self) -> Uuid {
-        self.uid
+    pub fn uid(&self) -> &[u8; 16] {
+        &self.uid
     }
     
     pub fn positions(&self) -> &Vec<coords::Position> {
@@ -119,7 +119,7 @@ impl Locatable for Obstacle {
 impl Randomizable for Obstacle {
     fn rand(ctx: &Context) -> Self {
         // Set UID
-        let uid = Uuid::new_v4();
+        let uid = *Uuid::new_v4().as_bytes();
 
         //  Get RNG thread handle and generate random origin
         let mut rng = rand::thread_rng();

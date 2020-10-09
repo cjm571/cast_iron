@@ -21,6 +21,8 @@ Purpose:
 
 extern crate chrono;
 extern crate rand;
+extern crate serde;
+extern crate serde_json;
 extern crate uuid;
 
 
@@ -74,7 +76,7 @@ pub mod actor;
 pub mod context;
 pub mod coords;
 pub mod element;
-pub mod fileops;
+//FEAT: file system leveraging serde
 pub mod hex_directions;
 pub mod logger;
 pub mod mechanics;
