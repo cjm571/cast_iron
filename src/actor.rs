@@ -171,11 +171,12 @@ impl Randomizable for Actor {
         // Generate UUID
         let uid = *Uuid::new_v4().as_bytes();
 
+        // Cache the RNG thread
+        let mut rng = rand::thread_rng();
+
         //FEAT: Pull from list of actual names or something
         // Generate random name
-        let name: String = rand::thread_rng().sample_iter(&Alphanumeric)
-                                             .take(10)
-                                             .collect();
+        let name: String = rng.sample_iter(&Alphanumeric).take(10).collect();
 
         // Generate a random position
         let pos: coords::Position = coords::Position::rand(ctx);
@@ -183,10 +184,10 @@ impl Randomizable for Actor {
         // New actor, so fatigue should be 0
         let cur_fatigue = 0;
 
-        //OPT: *DESIGN* Make the count random as well
         // Generate random abilities
         let mut abilities: Vec<Ability> = Vec::new();
-        for _i in 0 .. 5 {
+        let num_abilities: u32 = rng.gen_range(0, 10);
+        for _i in 0 .. num_abilities {
             abilities.push(Ability::rand(ctx));
         }
 
