@@ -89,9 +89,7 @@ use crate::context::Context;
 //  Trait Declarations
 ///////////////////////////////////////////////////////////////////////////////
 
-
-//OPT: *STYLE* This needs a better name...
-pub trait Locatable {
+pub trait Plottable {
     /// Implementor-defined function to return the origin (center/starting) point of the object.
     fn origin(&self) -> &coords::Position;
 }

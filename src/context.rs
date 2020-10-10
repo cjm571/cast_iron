@@ -64,7 +64,7 @@ pub struct Context {
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Context {
-    //OPT: *STYLE* Make a builder class
+    //OPT: *DESIGN* Make a builder class
     /// Fully-qualified constructor
     pub fn new(grid_radius: usize,
                max_resource_radius: usize,

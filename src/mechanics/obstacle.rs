@@ -30,7 +30,7 @@ use crate::{
         Elemental
     },
     hex_directions,
-    Locatable,
+    Plottable,
     Randomizable,
 };
 
@@ -86,8 +86,8 @@ impl Obstacle {
             element,
         })
     }
-    
-    
+
+
     /*  *  *  *  *  *  *  *\
      *  Accessor Methods  *
     \*  *  *  *  *  *  *  */
@@ -111,7 +111,7 @@ impl Elemental for Obstacle {
         self.element
     }
 }
-impl Locatable for Obstacle {
+impl Plottable for Obstacle {
     fn origin(&self) -> &coords::Position {
         self.positions.first().unwrap()
     }

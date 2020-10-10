@@ -28,7 +28,7 @@ use crate::{
         Element,
         Elemental
     },
-    Locatable,
+    Plottable,
     Randomizable,
 };
 
@@ -177,7 +177,7 @@ impl Elemental for Resource {
         self.element
     }
 }
-impl Locatable for Resource {
+impl Plottable for Resource {
     fn origin(&self) -> &coords::Position {
         &self.origin
     }

@@ -56,7 +56,6 @@ pub trait HexDirection:
 //  Data structures
 ///////////////////////////////////////////////////////////////////////////////
 
-//OPT: *STYLE* Derive the HexDirection trait if it has no required methods
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Side {
     NORTHEAST,
@@ -67,7 +66,6 @@ pub enum Side {
     SOUTHEAST,
 }
 
-//OPT: *STYLE* Derive the HexDirection trait if it has no required methods
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Vertex {
     EAST,

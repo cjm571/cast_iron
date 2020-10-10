@@ -38,10 +38,17 @@ use serde::{Serialize, Deserialize};
 //  Named Constants
 ///////////////////////////////////////////////////////////////////////////////
 
-// Difference between numerical and ASCII value of a number character
+/// Difference between numerical and ASCII value of a number character
 const ASCII_TO_VAL_CONVERSION_VAL: usize = 48;
 
-//OPT: *DESIGN* Could use an explicit declaration of enum min/maxes
+/// Maximum value of Aesthetics enumeration
+const MAX_VAL_AESTHETICS:   usize = 5;
+/// Maximum value of Method enumeration
+const MAX_VAL_METHOD:       usize = 4;
+/// Maximum value of Morality enumeration
+const MAX_VAL_MORALITY:     usize = 3;
+/// Maximum value of School enumeration
+const MAX_VAL_SCHOOL:       usize = 7;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -147,9 +154,9 @@ impl Aspects {
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-///
-// Aesthetics
-///
+/*  *  *  *  *  *  *  *\
+*      Aesthetics     *
+\*  *  *  *  *  *  *  */
 impl Default for Aesthetics {
     fn default() -> Self {
         Aesthetics::Unset
@@ -168,10 +175,15 @@ impl From<usize> for Aesthetics {
         }
     }
 }
+impl Randomizable for Aesthetics {
+    fn rand(_ctx: &Context) -> Self {
+        Self::from(rand::thread_rng().gen_range(0, MAX_VAL_AESTHETICS+1))
+    }
+}
 
-///
-// Method
-///
+/*  *  *  *  *  *  *  *\
+*        Method       *
+\*  *  *  *  *  *  *  */
 impl Default for Method {
     fn default() -> Self {
         Method::Unset
@@ -189,10 +201,15 @@ impl From<usize> for Method {
         }
     }
 }
+impl Randomizable for Method {
+    fn rand(_ctx: &Context) -> Self {
+        Self::from(rand::thread_rng().gen_range(0, MAX_VAL_METHOD+1))
+    }
+}
 
-///
-// Morality
-///
+/*  *  *  *  *  *  *  *\
+*       Morality      *
+\*  *  *  *  *  *  *  */
 impl Default for Morality {
     fn default() -> Self {
         Morality::Unset
@@ -209,10 +226,15 @@ impl From<usize> for Morality {
         }
     }
 }
+impl Randomizable for Morality {
+    fn rand(_ctx: &Context) -> Self {
+        Self::from(rand::thread_rng().gen_range(0, MAX_VAL_MORALITY+1))
+    }
+}
 
-///
-// School
-///
+/*  *  *  *  *  *  *  *\
+*        School       *
+\*  *  *  *  *  *  *  */
 impl Default for School {
     fn default() -> Self {
         School::Unset
@@ -233,10 +255,16 @@ impl From<usize> for School {
         }
     }
 }
+impl Randomizable for School {
+    fn rand(_ctx: &Context) -> Self {
+        Self::from(rand::thread_rng().gen_range(0, MAX_VAL_SCHOOL+1))
+    }
+}
 
-///
-// Aspects
-///
+
+/*  *  *  *  *  *  *  *\
+*        Aspects       *
+\*  *  *  *  *  *  *  */
 impl From<&String> for Aspects {
     fn from(src: &String) -> Self {
         let mut data_chars = src.chars();
@@ -266,23 +294,13 @@ impl fmt::Debug for Aspects {
     }
 }
 impl Randomizable for Aspects {
-    fn rand(_ctx: &Context) -> Self {
-        // Start randomization thread
-        let mut rng = rand::thread_rng();
-        
-        //OPT: *STYLE* magic numbers! and these should just be rand() calls
-        let aesthetics  = Aesthetics::from(rng.gen_range(0, 6) as usize);
-        let element     = Element::from(rng.gen_range(1, 9) as usize);
-        let method      = Method::from(rng.gen_range(0, 5) as usize);
-        let morality    = Morality::from(rng.gen_range(0, 4) as usize);
-        let school      = School::from(rng.gen_range(0, 8) as usize);
-
+    fn rand(ctx: &Context) -> Self {
         Self {
-            aesthetics,
-            element,
-            method,
-            morality,
-            school,
+            aesthetics: Aesthetics::rand(ctx),
+            element:    rand::thread_rng().gen(),
+            method:     Method::rand(ctx),
+            morality:   Morality::rand(ctx),
+            school:     School::rand(ctx),
         }
     }
 }

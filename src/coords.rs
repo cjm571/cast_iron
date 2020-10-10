@@ -85,7 +85,6 @@ pub struct Translation {
     z: i32,
 }
 
-//OPT: *DESIGN* Needs more specificity - i.e, can be due to invalid composition, out of bounds, etc
 #[derive(Debug)]
 pub enum CoordsError {
     InvalidComponents(i32, i32, i32),

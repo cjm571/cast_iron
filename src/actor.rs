@@ -27,7 +27,7 @@ use crate::{
     context::Context,
     coords,
     hex_directions,
-    Locatable,
+    Plottable,
     Randomizable,
 };
 
@@ -161,7 +161,7 @@ impl fmt::Display for Actor {
         res
     }
 }
-impl Locatable for Actor {
+impl Plottable for Actor {
     fn origin(&self) -> &coords::Position {
         &self.pos
     }
