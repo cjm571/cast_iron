@@ -51,44 +51,37 @@ const DEFAULT_MAX_WEATHER_DURATION:     f64 = 10.0;
 #[derive(Clone)]
 pub struct Context {
     grid_radius:            usize,
+    max_obstacle_len:       usize,
     max_rand_attempts:      usize,
     max_resource_radius:    usize,
-    max_obstacle_len:       usize,
-    max_weather_intensity:  f64,
     max_weather_duration:   f64,
+    max_weather_intensity:  f64,
+}
+
+#[derive(Default)]
+pub struct ContextBuilder {
+    context:    Context
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Object Implimentation
+//  Object Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Context {
-    //OPT: *DESIGN* Make a builder class
-    /// Fully-qualified constructor
-    pub fn new(grid_radius: usize,
-               max_resource_radius: usize,
-               max_rand_attempts: usize,
-               max_obstacle_len: usize,
-               max_weather_intensity: f64,
-               max_weather_duration: f64,) -> Self {
-        Self {
-            grid_radius,
-            max_rand_attempts,
-            max_resource_radius,
-            max_obstacle_len,
-            max_weather_intensity,
-            max_weather_duration,
-        }
-    }
+    //NOTE: Fully-qualified constructor intentionally ommitted due to excessive params
 
 
-    ///
-    // Accessor Methods
-    ///
+    /*  *  *  *  *  *  *  *\
+     *  Accessor Methods  *
+    \*  *  *  *  *  *  *  */
 
     pub fn grid_radius(&self) -> usize {
         self.grid_radius
+    }
+
+    pub fn max_obstacle_len(&self) -> usize {
+        self.max_obstacle_len
     }
 
     pub fn max_rand_attempts(&self) -> usize {
@@ -99,16 +92,54 @@ impl Context {
         self.max_resource_radius
     }
 
-    pub fn max_obstacle_len(&self) -> usize {
-        self.max_obstacle_len
+    pub fn max_weather_duration(&self) -> f64 {
+        self.max_weather_duration
     }
 
     pub fn max_weather_intensity(&self) -> f64 {
         self.max_weather_intensity
     }
+}
 
-    pub fn max_weather_duration(&self) -> f64 {
-        self.max_weather_duration
+
+impl ContextBuilder {
+    
+    pub fn build(&self) -> Context {
+        self.context.clone()
+    }
+
+    /*  *  *  *  *  *  *  *\
+     *  Builder Methods   *
+    \*  *  *  *  *  *  *  */
+
+    pub fn grid_radius<'a>(&'a mut self, radius: usize) -> &'a mut Self {
+        self.context.grid_radius = radius;
+        self
+    }
+
+    pub fn max_obstacle_len<'a>(&'a mut self, length: usize) -> &'a mut Self {
+        self.context.max_obstacle_len = length;
+        self
+    }
+
+    pub fn max_rand_attempts<'a>(&'a mut self, attempts: usize) -> &'a mut Self {
+        self.context.max_rand_attempts = attempts;
+        self
+    }
+
+    pub fn max_resource_radius<'a>(&'a mut self, radius: usize) -> &'a mut Self {
+        self.context.max_resource_radius = radius;
+        self
+    }
+
+    pub fn max_weather_duration<'a>(&'a mut self, duration: f64) -> &'a mut Self {
+        self.context.max_weather_duration = duration;
+        self
+    }
+
+    pub fn max_weather_intensity<'a>(&'a mut self, intensity: f64) -> &'a mut Self {
+        self.context.max_weather_intensity = intensity;
+        self
     }
 }
 

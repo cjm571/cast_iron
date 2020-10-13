@@ -56,9 +56,10 @@ pub struct Obstacle {
     element:    Element
 }
 
-//OPT: *DESIGN* Proper error implementation
 #[derive(Debug)]
-pub struct ObstacleError;
+pub enum ObstacleError {
+    NoncontiguousObstacle,
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,7 +76,7 @@ impl Obstacle {
                 prev_pos = pos;
             }
             else { // Noncontiguity detected!
-                return Err(ObstacleError)
+                return Err(ObstacleError::NoncontiguousObstacle)
             }
         }
         

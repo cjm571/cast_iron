@@ -98,3 +98,9 @@ pub trait Randomizable {
     /// Implementor-defined function to generate a random instance of itself.
     fn rand(ctx: &Context) -> Self;
 }
+
+pub trait Disableable {
+    /// Implementor-defined function that creates an instance of the object that shall perform 
+    /// no significant actions and take up no more memory than absolutely necessary.
+    fn disabled() -> Self;
+}

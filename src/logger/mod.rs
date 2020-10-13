@@ -34,6 +34,7 @@ use std::sync::mpsc::{
 };
 use std::thread;
 
+use crate::Disableable;
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Module Declarations
@@ -113,21 +114,6 @@ impl Instance {
         logger_instance
     }
 
-    //OPT: *DESIGN* Would be cool to make a Disablable trait
-    pub fn disabled() -> Self {
-        // Create dummy channel handles
-        let (dummy_tx, _dummy_rx) = mpsc::channel::<Command>();
-        
-        // Initialize dummy sender struct
-        let dummy_sender = LogSender::new(dummy_tx);
-
-        Self {
-            enabled:    false,
-            sender:     dummy_sender,
-            filter:     FilterLevel::Fatal as u8,
-        }
-    }
-
     
     /*  *  *  *  *  *  *  *
      *  Accessor Methods  *
@@ -161,7 +147,6 @@ impl Instance {
                    fn_name: String,
                    line: u32,
                    msg: String) -> Result<(), SendError<Command>> {
-        //OPT: *DESIGN* Proper filter masking instead of greater-than check
         // Check filter and send message if it passes
         if self.enabled && level as u8 >= self.filter {
             // Package log message into tuple and send
@@ -214,6 +199,22 @@ impl Default for Instance {
             enabled:    true,
             sender:     log_sender,
             filter:     FilterLevel::Info as u8
+        }
+    }
+}
+
+impl Disableable for Instance {
+    fn disabled() -> Self {
+        // Create dummy channel handles
+        let (dummy_tx, _dummy_rx) = mpsc::channel::<Command>();
+        
+        // Initialize dummy sender struct
+        let dummy_sender = LogSender::new(dummy_tx);
+
+        Self {
+            enabled:    false,
+            sender:     dummy_sender,
+            filter:     FilterLevel::Fatal as u8,
         }
     }
 }

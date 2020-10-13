@@ -111,7 +111,6 @@ impl Event {
      *  Accesspr Methods  *
      *  *  *  *  *  *  *  */
 
-    //OPT: *STYLE* "tick" isn't a good name
     pub fn intensity(&self, tick: f64) -> Intensity {
         Intensity::from(self.function.solve(tick) as i64)
     }
