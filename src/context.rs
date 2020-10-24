@@ -112,32 +112,32 @@ impl ContextBuilder {
      *  Builder Methods   *
     \*  *  *  *  *  *  *  */
 
-    pub fn grid_radius<'a>(&'a mut self, radius: usize) -> &'a mut Self {
+    pub fn grid_radius(&'_ mut self, radius: usize) -> &'_ mut Self {
         self.context.grid_radius = radius;
         self
     }
 
-    pub fn max_obstacle_len<'a>(&'a mut self, length: usize) -> &'a mut Self {
+    pub fn max_obstacle_len(&'_ mut self, length: usize) -> &'_ mut Self {
         self.context.max_obstacle_len = length;
         self
     }
 
-    pub fn max_rand_attempts<'a>(&'a mut self, attempts: usize) -> &'a mut Self {
+    pub fn max_rand_attempts(&'_ mut self, attempts: usize) -> &'_ mut Self {
         self.context.max_rand_attempts = attempts;
         self
     }
 
-    pub fn max_resource_radius<'a>(&'a mut self, radius: usize) -> &'a mut Self {
+    pub fn max_resource_radius(&'_ mut self, radius: usize) -> &'_ mut Self {
         self.context.max_resource_radius = radius;
         self
     }
 
-    pub fn max_weather_duration<'a>(&'a mut self, duration: f64) -> &'a mut Self {
+    pub fn max_weather_duration(&'_ mut self, duration: f64) -> &'_ mut Self {
         self.context.max_weather_duration = duration;
         self
     }
 
-    pub fn max_weather_intensity<'a>(&'a mut self, intensity: f64) -> &'a mut Self {
+    pub fn max_weather_intensity(&'_ mut self, intensity: f64) -> &'_ mut Self {
         self.context.max_weather_intensity = intensity;
         self
     }
