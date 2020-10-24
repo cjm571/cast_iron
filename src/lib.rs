@@ -69,6 +69,7 @@ macro_rules! debug_println {
 //FEAT: Multiple function types bound together with a 'function' trait or something awesome like that
 //FEAT: Thread to collect 'core dump' data?
 //FEAT: Procedurally-generated art assets
+//FEAT: Adapter layer for non-2D/hex grid systems
 
 #[macro_use]
 pub mod ability;
