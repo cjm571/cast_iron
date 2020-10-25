@@ -6,7 +6,15 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  rustup:
+    runs-on: self-hosted
+
+    steps:
+      - name: Update
+        run: rustup update
+        
+
+  checkout:
     runs-on: self-hosted
 
     steps:
