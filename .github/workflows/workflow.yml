@@ -1,0 +1,17 @@
+name: Default-Workflow
+
+on: [push, pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v2
+
+    - name: Build debug target
+      run: cargo build --verbose
