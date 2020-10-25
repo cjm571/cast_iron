@@ -2,12 +2,15 @@ name: Test-Workflow
 
 on: push
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   build:
-    name: Build
+
     runs-on: self-hosted
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Checkout code and build
-        run: cargo build --verbose
+    - uses: actions/checkout@v2
+    - name: Build
+      run: cargo build --verbose
