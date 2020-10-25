@@ -13,8 +13,8 @@ jobs:
     - name: Checkout source
       uses: actions/checkout@v2
 
-    - name: Display active toolchain
-      run: rustup default
+    - name: Display installed toolchains
+      run: rustup toolchain list
 
     - name: Build debug target
       run: cargo build --verbose
