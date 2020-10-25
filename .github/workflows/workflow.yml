@@ -13,5 +13,11 @@ jobs:
     - name: Checkout source
       uses: actions/checkout@v2
 
+    - name: Display active toolchain
+      run: rustup default
+
     - name: Build debug target
       run: cargo build --verbose
+
+    - name: Lint via `clippy`
+      run: cargo clippy
