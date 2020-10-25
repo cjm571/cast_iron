@@ -24,7 +24,7 @@ Purpose:
 
     Due to the nature of Rusts' "multiple producer, single consumer" model
     of inter-thread communication, all clones will send their messages to
-    the single reciever spawned by the original Instance.
+    the single receiver spawned by the original Instance.
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -35,6 +35,7 @@ use std::sync::mpsc::{
 use std::thread;
 
 use crate::Disableable;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Module Declarations
@@ -115,18 +116,18 @@ impl Instance {
     }
 
     
-    /*  *  *  *  *  *  *  *
+    /*  *  *  *  *  *  *  *\
      *  Accessor Methods  *
-     *  *  *  *  *  *  *  */
+    \*  *  *  *  *  *  *  */
 
     pub fn filter(&self) -> u8 {
         self.filter
     }
 
 
-    /*  *  *  *  *  *  *  *
+    /*  *  *  *  *  *  *  *\
      *  Mutator Methods   *
-     *  *  *  *  *  *  *  */
+    \*  *  *  *  *  *  *  */
 
     pub fn set_filter(&mut self, new_filter: u8) {
         self.filter = new_filter;
@@ -138,9 +139,9 @@ impl Instance {
     }
 
 
-    /*  *  *  *  *  *  *  *
+    /*  *  *  *  *  *  *  *\
      *  Utility Methods   *
-     *  *  *  *  *  *  *  */
+    \*  *  *  *  *  *  *  */
 
     pub fn log_msg(&self,
                    level: FilterLevel,
@@ -173,12 +174,13 @@ impl Instance {
 }
 
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
+/*  *  *  *  *  *  *  *\
+ *      Instance      *
+\*  *  *  *  *  *  *  */
 impl Default for Instance {
     fn default() -> Self {
         // Create the log messaging and control channel
@@ -219,6 +221,10 @@ impl Disableable for Instance {
     }
 }
 
+
+/*  *  *  *  *  *  *  *\
+ *     FilterLevel    *
+\*  *  *  *  *  *  *  */
 impl From<FilterLevel> for String {
     fn from(src: FilterLevel) -> Self {
         match src {
@@ -268,7 +274,7 @@ mod tests {
 
     #[test]
     fn visual_verification() {
-        // Create a logger instance that will log all messsages to Both outputs
+        // Create a logger instance that will log all messages to Both outputs
         let logger = Instance::new(FilterLevel::Trace as u8, OutputType::Both);
 
         ci_log!(&logger, FilterLevel::Trace,   "This is a TRACE message.");
@@ -278,7 +284,7 @@ mod tests {
         ci_log!(&logger, FilterLevel::Error,   "This is an ERROR message.");
         ci_log!(&logger, FilterLevel::Fatal,   "This is a FATAL message.");
 
-        // Sleep for 5 seconds to allow the reciever thread to do stuff
+        // Sleep for 5 seconds to allow the receiver thread to do stuff
         println!("Sleeping for 5s...");
         thread::sleep(time::Duration::from_secs(5));
         println!("Done sleeping!");
@@ -286,7 +292,7 @@ mod tests {
 
     #[test]
     fn output_type_cmd_test() {
-        // Create a logger instance that will log messsages to BOTH outputs
+        // Create a logger instance that will log messages to BOTH outputs
         let logger = Instance::new(FilterLevel::Trace as u8, OutputType::Both);
 
         ci_log!(&logger, FilterLevel::Trace, "This message appears in BOTH console and file.");
@@ -307,7 +313,7 @@ mod tests {
         ci_log!(&logger, FilterLevel::Trace, "This message appears in NEITHER ONLY.");
         ci_log!(&logger, FilterLevel::Fatal, "This message appears in NEITHER ONLY.");
 
-        // Sleep for 5 seconds to allow the reciever thread to do stuff
+        // Sleep for 5 seconds to allow the receiver thread to do stuff
         println!("Sleeping for 5s...");
         thread::sleep(time::Duration::from_secs(5));
         println!("Done sleeping!");

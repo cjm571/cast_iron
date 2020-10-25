@@ -234,7 +234,6 @@ impl Position {
         let mut pos_clone = *self;
         pos_clone.blind_translate(trans);
         
-        //FEAT: Need to do a global collision check here?
         pos_clone.is_sane(ctx)
     }
 }
@@ -324,7 +323,7 @@ impl Translation {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*  *  *  *  *  *  *  *\
- *  Position          *
+ *      Position      *
 \*  *  *  *  *  *  *  */
 impl fmt::Debug for Position {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -356,7 +355,7 @@ impl Randomizable for Position {
 
 
 /*  *  *  *  *  *  *  *\
- *  Translation       *
+ *     Translation    *
 \*  *  *  *  *  *  *  */
 //OPT: *DESIGN* Would be better if this took an angle and a magnitude (what would the units of magnitude be though?)
 impl From<hex_directions::Side> for Translation {
@@ -385,7 +384,7 @@ impl Neg for Translation {
 
 
 /*  *  *  *  *  *  *  *\
- *  CoordsError       *
+ *     CoordsError    *
 \*  *  *  *  *  *  *  */
 impl Error for CoordsError {}
 impl fmt::Display for CoordsError {

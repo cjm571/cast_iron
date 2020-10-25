@@ -24,7 +24,10 @@ Purpose:
 //  Named Constants
 ///////////////////////////////////////////////////////////////////////////////
 
-/* CastIron Game Defaults */
+/*  *  *  *  *  *  *  *  *  *\
+ *  CastIron Game Defaults  *
+\*  *  *  *  *  *  *  *  *  */
+
 /// Default hexagonal grid radius (in cells)
 const DEFAULT_GRID_RADIUS:              usize = 10;
 
@@ -104,10 +107,12 @@ impl Context {
 
 impl ContextBuilder {
     
+    /// Builder constructor
     pub fn build(&self) -> Context {
         self.context.clone()
     }
 
+    
     /*  *  *  *  *  *  *  *\
      *  Builder Methods   *
     \*  *  *  *  *  *  *  */

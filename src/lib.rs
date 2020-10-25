@@ -64,20 +64,12 @@ macro_rules! debug_println {
 //  Module Declarations
 ///////////////////////////////////////////////////////////////////////////////
 
-// FEATURES IDEAS! Coolest/most needed at the top
-//FEAT: Timer/performance module
-//FEAT: Multiple function types bound together with a 'function' trait or something awesome like that
-//FEAT: Thread to collect 'core dump' data?
-//FEAT: Procedurally-generated art assets
-//FEAT: Adapter layer for non-2D/hex grid systems
-
 #[macro_use]
 pub mod ability;
 pub mod actor;
 pub mod context;
 pub mod coords;
 pub mod element;
-//FEAT: file system leveraging serde
 pub mod hex_directions;
 pub mod logger;
 pub mod mechanics;

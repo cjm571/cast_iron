@@ -39,7 +39,6 @@ use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
 
-//FEAT: Full phylogeny for actor? could be cool way to procedurally generate enemies using features of KPCOFGS hierarchy
 ///////////////////////////////////////////////////////////////////////////////
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,7 +55,7 @@ pub struct Actor {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Object Implementatoin
+//  Object Implementation
 ///////////////////////////////////////////////////////////////////////////////
 
 impl Actor {
@@ -86,32 +85,9 @@ impl Actor {
     }
 
 
-    ///
-    // Mutator Methods
-    ///
-
-    // Names the actor
-    pub fn set_name(&mut self, _name: &'static str) {
-        self.name.clear();
-        self.name.push_str(_name);
-    }
-
-    /// Moves actor one cell in the given direction
-    pub fn move_one_cell(&mut self, dir: hex_directions::Side, ctx: &Context) -> Result<(), coords::CoordsError> {
-        let trans = coords::Translation::from(dir);
-        
-        self.pos.translate(&trans, ctx)
-    }
-
-    // Adds ability to actor's ability list
-    pub fn add_ability(&mut self, ability: Ability) {
-        self.abilities.push(ability);
-    }
-
-
-    ///
-    // Accessor Methods
-    ///
+    /*  *  *  *  *  *  *  *\
+     *  Accessor Methods  *
+    \*  *  *  *  *  *  *  */
 
     // Returns a reference for the actor's unique ID
     pub fn uid(&self) -> &[u8; 16] {
@@ -133,9 +109,32 @@ impl Actor {
         &self.cur_fatigue
     }
 
-    // Returns a refernce to the vector of the actor's abilities
+    // Returns a reference to the vector of the actor's abilities
     pub fn abilities(&self) -> &Vec<Ability>{
         &self.abilities
+    }
+
+
+    /*  *  *  *  *  *  *  *\
+     *  Mutator Methods   *
+    \*  *  *  *  *  *  *  */
+
+    // Names the actor
+    pub fn set_name(&mut self, _name: &'static str) {
+        self.name.clear();
+        self.name.push_str(_name);
+    }
+
+    /// Moves actor one cell in the given direction
+    pub fn move_one_cell(&mut self, dir: hex_directions::Side, ctx: &Context) -> Result<(), coords::CoordsError> {
+        let trans = coords::Translation::from(dir);
+        
+        self.pos.translate(&trans, ctx)
+    }
+
+    // Adds ability to actor's ability list
+    pub fn add_ability(&mut self, ability: Ability) {
+        self.abilities.push(ability);
     }
 }
 
@@ -174,7 +173,6 @@ impl Randomizable for Actor {
         // Cache the RNG thread
         let mut rng = rand::thread_rng();
 
-        //FEAT: Pull from list of actual names or something
         // Generate random name
         let name: String = rng.sample_iter(&Alphanumeric).take(10).collect();
 

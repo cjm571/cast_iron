@@ -16,7 +16,7 @@ Copyright (C) 2017 CJ McAllister
 
 Purpose:
     This module provides a PolyFunc object and associated functions to game mechanics
-    that are time-driven and have bevahior that can be modelled by polynomial functions.
+    that are time-driven and have behavior that can be modelled by polynomial functions.
 
     Available models:
     - Quadratic
@@ -66,7 +66,9 @@ impl PolyFunc {
     }
 
 
-    /* Builder Methods */
+    /*  *  *  *  *  *  *  *\
+     *  Builder Methods   *
+    \*  *  *  *  *  *  *  */
     
     pub fn starting_at(mut self, start_time: f64) -> Self {
         self.start_time = start_time;
@@ -75,7 +77,9 @@ impl PolyFunc {
     }
 
 
-    /* Accessor Methods */
+    /*  *  *  *  *  *  *  *\
+     *  Accessor Methods  *
+    \*  *  *  *  *  *  *  */
 
     pub fn duration(&self) -> f64 {
         self.duration
@@ -86,7 +90,9 @@ impl PolyFunc {
     }
     
 
-    /* Mutator Methods */
+    /*  *  *  *  *  *  *  *\
+     *  Mutator Methods   *
+    \*  *  *  *  *  *  *  */
 
     pub fn set_duration(&mut self, duration: f64) {
         self.duration = duration;
@@ -96,8 +102,10 @@ impl PolyFunc {
         self.start_time = start_time;
     }
 
-    //FEAT: A find-max function could be very useful
-    /* Utility Methods */
+    
+    /*  *  *  *  *  *  *  *\
+     *  Utility Methods   *
+    \*  *  *  *  *  *  *  */
 
     // Solves the polynomial function at the given game time tick
     pub fn solve(&self, tick: f64) -> f64 {

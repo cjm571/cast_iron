@@ -55,7 +55,7 @@ const MAX_VAL_SCHOOL:       usize = 7;
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
-// Enumeration of the aesthetics (coolness) of an ability
+/// Enumeration of the aesthetics (coolness) of an ability
 #[derive(
     Debug,
     Copy, Clone,
@@ -70,7 +70,7 @@ pub enum Aesthetics {
     Subtle      = 5,
 }
 
-// Enumeration of method by which an ability is performed
+/// Enumeration of method by which an ability is performed
 #[derive(
     Debug,
     Copy, Clone,
@@ -84,7 +84,7 @@ pub enum Method {
     Vocal       = 4,
 }
 
-// Enumeration of morality aspect of an ability
+/// Enumeration of morality aspect of an ability
 #[derive(
     Debug,
     Copy, Clone,
@@ -97,7 +97,7 @@ pub enum Morality {
     Evil        = 3,
 }
 
-// Enumeration of all schools of an ability
+/// Enumeration of all schools of an ability
 #[derive(
     Debug,
     Copy, Clone,
@@ -114,7 +114,7 @@ pub enum School {
     Song        = 7,
 }
 
-// Structure containing all aspect classifications
+/// Structure containing all aspect classifications
 #[derive(
     Default,
     Serialize, Deserialize
@@ -155,7 +155,7 @@ impl Aspects {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*  *  *  *  *  *  *  *\
-*      Aesthetics     *
+ *     Aesthetics     *
 \*  *  *  *  *  *  *  */
 impl Default for Aesthetics {
     fn default() -> Self {
@@ -182,7 +182,7 @@ impl Randomizable for Aesthetics {
 }
 
 /*  *  *  *  *  *  *  *\
-*        Method       *
+ *       Method       *
 \*  *  *  *  *  *  *  */
 impl Default for Method {
     fn default() -> Self {
@@ -208,7 +208,7 @@ impl Randomizable for Method {
 }
 
 /*  *  *  *  *  *  *  *\
-*       Morality      *
+ *      Morality      *
 \*  *  *  *  *  *  *  */
 impl Default for Morality {
     fn default() -> Self {
@@ -233,7 +233,7 @@ impl Randomizable for Morality {
 }
 
 /*  *  *  *  *  *  *  *\
-*        School       *
+ *       School       *
 \*  *  *  *  *  *  *  */
 impl Default for School {
     fn default() -> Self {
@@ -263,7 +263,7 @@ impl Randomizable for School {
 
 
 /*  *  *  *  *  *  *  *\
-*        Aspects       *
+ *       Aspects      *
 \*  *  *  *  *  *  *  */
 impl From<&String> for Aspects {
     fn from(src: &String) -> Self {

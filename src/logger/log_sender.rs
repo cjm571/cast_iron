@@ -16,7 +16,7 @@ Copyright (C) 2020 CJ McAllister
 
 Purpose:
     This module defines the Log Sender object, used to dispatch messages to
-    the Reciever, which will avoid blocking the main thread for logging
+    the Receiver, which will avoid blocking the main thread for logging
     operations.
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -47,9 +47,9 @@ impl LogSender {
     }
 
 
-    /*  *  *  *  *  *  *  *
+    /*  *  *  *  *  *  *  *\
      *  Utility Methods   *
-     *  *  *  *  *  *  *  */
+    \*  *  *  *  *  *  *  */
 
     pub fn send_log(&self, logger_cmd: logger::Command) -> Result<(), mpsc::SendError<logger::Command>> {
         self.logger_tx.send(logger_cmd)
@@ -59,4 +59,3 @@ impl LogSender {
         self.logger_tx.send(cmd)
     }
 }
-

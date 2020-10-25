@@ -58,7 +58,6 @@ const SEVERE_INTENSITY_RANGE_MAX:   i64 = 255;
 //  Data Structures
 ///////////////////////////////////////////////////////////////////////////////
 
-//FEAT: Regional (and global?) weather events
 #[derive(Debug, Default)]
 pub struct Event {
     element:    Element,
@@ -86,9 +85,9 @@ impl Event {
     }
 
 
-    /*  *  *  *  *  *  *  *
+    /*  *  *  *  *  *  *  *\
      *  Builder Methods   *
-     *  *  *  *  *  *  *  */
+    \*  *  *  *  *  *  *  */
     
     pub fn starting_at(mut self, start_time: Duration) -> Self {
         self.function = self.function.starting_at(start_time.as_secs_f64());
@@ -97,9 +96,9 @@ impl Event {
     }
 
 
-    /*  *  *  *  *  *  *  *
+    /*  *  *  *  *  *  *  *\
      *  Mutator Methods   *
-     *  *  *  *  *  *  *  */
+    \*  *  *  *  *  *  *  */
 
     /// Changes the kind of weather to the given Element
     pub fn change(&mut self, element: Element) {
@@ -107,9 +106,9 @@ impl Event {
     }
 
 
-    /*  *  *  *  *  *  *  *
-     *  Accesspr Methods  *
-     *  *  *  *  *  *  *  */
+    /*  *  *  *  *  *  *  *\
+     *  Accessor Methods  *
+    \*  *  *  *  *  *  *  */
 
     pub fn intensity(&self, tick: f64) -> Intensity {
         Intensity::from(self.function.solve(tick) as i64)
@@ -142,9 +141,9 @@ impl Intensity {
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-/*  *  *  *  *  *\
- *  Intensity   *
-\*  *  *  *  *  */
+/*  *  *  *  *  *  *  *\
+ *     Intensity      *
+\*  *  *  *  *  *  *  */
 impl Default for Intensity {
     fn default() -> Self {
         Self::None
@@ -175,9 +174,9 @@ impl From<Intensity> for String {
 }
 
 
-/*  *  *  *  *\
- *  Event    *
-\*  *  *  *  */
+/*  *  *  *  *  *  *  *\
+ *       Event        *
+\*  *  *  *  *  *  *  */
 impl Elemental for Event {
     fn element(&self) -> Element {
         self.element

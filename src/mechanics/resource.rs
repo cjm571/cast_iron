@@ -15,7 +15,7 @@ Copyright (C) 2017 CJ McAllister
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 Purpose:
-    This package defines the status of an actor-usable resource. A reource
+    This package defines the status of an actor-usable resource. A resource
     can be things like campfires, ponds, etc. that enhance elementally-aligned
     abilities for actors within its radius.
 
@@ -84,9 +84,26 @@ impl Resource {
     }
 
 
-    ///
-    // Mutator Methods
-    ///
+    /*  *  *  *  *  *  *  *\
+     *  Accessor Methods  *
+    \*  *  *  *  *  *  *  */
+
+    pub fn uid(&self) -> &[u8; 16] {
+        &self.uid
+    }
+
+    pub fn state(&self) -> State {
+        self.state
+    }
+
+    pub fn radius(&self) -> usize {
+        self.radius
+    }
+
+    
+    /*  *  *  *  *  *  *  *\
+     *  Mutator Methods   *
+    \*  *  *  *  *  *  *  */
 
     // Attempt to make use of the resource
     // Returns magnitude of potency boost, or None if already depleted
@@ -134,23 +151,6 @@ impl Resource {
     pub fn weaken(&mut self, mag: usize) {
         self.radius -= mag;
     }
-
-
-    ///
-    // Accessor Methods
-    ///
-
-    pub fn uid(&self) -> &[u8; 16] {
-        &self.uid
-    }
-
-    pub fn state(&self) -> State {
-        self.state
-    }
-
-    pub fn radius(&self) -> usize {
-        self.radius
-    }
 }
 
 
@@ -158,9 +158,9 @@ impl Resource {
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-///
-// Resource
-///
+/*  *  *  *  *  *  *  *\
+ *      Resource      *
+\*  *  *  *  *  *  *  */
 impl Default for Resource {
     fn default() -> Self {
         Self {
@@ -211,9 +211,9 @@ impl Randomizable for Resource {
 }
 
 
-///
-// State
-///
+/*  *  *  *  *  *  *  *\
+ *       State        *
+\*  *  *  *  *  *  *  */
 impl Default for State {
     fn default() -> Self {
         Self::Depleted
@@ -232,11 +232,10 @@ impl From<u8> for State {
         }
     }
 }
-// Distribution trait provides randomnization for this module
+// Distribution trait provides randomization for this module
 impl Distribution<State> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> State {
         let rand_num: u8 = rng.gen();
         State::from((rand_num % State::Overflow as u8) + 1)
     }
 }
-

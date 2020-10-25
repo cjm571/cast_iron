@@ -36,7 +36,6 @@ use rand::{
 ///////////////////////////////////////////////////////////////////////////////
 //  Named Constants
 ///////////////////////////////////////////////////////////////////////////////
-//FEAT: Use VariantCount instead of this
 const NUM_HEX_DIRECTIONS: usize = 6;
 
 
@@ -133,9 +132,9 @@ impl Vertex {
 //  Trait Implementations
 ///////////////////////////////////////////////////////////////////////////////
 
-///
-// Provider
-///
+/*  *  *  *  *  *  *  *\
+ *      Provider      *
+\*  *  *  *  *  *  *  */
 impl<T: HexDirection> Iterator for Provider<T> {
     type Item = T;
 
@@ -167,9 +166,9 @@ impl<T: HexDirection> Distribution<Provider<T>> for Standard {
 }
 
 
-///
-// Side
-///
+/*  *  *  *  *  *  *  *\
+ *        Side        *
+\*  *  *  *  *  *  *  */
 impl HexDirection for Side {}
 impl From<Side> for f32 {
     fn from(src: Side) -> f32 {
@@ -251,9 +250,9 @@ impl Default for Side {
 }
 
 
-///
-// Vertex
-///
+/*  *  *  *  *  *  *  *\
+ *       Vertex       *
+\*  *  *  *  *  *  *  */
 impl HexDirection for Vertex {}
 impl From<Vertex> for f32 {
     fn from(src: Vertex) -> f32 {

@@ -196,7 +196,6 @@ impl Randomizable for Ability {
         // Generate UUID
         let uid = *Uuid::new_v4().as_bytes();
 
-        //FEAT: Pull from list of actual names or something
         // Generate random name
         let mut rng = rand::thread_rng();
         let name: String = rng.sample_iter(&Alphanumeric).take(10).collect();

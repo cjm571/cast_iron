@@ -63,11 +63,11 @@ impl LogReceiver {
     }
 
 
-    /*  *  *  *  *  *  *
+    /*  *  *  *  *  *  *\
      * Utility Methods *
-     *  *  *  *  *  *  */
+    \*  *  *  *  *  *  */
 
-    /// Main loop for recieving logger commands
+    /// Main loop for receiving logger commands
     pub fn main(&mut self) {
         let start_time = Local::now();
         println!("{}: Entered LogReceiver thread.", start_time.format("%Y-%m-%d %T%.3f"));
