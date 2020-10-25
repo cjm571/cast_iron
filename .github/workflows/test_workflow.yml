@@ -1,0 +1,13 @@
+name: Test-Workflow
+
+on: push
+
+jobs:
+  build:
+    name: Build
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Checkout code and build
+        run: cargo build --verbose
