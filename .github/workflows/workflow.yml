@@ -6,14 +6,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  rustup:
-    runs-on: self-hosted
-
-    steps:
-      - name: Update
-        run: rustup update
-        
-
   checkout:
     runs-on: self-hosted
 
@@ -22,10 +14,28 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Display installed toolchains
-      run: rustup toolchain list
+      run:  rustup toolchain list
+      
 
+  stable:
+    runs-on: self-hosted
+    needs: checkout
+
+    steps:
     - name: Build debug target
-      run: cargo build --verbose
+      run:  cargo +stable build --verbose
 
     - name: Lint via `clippy`
-      run: cargo clippy
+      run:  cargo +stable clippy
+
+
+  nightly:
+    runs-on: self-hosted
+    needs: checkout
+
+    steps:
+    - name: Build debug target
+      run:  cargo +nightly build --verbose
+
+    - name: Lint via `clippy`
+      run:  cargo +nightly clippy
