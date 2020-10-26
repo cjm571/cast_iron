@@ -74,6 +74,7 @@ pub mod hex_directions;
 pub mod logger;
 pub mod mechanics;
 pub mod polyfunc;
+pub mod state_machine;
 
 use crate::context::Context;
 
