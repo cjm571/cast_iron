@@ -126,8 +126,7 @@ impl Randomizable for Obstacle {
         //  Get RNG thread handle and generate random origin
         let mut rng = rand::thread_rng();
         let rand_origin = coords::Position::rand(ctx);
-        let mut positions = Vec::new();
-        positions.push(rand_origin);
+        let mut positions = vec![rand_origin];
 
         // Up to Context's constraint, make a randomly-snaking string of coords::Position objects
         let mut trial_pos = rand_origin;

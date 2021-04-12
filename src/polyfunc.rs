@@ -149,23 +149,23 @@ mod tests {
         let func_d: PolyFunc = PolyFunc::new(100.0, 5.0, 0.0);
 
         // Check function A's solutions
-        assert_eq!(func_a.solve(0.0), 0);
-        assert_eq!(func_a.solve(4.0), 0);
-        assert_eq!(func_a.solve(2.0), 10);
+        assert_eq!(func_a.solve(0.0), 0.0);
+        assert_eq!(func_a.solve(4.0), 0.0);
+        assert_eq!(func_a.solve(2.0), 10.0);
 
         // Check function B's solutions
-        assert_eq!(func_b.solve(10.0), 0);
-        assert_eq!(func_b.solve(26.0), 0);
-        assert_eq!(func_b.solve(18.0), 255);
+        assert_eq!(func_b.solve(10.0), 0.0);
+        assert_eq!(func_b.solve(26.0), 0.0);
+        assert_eq!(func_b.solve(18.0), 255.0);
 
         // Check function C's solutions
-        assert_eq!(func_c.solve(30.0), 0);
-        assert_eq!(func_c.solve(40.0), 0);
-        assert_eq!(func_c.solve(35.0), 150);
+        assert_eq!(func_c.solve(30.0), 0.0);
+        assert_eq!(func_c.solve(40.0), 0.0);
+        assert_eq!(func_c.solve(35.0), 150.0);
 
         // Check function D's solutions
-        assert_eq!(func_d.solve(0.0), 0);
-        assert_eq!(func_d.solve(5.0), 0);
-        assert_eq!(func_d.solve(2.0), 96);
+        assert_eq!(func_d.solve(0.0), 0.0);
+        assert_eq!(func_d.solve(5.0), 0.0);
+        assert_eq!(func_d.solve(2.0), 96.0);
     }
 }

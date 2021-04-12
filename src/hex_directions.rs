@@ -57,22 +57,22 @@ pub trait HexDirection:
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Side {
-    NORTHEAST,
-    NORTH,
-    NORTHWEST,
-    SOUTHWEST,
-    SOUTH,
-    SOUTHEAST,
+    NorthEast,
+    North,
+    NorthWest,
+    SouthWest,
+    South,
+    SouthEast,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Vertex {
-    EAST,
-    NORTHEAST,
-    NORTHWEST,
-    WEST,
-    SOUTHWEST,
-    SOUTHEAST,
+    East,
+    NorthEast,
+    NorthWest,
+    West,
+    SouthWest,
+    SouthEast,
 }
 
 
@@ -103,12 +103,12 @@ impl Side {
     /// Returns the adjacent vertices as a tuple in counter-clockwise order
     pub fn get_adjacent_vertices(side: Self) -> (Vertex, Vertex) {
         match side {
-            Self::NORTHEAST   => (Vertex::EAST,        Vertex::NORTHEAST),
-            Self::NORTH       => (Vertex::NORTHEAST,   Vertex::NORTHWEST),
-            Self::NORTHWEST   => (Vertex::NORTHWEST,   Vertex::WEST),
-            Self::SOUTHWEST   => (Vertex::WEST,        Vertex::SOUTHWEST),
-            Self::SOUTH       => (Vertex::SOUTHWEST,   Vertex::SOUTHEAST),
-            Self::SOUTHEAST   => (Vertex::SOUTHEAST,   Vertex::EAST),
+            Self::NorthEast   => (Vertex::East,        Vertex::NorthEast),
+            Self::North       => (Vertex::NorthEast,   Vertex::NorthWest),
+            Self::NorthWest   => (Vertex::NorthWest,   Vertex::West),
+            Self::SouthWest   => (Vertex::West,        Vertex::SouthWest),
+            Self::South       => (Vertex::SouthWest,   Vertex::SouthEast),
+            Self::SouthEast   => (Vertex::SouthEast,   Vertex::East),
         }
     }
 }
@@ -117,12 +117,12 @@ impl Vertex {
     /// Returns the adjacent sides as a tuple in counter-clockwise order
     pub fn get_adjacent_sides(vertex: Self) -> (Side, Side) {
         match vertex {
-            Self::EAST      => (Side::SOUTHEAST,    Side::NORTHEAST),
-            Self::NORTHEAST => (Side::NORTHEAST,    Side::NORTH),
-            Self::NORTHWEST => (Side::NORTH,        Side::NORTHWEST),
-            Self::WEST      => (Side::NORTHWEST,    Side::SOUTHWEST),
-            Self::SOUTHWEST => (Side::SOUTHWEST,    Side::SOUTH),
-            Self::SOUTHEAST => (Side::SOUTH,        Side::SOUTHEAST),
+            Self::East      => (Side::SouthEast,    Side::NorthEast),
+            Self::NorthEast => (Side::NorthEast,    Side::North),
+            Self::NorthWest => (Side::North,        Side::NorthWest),
+            Self::West      => (Side::NorthWest,    Side::SouthWest),
+            Self::SouthWest => (Side::SouthWest,    Side::South),
+            Self::SouthEast => (Side::South,        Side::SouthEast),
         }
     }
 }
@@ -173,12 +173,12 @@ impl HexDirection for Side {}
 impl From<Side> for f32 {
     fn from(src: Side) -> f32 {
         match src {
-            Side::NORTHEAST    => PI/6.0,
-            Side::NORTH        => PI/2.0,
-            Side::NORTHWEST    => 5.0*PI/6.0,
-            Side::SOUTHWEST    => 7.0*PI/6.0,
-            Side::SOUTH        => 3.0*PI/2.0,
-            Side::SOUTHEAST    => 11.0*PI/6.0
+            Side::NorthEast    => PI/6.0,
+            Side::North        => PI/2.0,
+            Side::NorthWest    => 5.0*PI/6.0,
+            Side::SouthWest    => 7.0*PI/6.0,
+            Side::South        => 3.0*PI/2.0,
+            Side::SouthEast    => 11.0*PI/6.0
         }
     }
 }
@@ -188,12 +188,12 @@ impl From<f32> for Side {
         let clamped_val = src % (2.0*PI);
 
         match clamped_val {
-            x if x < PI/3.0         => Side::NORTHEAST,
-            x if x < 2.0*PI/3.0     => Side::NORTH,
-            x if x < PI             => Side::NORTHWEST,
-            x if x < 4.0*PI/3.0     => Side::SOUTHWEST,
-            x if x < 5.0*PI/3.0     => Side::SOUTH,
-            x if x < 2.0*PI         => Side::SOUTHEAST,
+            x if x < PI/3.0         => Side::NorthEast,
+            x if x < 2.0*PI/3.0     => Side::North,
+            x if x < PI             => Side::NorthWest,
+            x if x < 4.0*PI/3.0     => Side::SouthWest,
+            x if x < 5.0*PI/3.0     => Side::South,
+            x if x < 2.0*PI         => Side::SouthEast,
             _ => panic!("Invalid value for f32->Side conversion")
         }
     }
@@ -201,24 +201,24 @@ impl From<f32> for Side {
 impl From<Side> for usize {
     fn from(src: Side) -> usize {
         match src {
-            Side::NORTHEAST    => 0,
-            Side::NORTH        => 1,
-            Side::NORTHWEST    => 2,
-            Side::SOUTHWEST    => 3,
-            Side::SOUTH        => 4,
-            Side::SOUTHEAST    => 5
+            Side::NorthEast    => 0,
+            Side::North        => 1,
+            Side::NorthWest    => 2,
+            Side::SouthWest    => 3,
+            Side::South        => 4,
+            Side::SouthEast    => 5
         }
     }
 }
 impl From<usize> for Side {
     fn from(src: usize) -> Self {
         match src {
-            0 => Side::NORTHEAST,
-            1 => Side::NORTH,
-            2 => Side::NORTHWEST,
-            3 => Side::SOUTHWEST,
-            4 => Side::SOUTH,
-            5 => Side::SOUTHEAST,
+            0 => Side::NorthEast,
+            1 => Side::North,
+            2 => Side::NorthWest,
+            3 => Side::SouthWest,
+            4 => Side::South,
+            5 => Side::SouthEast,
             _ => panic!("Invalid value for usize->Side conversion")
         }
     }
@@ -226,12 +226,12 @@ impl From<usize> for Side {
 impl From<coords::Translation> for Side {
     fn from(src: coords::Translation) -> Self {
         match (src.x(), src.y(), src.z()) {
-            (1, 0, -1)  => Side::NORTHEAST,
-            (0, 1, -1)  => Side::NORTH,
-            (-1, 1, 0)  => Side::NORTHWEST,
-            (-1, 0, 1)  => Side::SOUTHWEST,
-            (0, -1, 1)  => Side::SOUTH,
-            (1, -1, 0)  => Side::SOUTHEAST,
+            (1, 0, -1)  => Side::NorthEast,
+            (0, 1, -1)  => Side::North,
+            (-1, 1, 0)  => Side::NorthWest,
+            (-1, 0, 1)  => Side::SouthWest,
+            (0, -1, 1)  => Side::South,
+            (1, -1, 0)  => Side::SouthEast,
             _           => panic!("Invalid Coords Translation for conversion to HexSide"),
         }
     }
@@ -245,7 +245,7 @@ impl Distribution<Side> for Standard {
 }
 impl Default for Side {
     fn default() -> Self {
-        Self::NORTHEAST
+        Self::NorthEast
     }
 }
 
@@ -257,12 +257,12 @@ impl HexDirection for Vertex {}
 impl From<Vertex> for f32 {
     fn from(src: Vertex) -> f32 {
         match src {
-            Vertex::EAST       => 0.0,
-            Vertex::NORTHEAST  => PI/3.0,
-            Vertex::NORTHWEST  => 2.0*PI/3.0,
-            Vertex::WEST       => PI,
-            Vertex::SOUTHWEST  => 4.0*PI/3.0,
-            Vertex::SOUTHEAST  => 5.0*PI/3.0
+            Vertex::East       => 0.0,
+            Vertex::NorthEast  => PI/3.0,
+            Vertex::NorthWest  => 2.0*PI/3.0,
+            Vertex::West       => PI,
+            Vertex::SouthWest  => 4.0*PI/3.0,
+            Vertex::SouthEast  => 5.0*PI/3.0
         }
     }
 }
@@ -272,13 +272,13 @@ impl From<f32> for Vertex {
         let clamped_val = src % (2.0*PI);
 
         match clamped_val {
-            x if x < PI/6.0         => Vertex::EAST,
-            x if x < PI/2.0         => Vertex::NORTHEAST,
-            x if x < 5.0*PI/6.0     => Vertex::NORTHWEST,
-            x if x < 7.0*PI/6.0     => Vertex::WEST,
-            x if x < 3.0*PI/2.0     => Vertex::SOUTHWEST,
-            x if x < 11.0*PI/6.0    => Vertex::SOUTHEAST,
-            x if x < 2.0*PI         => Vertex::EAST,
+            x if x < PI/6.0         => Vertex::East,
+            x if x < PI/2.0         => Vertex::NorthEast,
+            x if x < 5.0*PI/6.0     => Vertex::NorthWest,
+            x if x < 7.0*PI/6.0     => Vertex::West,
+            x if x < 3.0*PI/2.0     => Vertex::SouthWest,
+            x if x < 11.0*PI/6.0    => Vertex::SouthEast,
+            x if x < 2.0*PI         => Vertex::East,
             _ => panic!("Invalid value for Vertex conversion")
         }
     }
@@ -286,24 +286,24 @@ impl From<f32> for Vertex {
 impl From<Vertex> for usize {
     fn from(src: Vertex) -> usize {
         match src {
-            Vertex::EAST       => 0,
-            Vertex::NORTHEAST  => 1,
-            Vertex::NORTHWEST  => 2,
-            Vertex::WEST       => 3,
-            Vertex::SOUTHWEST  => 4,
-            Vertex::SOUTHEAST  => 5
+            Vertex::East       => 0,
+            Vertex::NorthEast  => 1,
+            Vertex::NorthWest  => 2,
+            Vertex::West       => 3,
+            Vertex::SouthWest  => 4,
+            Vertex::SouthEast  => 5
         }
     }
 }
 impl From<usize> for Vertex {
     fn from(src: usize) -> Self {
         match src {
-            0 => Vertex::EAST,
-            1 => Vertex::NORTHEAST,
-            2 => Vertex::NORTHWEST,
-            3 => Vertex::WEST,
-            4 => Vertex::SOUTHWEST,
-            5 => Vertex::SOUTHEAST,
+            0 => Vertex::East,
+            1 => Vertex::NorthEast,
+            2 => Vertex::NorthWest,
+            3 => Vertex::West,
+            4 => Vertex::SouthWest,
+            5 => Vertex::SouthEast,
             _ => panic!("Invalid value for usize->Vertex conversion")
         }
     }
@@ -317,7 +317,7 @@ impl Distribution<Vertex> for Standard {
 }
 impl Default for Vertex {
     fn default() -> Self {
-        Self::EAST
+        Self::East
     }
 }
 
@@ -334,12 +334,12 @@ mod tests {
     fn hex_sides() {
         // Setup correct value arrays
         let correct_enum: [Side;NUM_HEX_DIRECTIONS] = [
-            Side::NORTHEAST,
-            Side::NORTH,
-            Side::NORTHWEST,
-            Side::SOUTHWEST,
-            Side::SOUTH,
-            Side::SOUTHEAST
+            Side::NorthEast,
+            Side::North,
+            Side::NorthWest,
+            Side::SouthWest,
+            Side::South,
+            Side::SouthEast
         ];
         let correct_usize: [usize;NUM_HEX_DIRECTIONS] = [
             0,
@@ -377,7 +377,7 @@ mod tests {
         assert_eq!(i, 1);
 
         // Verify conversions
-        side_provider = Provider::new(Side::SOUTHEAST);
+        side_provider = Provider::new(Side::SouthEast);
         for j in 0..NUM_HEX_DIRECTIONS {
             let side = side_provider.next().unwrap();
             assert_eq!(Side::from(correct_usize[j]), side);
@@ -390,12 +390,12 @@ mod tests {
     fn hex_vertices() {
         // Setup correct value arrays
         let correct_enum: [Vertex;NUM_HEX_DIRECTIONS] = [
-            Vertex::EAST,
-            Vertex::NORTHEAST,
-            Vertex::NORTHWEST,
-            Vertex::WEST,
-            Vertex::SOUTHWEST,
-            Vertex::SOUTHEAST
+            Vertex::East,
+            Vertex::NorthEast,
+            Vertex::NorthWest,
+            Vertex::West,
+            Vertex::SouthWest,
+            Vertex::SouthEast
         ];
         let correct_usize: [usize;NUM_HEX_DIRECTIONS] = [
             0,
@@ -433,7 +433,7 @@ mod tests {
         assert_eq!(i, 1);
 
         // Verify conversions
-        side_provider = Provider::new(Vertex::SOUTHEAST);
+        side_provider = Provider::new(Vertex::SouthEast);
         for j in 0..NUM_HEX_DIRECTIONS {
             let side = side_provider.next().unwrap();
             assert_eq!(Vertex::from(correct_usize[j]), side);

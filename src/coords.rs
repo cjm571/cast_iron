@@ -361,12 +361,12 @@ impl Randomizable for Position {
 impl From<hex_directions::Side> for Translation {
     fn from(src: hex_directions::Side) -> Self {
         match src {
-            hex_directions::Side::NORTHEAST =>  Self {x: 1,     y: 0,   z: -1},
-            hex_directions::Side::NORTH     =>  Self {x: 0,     y: 1,   z: -1},
-            hex_directions::Side::NORTHWEST =>  Self {x: -1,    y: 1,   z: 0},
-            hex_directions::Side::SOUTHWEST =>  Self {x: -1,    y: 0,   z: 1},
-            hex_directions::Side::SOUTH     =>  Self {x: 0,     y: -1,  z: 1},
-            hex_directions::Side::SOUTHEAST =>  Self {x: 1,     y: -1,  z: 0},
+            hex_directions::Side::NorthEast =>  Self {x: 1,     y: 0,   z: -1},
+            hex_directions::Side::North     =>  Self {x: 0,     y: 1,   z: -1},
+            hex_directions::Side::NorthWest =>  Self {x: -1,    y: 1,   z: 0},
+            hex_directions::Side::SouthWest =>  Self {x: -1,    y: 0,   z: 1},
+            hex_directions::Side::South     =>  Self {x: 0,     y: -1,  z: 1},
+            hex_directions::Side::SouthEast =>  Self {x: 1,     y: -1,  z: 0},
         }
     }
 }
