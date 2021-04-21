@@ -19,7 +19,6 @@ Purpose:
 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-extern crate chrono;
 extern crate rand;
 extern crate serde;
 extern crate serde_json;
@@ -71,7 +70,6 @@ pub mod context;
 pub mod coords;
 pub mod element;
 pub mod hex_directions;
-pub mod logger;
 pub mod mechanics;
 pub mod polyfunc;
 
